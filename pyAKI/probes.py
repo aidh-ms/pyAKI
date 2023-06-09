@@ -2,9 +2,6 @@ from abc import ABC
 from enum import StrEnum, auto
 
 import pandas as pd
-import numpy as np
-
-from scipy.ndimage import uniform_filter1d
 
 from utils import dataset_filter, dataset_as_df, Dataset, DatasetType
 
