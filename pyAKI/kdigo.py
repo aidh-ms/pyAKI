@@ -1,6 +1,11 @@
 import pandas as pd
 
-from probes import Probe, UrineOutputProbe, AbsoluteCreatinine, RelativeCreatinine
+from probes import (
+    Probe,
+    UrineOutputProbe,
+    AbsoluteCreatinineProbe,
+    RelativeCreatinineProbe,
+)
 from preprocessors import Preprocessor, TimeseriesResempler
 from utils import Dataset, DatasetType
 
@@ -15,7 +20,11 @@ class Analyser:
         time_identifier: str = "charttime",
     ) -> None:
         if probes is None:
-            probes = [UrineOutputProbe(), RelativeCreatinine(), AbsoluteCreatinine()]
+            probes = [
+                UrineOutputProbe(),
+                AbsoluteCreatinineProbe(),
+                RelativeCreatinineProbe(),
+            ]
         if preprocessors is None:
             preprocessors = [TimeseriesResempler(time_identifier=time_identifier)]
 

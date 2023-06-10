@@ -1,4 +1,4 @@
-from abc import ABC
+from abc import ABC, ABCMeta
 from enum import StrEnum, auto
 
 import pandas as pd
@@ -45,10 +45,7 @@ class CreatinineMethod(StrEnum):
     FIRST = auto()
 
 
-class AbsoluteCreatinine(Probe):
-    DATASETS = [DatasetType.CREATININE]
-    RESNAME = "abs_creatinine_stage"
-
+class AbstractCreCreatinineProbe(Probe, metaclass=ABCMeta):
     def __init__(
         self,
         column: str = "creat",
@@ -60,6 +57,11 @@ class AbsoluteCreatinine(Probe):
         self._column = column
         self._timeframe = timeframe
         self._method = method
+
+
+class AbsoluteCreatinineProbe(AbstractCreCreatinineProbe):
+    DATASETS = [DatasetType.CREATININE]
+    RESNAME = "abs_creatinine_stage"
 
     @dataset_filter
     @dataset_as_df
@@ -93,21 +95,9 @@ class AbsoluteCreatinine(Probe):
         return df
 
 
-class RelativeCreatinine(Probe):
+class RelativeCreatinineProbe(AbstractCreCreatinineProbe):
     DATASETS = [DatasetType.CREATININE]
     RESNAME = "rel_creatinine_stage"
-
-    def __init__(
-        self,
-        column: str = "creat",
-        timeframe: str = "7d",
-        method: CreatinineMethod = CreatinineMethod.MIN,
-    ) -> None:
-        super().__init__()
-
-        self._column = column
-        self._timeframe = timeframe
-        self._method = method
 
     @dataset_filter
     @dataset_as_df
