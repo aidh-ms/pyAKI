@@ -40,24 +40,57 @@ class UrineOutputProbe(Probe):
         return df
 
 
+class CreatinineMethod(StrEnum):
+    MIN = auto()
+    FIRST = auto()
+
+
 class AbsoluteCreatinine(Probe):
     DATASETS = [DatasetType.CREATININE]
     RESNAME = "abs_creatinine_stage"
 
-    def __init__(self, column: str = "creat", anuria_limit: float = 0.1) -> None:
+    def __init__(
+        self,
+        column: str = "creat",
+        timeframe: str = "7d",
+        method: CreatinineMethod = CreatinineMethod.MIN,
+    ) -> None:
         super().__init__()
 
         self._column = column
+        self._timeframe = timeframe
+        self._method = method
 
     @dataset_filter
     @dataset_as_df
     def probe(self, df: pd.DataFrame, **kwargs) -> pd.DataFrame:
-        return df  # TODO
+        if self._method == CreatinineMethod.MIN:
+            values = (
+                df[df[self._column] > 0]
+                .rolling(self._timeframe)
+                .agg(lambda rows: rows[0])
+                .resample("1h")
+                .first()
+                .ffill()[self._column]
+            )
+        elif self._method == CreatinineMethod.FIRST:
+            values = (
+                df[df[self._column] > 0]
+                .rolling(self._timeframe)
+                .min()
+                .resample("1h")
+                .min()
+                .ffill()[self._column]
+            )
 
+        df[self.RESNAME] = 0
+        df.loc[(df[self._column] - values) > 0.3, self.RESNAME] = 1
+        df.loc[(df[self._column] - values) > 4, self.RESNAME] = 3
 
-class CreatinineMethod(StrEnum):
-    MIN = auto()
-    FIRST = auto()
+        df.loc[df[self._column] == 0, self.RESNAME] = None
+        df[self.RESNAME] = df[self.RESNAME].ffill().fillna(0)
+
+        return df
 
 
 class RelativeCreatinine(Probe):
