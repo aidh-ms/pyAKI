@@ -7,6 +7,7 @@ import pandas as pd
 class DatasetType(StrEnum):
     URINEOUTPUT = auto()
     CREATININE = auto()
+    DEMOGRAPHICS = auto()
 
 
 class Dataset(NamedTuple):
