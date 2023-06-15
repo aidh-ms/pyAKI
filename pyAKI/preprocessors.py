@@ -81,3 +81,36 @@ class UrineOutputPreProcessor(Preprocessor):
             .fillna(1)
         )
         return df.bfill(limit=self._threshold)
+
+
+class CreatininePreProcessor(Preprocessor):
+    DATASETS = [DatasetType.CREATININE]
+
+    def __init__(
+        self,
+        stay_identifier: str = "stay_id",
+        time_identifier: str = "charttime",
+        ffill: bool = True,
+        threshold: int | None = None,
+    ) -> None:
+        super().__init__(stay_identifier, time_identifier)
+
+        self._ffill = ffill
+        self._threshold = threshold
+
+    @dataset_filter
+    @dataset_as_df
+    def process(self, df: pd.DataFrame) -> pd.DataFrame:
+        df[self._time_identifier] = pd.to_datetime(df[self._time_identifier])
+
+        df = (
+            df.set_index(self._time_identifier)
+            .groupby(self._stay_identifier)
+            .resample("1H")
+            .mean()
+        )
+        if not self._ffill:
+            return df
+
+        df[df["creat"] == 0] = None
+        return df.ffill(limit=self._threshold)
