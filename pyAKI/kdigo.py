@@ -65,28 +65,3 @@ class Analyser:
 
         df["stage"] = df.filter(like="stage").max(axis=1)
         return df
-
-
-if __name__ == "__main__":
-    from pathlib import Path
-
-    root_dir = Path(__file__).parent.parent
-    data_dir = root_dir / "tests" / "data"
-
-    urine_output = pd.read_csv(data_dir / "aki_urineoutput.csv")
-    creatinine = pd.read_csv(data_dir / "aki_creatinine.csv")
-    user_data = pd.DataFrame(
-        data={
-            "stay_id": ["A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8", "A9", "A10", "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "B10"],  # fmt: skip
-            "weight": [100 for _ in range(20)]
-        }
-    )
-
-    ana = Analyser(
-        [
-            Dataset(DatasetType.URINEOUTPUT, urine_output),
-            Dataset(DatasetType.CREATININE, creatinine),
-            Dataset(DatasetType.DEMOGRAPHICS, user_data),
-        ]
-    )
-    test = ana.process_stay("A7")
