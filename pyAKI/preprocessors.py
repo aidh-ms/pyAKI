@@ -114,3 +114,12 @@ class CreatininePreProcessor(Preprocessor):
 
         df[df["creat"] == 0] = None
         return df.ffill(limit=self._threshold)
+
+
+class DemographicsPreProcessor(Preprocessor):
+    DATASETS = [DatasetType.DEMOGRAPHICS]
+
+    @dataset_filter
+    @dataset_as_df
+    def process(self, df: pd.DataFrame) -> pd.DataFrame:
+        return df.groupby(self._stay_identifier).last()
