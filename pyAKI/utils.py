@@ -1,5 +1,6 @@
 from typing import NamedTuple
 from enum import StrEnum, auto
+from functools import wraps
 
 import pandas as pd
 
@@ -15,30 +16,35 @@ class Dataset(NamedTuple):
     df: pd.DataFrame
 
 
-def dataset_filter(func):
-    def wrapper(self, datasets: list[Dataset], *args: list, **kwargs: dict):
-        if not self.DATASETS:
-            return func(self, datasets, *args, **kwargs)
+def dataset_as_df(**mapping: dict[str, DatasetType]):
+    in_mapping = {v: k for k, v in mapping.items()}
 
-        return [
-            (name, dataset) for name, dataset in datasets if name not in self.DATASETS
-        ] + func(
-            self,
-            [(name, dataset) for name, dataset in datasets if name in self.DATASETS],
-            *args,
-            **kwargs
-        )
+    def decorator(func):
+        @wraps(func)
+        def wrapper(self, datasets: list[Dataset], *args: list, **kwargs: dict):
+            _mapping = {
+                in_mapping[dtype]: df
+                for dtype, df in datasets
+                if dtype in in_mapping.keys()
+            }
 
-    return wrapper
+            _dtype, _df = func(self, *args, **_mapping, **kwargs)
+
+            return [
+                Dataset(dtype, _df if dtype == _dtype else df) for dtype, df in datasets
+            ]
+
+        return wrapper
+
+    return decorator
 
 
-def dataset_as_df(func):
-    def wrapper(self, datasets: list[Dataset], *args: list, **kwargs: dict):
-        if len(datasets) != 1:
-            raise ValueError()
+def df_to_dataset(dtype: DatasetType):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(self, *args: list, **kwargs: dict):
+            return Dataset(dtype, func(self, *args, **kwargs))
 
-        name, df = datasets[0]
+        return wrapper
 
-        return [(name, func(self, df, *args, **kwargs))]
-
-    return wrapper
+    return decorator

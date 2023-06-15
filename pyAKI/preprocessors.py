@@ -2,12 +2,10 @@ from abc import ABC
 
 import pandas as pd
 
-from utils import dataset_filter, dataset_as_df, Dataset, DatasetType
+from utils import dataset_as_df, df_to_dataset, Dataset, DatasetType
 
 
 class Preprocessor(ABC):
-    DATASETS = []
-
     def __init__(
         self, stay_identifier: str = "stay_id", time_identifier: str = "charttime"
     ) -> None:
@@ -16,20 +14,23 @@ class Preprocessor(ABC):
         self._stay_identifier = stay_identifier
         self._time_identifier = time_identifier
 
-    def process(self, datasets: list[Dataset]) -> pd.DataFrame:
+    def process(self, datasets: list[Dataset]) -> list[Dataset]:
         raise NotImplementedError()
 
 
 class TimeseriesResempler(Preprocessor):
     DATASETS = [DatasetType.CREATININE, DatasetType.URINEOUTPUT]
 
-    @dataset_filter
-    def process(self, datasets: list[Dataset]) -> pd.DataFrame:
+    def process(self, datasets: list[Dataset]) -> list[Dataset]:
+        datasets = [
+            Dataset(dtype, df) for dtype, df in datasets if dtype in self.DATASETS
+        ]
+
         for name, df in datasets:
             df[self._time_identifier] = pd.to_datetime(df[self._time_identifier])
 
         return [
-            (
+            Dataset(
                 name,
                 df.set_index(self._time_identifier)
                 .groupby(self._stay_identifier)
@@ -42,8 +43,6 @@ class TimeseriesResempler(Preprocessor):
 
 
 class UrineOutputPreProcessor(Preprocessor):
-    DATASETS = [DatasetType.URINEOUTPUT]
-
     def __init__(
         self,
         stay_identifier: str = "stay_id",
@@ -56,9 +55,9 @@ class UrineOutputPreProcessor(Preprocessor):
         self._interpolate = interpolate
         self._threshold = threshold
 
-    @dataset_filter
-    @dataset_as_df
-    def process(self, df: pd.DataFrame) -> pd.DataFrame:
+    @dataset_as_df(df=DatasetType.URINEOUTPUT)
+    @df_to_dataset(DatasetType.URINEOUTPUT)
+    def process(self, df: pd.DataFrame = None) -> pd.DataFrame:
         df[self._time_identifier] = pd.to_datetime(df[self._time_identifier])
 
         df = (
@@ -84,8 +83,6 @@ class UrineOutputPreProcessor(Preprocessor):
 
 
 class CreatininePreProcessor(Preprocessor):
-    DATASETS = [DatasetType.CREATININE]
-
     def __init__(
         self,
         stay_identifier: str = "stay_id",
@@ -98,9 +95,9 @@ class CreatininePreProcessor(Preprocessor):
         self._ffill = ffill
         self._threshold = threshold
 
-    @dataset_filter
-    @dataset_as_df
-    def process(self, df: pd.DataFrame) -> pd.DataFrame:
+    @dataset_as_df(df=DatasetType.CREATININE)
+    @df_to_dataset(DatasetType.CREATININE)
+    def process(self, df: pd.DataFrame = None) -> pd.DataFrame:
         df[self._time_identifier] = pd.to_datetime(df[self._time_identifier])
 
         df = (
@@ -117,9 +114,7 @@ class CreatininePreProcessor(Preprocessor):
 
 
 class DemographicsPreProcessor(Preprocessor):
-    DATASETS = [DatasetType.DEMOGRAPHICS]
-
-    @dataset_filter
-    @dataset_as_df
-    def process(self, df: pd.DataFrame) -> pd.DataFrame:
+    @dataset_as_df(df=DatasetType.DEMOGRAPHICS)
+    @df_to_dataset(DatasetType.DEMOGRAPHICS)
+    def process(self, df: pd.DataFrame = None) -> pd.DataFrame:
         return df.groupby(self._stay_identifier).last()
