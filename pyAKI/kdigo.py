@@ -6,7 +6,12 @@ from probes import (
     AbsoluteCreatinineProbe,
     RelativeCreatinineProbe,
 )
-from preprocessors import Preprocessor, TimeseriesResempler
+from preprocessors import (
+    Preprocessor,
+    UrineOutputPreProcessor,
+    CreatininePreProcessor,
+    DemographicsPreProcessor,
+)
 from utils import Dataset, DatasetType
 
 
@@ -26,7 +31,15 @@ class Analyser:
                 RelativeCreatinineProbe(),
             ]
         if preprocessors is None:
-            preprocessors = [TimeseriesResempler(time_identifier=time_identifier)]
+            preprocessors = [
+                UrineOutputPreProcessor(
+                    stay_identifier=stay_identifier, time_identifier=time_identifier
+                ),
+                CreatininePreProcessor(
+                    stay_identifier=stay_identifier, time_identifier=time_identifier
+                ),
+                DemographicsPreProcessor(stay_identifier=stay_identifier),
+            ]
 
         for preprocessor in preprocessors:
             data = preprocessor.process(data)
@@ -38,14 +51,16 @@ class Analyser:
     def process_stays(self) -> pd.DataFrame:
         pass  # TODO
 
-    def process_stay(self, stay_id: str, weight: float) -> pd.DataFrame:
+    def process_stay(self, stay_id: str) -> pd.DataFrame:
         data = [(name, data.loc[stay_id]) for name, data in self._data]
 
         for probe in self._probes:
-            data = probe.probe(data, weight=weight)
+            data = probe.probe(data)
 
         (_, df) = data[0]
         for _, _df in data[1:]:
+            if isinstance(_df, pd.Series):
+                _df = pd.DataFrame([_df], index=df.index)
             df = df.merge(_df, how="outer", left_index=True, right_index=True)
 
         df["stage"] = df.filter(like="stage").max(axis=1)

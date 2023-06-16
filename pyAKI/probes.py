@@ -3,11 +3,10 @@ from enum import StrEnum, auto
 
 import pandas as pd
 
-from utils import dataset_filter, dataset_as_df, Dataset, DatasetType
+from utils import dataset_as_df, df_to_dataset, Dataset, DatasetType
 
 
 class Probe(ABC):
-    DATASETS = []
     RESNAME = ""
 
     def probe(self, datasets: list[Dataset], **kwargs) -> pd.DataFrame:
@@ -15,7 +14,6 @@ class Probe(ABC):
 
 
 class UrineOutputProbe(Probe):
-    DATASETS = [DatasetType.URINEOUTPUT]
     RESNAME = "urineoutput_stage"
 
     def __init__(self, column: str = "urineoutput", anuria_limit: float = 0.1) -> None:
@@ -24,12 +22,12 @@ class UrineOutputProbe(Probe):
         self._column = column
         self._anuria_limit = anuria_limit
 
-    @dataset_filter
-    @dataset_as_df
-    def probe(self, df: pd.DataFrame, **kwargs) -> pd.DataFrame:
-        if "weight" not in kwargs:
-            raise ValueError()
-        weight = kwargs["weight"]
+    @dataset_as_df(df=DatasetType.URINEOUTPUT, patient=DatasetType.DEMOGRAPHICS)
+    @df_to_dataset(DatasetType.URINEOUTPUT)
+    def probe(
+        self, df: pd.DataFrame = None, patient: pd.DataFrame = None, **kwargs
+    ) -> pd.DataFrame:
+        weight = patient["weight"]
         # fmt: off
         df[self.RESNAME] = 0
         df.loc[(df.rolling(6).max()[self._column] / weight) < 0.5, self.RESNAME] = 1
@@ -60,12 +58,11 @@ class AbstractCreCreatinineProbe(Probe, metaclass=ABCMeta):
 
 
 class AbsoluteCreatinineProbe(AbstractCreCreatinineProbe):
-    DATASETS = [DatasetType.CREATININE]
     RESNAME = "abs_creatinine_stage"
 
-    @dataset_filter
-    @dataset_as_df
-    def probe(self, df: pd.DataFrame, **kwargs) -> pd.DataFrame:
+    @dataset_as_df(df=DatasetType.CREATININE)
+    @df_to_dataset(DatasetType.CREATININE)
+    def probe(self, df: pd.DataFrame = None, **kwargs) -> pd.DataFrame:
         if self._method == CreatinineMethod.MIN:
             values = (
                 df[df[self._column] > 0]
@@ -96,12 +93,11 @@ class AbsoluteCreatinineProbe(AbstractCreCreatinineProbe):
 
 
 class RelativeCreatinineProbe(AbstractCreCreatinineProbe):
-    DATASETS = [DatasetType.CREATININE]
     RESNAME = "rel_creatinine_stage"
 
-    @dataset_filter
-    @dataset_as_df
-    def probe(self, df: pd.DataFrame, **kwargs) -> pd.DataFrame:
+    @dataset_as_df(df=DatasetType.CREATININE)
+    @df_to_dataset(DatasetType.CREATININE)
+    def probe(self, df: pd.DataFrame = None, **kwargs) -> pd.DataFrame:
         if self._method == CreatinineMethod.MIN:
             values = (
                 df[df[self._column] > 0]

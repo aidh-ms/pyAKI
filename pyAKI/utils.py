@@ -1,11 +1,13 @@
 from typing import NamedTuple
 from enum import StrEnum, auto
+from functools import wraps
 
 import pandas as pd
 
 
 class DatasetType(StrEnum):
     """Enumeration class representing different types of datasets."""
+
     URINEOUTPUT = auto()
     CREATININE = auto()
     DEMOGRAPHICS = auto()
@@ -28,98 +30,40 @@ class Dataset(NamedTuple):
     Example:
         dataset = Dataset(dataset_type=DatasetType.URINEOUTPUT, df=my_dataframe)
     """
+
     dataset_type: DatasetType
     df: pd.DataFrame
 
 
-def dataset_filter(func):
-   """
-   Decorator that filters datasets based on predefined dataset names.
+def dataset_as_df(**mapping: dict[str, DatasetType]):
+    in_mapping = {v: k for k, v in mapping.items()}
 
-    This decorator is intended to be used on methods that operate on datasets.
-    It filters the datasets based on a predefined set of dataset names before
-    calling the decorated function. If the `self.DATASETS` attribute is empty,
-    the decorator directly calls the decorated function with the given arguments
-    and returns the result. If `self.DATASETS` is not empty, the decorator filters
-    the datasets based on their names and calls the decorated function on the
-    remaining datasets whose names are in `self.DATASETS`. The filtered datasets
-    are concatenated with the result of the function call, and the final result
-    is returned.
+    def decorator(func):
+        @wraps(func)
+        def wrapper(self, datasets: list[Dataset], *args: list, **kwargs: dict):
+            _mapping = {
+                in_mapping[dtype]: df
+                for dtype, df in datasets
+                if dtype in in_mapping.keys()
+            }
 
-    Args:
-        func (function): The function to be decorated.
+            _dtype, _df = func(self, *args, **_mapping, **kwargs)
 
-    Returns:
-        function: The decorated function.
+            return [
+                Dataset(dtype, _df if dtype == _dtype else df) for dtype, df in datasets
+            ]
 
-    Example:
-        @dataset_filter
-        def analyze_datasets(self, datasets):
-            # Perform analysis operations on the datasets
-            ...
+        return wrapper
 
-        self.DATASETS = ["URINEOUTPUT", "DEMOGRAPHICS"]
-        datasets = [(name, dataset) for name, dataset in all_datasets]
-        analyzed_datasets = analyze_datasets(datasets)
-        # analyzed_datasets will contain the analyzed datasets excluding
-        # "URINEOUTPUT" and "DEMOGRAPHICS" datasets.
-    """
-    
-    def wrapper(self, datasets: list[Dataset], *args: list, **kwargs: dict):
-        if not self.DATASETS: # If DATASETS is empty, return the result of the function call
-            return func(self, datasets, *args, **kwargs)
-
-        # Filter datasets based on DATASETS
-        return [
-            (name, dataset) for name, dataset in datasets if name not in self.DATASETS
-        ] + func( 
-            self,
-            [(name, dataset) for name, dataset in datasets if name in self.DATASETS],
-            *args,
-            **kwargs
-        )
-
-    return wrapper
+    return decorator
 
 
-def dataset_as_df(func):
-    """
-    Decorator that extracts a single dataset as a DataFrame.
+def df_to_dataset(dtype: DatasetType):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(self, *args: list, **kwargs: dict):
+            return Dataset(dtype, func(self, *args, **kwargs))
 
-    This decorator is intended to be used on methods that operate on datasets.
-    It ensures that the decorated function is only called with a single
-    dataset, represented as a list containing one `Dataset` object.
-    The function extracts the name and DataFrame from the dataset list,
-    and calls the decorated function on the DataFrame.
-    The result is wrapped in a list along with the original name
-    and returned.
+        return wrapper
 
-    Args:
-        func (function): The function to be decorated.
-
-    Returns:
-        function: The decorated function.
-
-    Raises:
-        ValueError: If the length of the dataset list is not equal to 1.
-
-    Example:
-        @dataset_as_df
-        def preprocess_dataset(self, df):
-            # Perform preprocessing operations on the dataset DataFrame
-            ...
-
-        datasets = [(name, dataset)]
-        preprocessed_datasets = preprocess_dataset(datasets)
-        # preprocessed_datasets will be [(name, preprocessed_df)]
-    """
-
-    def wrapper(self, datasets: list[Dataset], *args: list, **kwargs: dict):
-        if len(datasets) != 1:
-            raise ValueError()
-
-        name, df = datasets[0]
-
-        return [(name, func(self, df, *args, **kwargs))]
-
-    return wrapper
+    return decorator
