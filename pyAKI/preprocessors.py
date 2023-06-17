@@ -18,7 +18,7 @@ class Preprocessor(ABC):
         raise NotImplementedError()
 
 
-class TimeseriesResempler(Preprocessor):
+class TimeseriesResampler(Preprocessor):
     DATASETS: list[int] = [DatasetType.CREATININE, DatasetType.URINEOUTPUT]
 
     def process(self, datasets: list[Dataset]) -> list[Dataset]:
