@@ -59,9 +59,36 @@ class Probe(ABC):
 
 
 class UrineOutputProbe(Probe):
+    """
+    Subclass of Probe representing a probe for urine output analysis.
+
+    This class specializes the abstract base class `Probe` to perform calculations of KDIGO stages based on urine output. Common KDIGO criteria apply.
+    It overrides the `RESNAME` attribute to set the name of the result column.
+    The `probe()` method performs urine output analysis on the provided DataFrame and returns a modified DataFrame
+    with a column containing the appropriate KDIGO stage, according to urine output, added.
+
+    Attributes:
+        RESNAME (str): The name of the result column representing urine output stage.
+
+    Args:
+        column (str): The name of the column representing urine output in the DataFrame.
+        anuria_limit (float): The anuria limit for urine output calculations.
+
+    Example:
+        probe = UrineOutputProbe(column="urineoutput", anuria_limit=0.1)
+        result_df = probe.probe(df=my_dataframe, patient=patient_df)
+    """
+
     RESNAME = "urineoutput_stage"
 
     def __init__(self, column: str = "urineoutput", anuria_limit: float = 0.1) -> None:
+        """
+        Initialize the UrineOutputProbe instance.
+
+        Args:
+            column (str): The name of the column representing urine output in the DataFrame.
+            anuria_limit (float): The anuria limit for urine output calculations. Defaults to 0.1ml/kg/h.
+        """
         super().__init__()
 
         self._column: str = column
@@ -72,10 +99,24 @@ class UrineOutputProbe(Probe):
     def probe(
         self, df: pd.DataFrame = None, patient: pd.DataFrame = None, **kwargs
     ) -> pd.DataFrame:
+        """
+        Perform urine output analysis on the provided DataFrame.
+
+        This method calculates the KDIGO stage according to urine output based on the provided DataFrame and patient information DataFrame.
+        It modifies the DataFrame by adding the urine output stage column with appropriate values based on the calculations.
+
+        Args:
+            df (pd.DataFrame): The DataFrame containing the urine output data. We expect the DataFrame to contain urine output values in ml, sampled hourly.
+            patient (pd.DataFrame): The DataFrame containing patient information. Should contain the patients weight in kg.
+
+        Returns:
+            pd.DataFrame: The modified DataFrame with the urine output stage column added.
+        """
         weight = patient["weight"]
         # fmt: off
-        df[self.RESNAME] = 0
-        df.loc[(df.rolling(6).max()[self._column] / weight) < 0.5, self.RESNAME] = 1
+        df[self.RESNAME] = 0 # set all urineoutput_stage values to 0
+        # TODO: #13 check if this is correct
+        df.loc[(df.rolling(6).max()[self._column] / weight) < 0.5, self.RESNAME] = 1 # why are we using the maximum here?
         df.loc[(df.rolling(12).max()[self._column] / weight) < 0.5, self.RESNAME] = 2
         df.loc[(df.rolling(24).max()[self._column] / weight) < 0.3, self.RESNAME] = 3
         df.loc[(df.rolling(12).max()[self._column] / weight) < self._anuria_limit, self.RESNAME] = 3
@@ -84,6 +125,18 @@ class UrineOutputProbe(Probe):
 
 
 class CreatinineMethod(StrEnum):
+    """
+    Enumeration class representing different methods for creatinine baseline calculations.
+
+    This class defines the available methods for calculating creatinine values.
+    It is a subclass of the `StrEnum` class, which is a string-based enumeration.
+    The available methods are `MIN` and `FIRST`.
+
+    Attributes:
+        MIN: Represents the minimum method for creatinine calculations. Minimum creatinine value within the first 48 hours of ICU stay is used as baseline.
+        FIRST: Represents the first method for creatinine calculations. First creatinine value within the time series is used as baseline.
+    """
+
     MIN = auto()
     FIRST = auto()
 
