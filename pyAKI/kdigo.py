@@ -12,7 +12,7 @@ from preprocessors import (
     CreatininePreProcessor,
     DemographicsPreProcessor,
 )
-from utils import Dataset, DatasetType
+from utils import Dataset
 
 
 class Analyser:
