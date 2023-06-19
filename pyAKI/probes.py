@@ -60,7 +60,7 @@ class Probe(ABC):
 
 class UrineOutputProbe(Probe):
     """
-    Subclass of Probe representing a probe for urine output analysis.
+    Subclass of Probe representing a probe calculating KDIGO stages according to urine output.
 
     This class specializes the abstract base class `Probe` to perform calculations of KDIGO stages based on urine output. Common KDIGO criteria apply.
     It overrides the `RESNAME` attribute to set the name of the result column.
