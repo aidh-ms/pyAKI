@@ -124,7 +124,7 @@ class UrineOutputProbe(Probe):
         return df
 
 
-class CreatinineMethod(StrEnum):
+class CreatinineBaselineMethod(StrEnum):
     """
     Enumeration class representing different methods for creatinine baseline calculations.
 
@@ -142,11 +142,33 @@ class CreatinineMethod(StrEnum):
 
 
 class AbstractCreatinineProbe(Probe, metaclass=ABCMeta):
+    """
+    Abstract base class representing a creatinine probe.
+
+    This class serves as an abstract base class for creatinine probes.
+    It extends the `Probe` class and provides common functionality and attributes
+    for creatinine probe implementations.
+
+    Attributes:
+        column (str): The name of the column containing creatinine values.
+        timeframe (str): The timeframe over which creatinine values are analyzed.
+        method (CreatinineBaselineMethod): The method used for creatinine baseline calculations.
+
+    Example:
+        class MyCreatinineProbe(AbstractCreCreatinineProbe):
+            def __init__(self, column="creatinine", timeframe="7d", method=CreatinineBaselineMethod.MIN):
+                super().__init__(column, timeframe, method)
+                # Additional initialization
+
+            def probe(self, df, **kwargs):
+                # Probe implementation specific to the derived class
+    """
+
     def __init__(
         self,
         column: str = "creat",
         timeframe: str = "7d",
-        method: CreatinineMethod = CreatinineMethod.MIN,
+        method: CreatinineBaselineMethod = CreatinineBaselineMethod.MIN,
     ) -> None:
         super().__init__()
 
@@ -161,7 +183,7 @@ class AbsoluteCreatinineProbe(AbstractCreatinineProbe):
     @dataset_as_df(df=DatasetType.CREATININE)
     @df_to_dataset(DatasetType.CREATININE)
     def probe(self, df: pd.DataFrame = None, **kwargs) -> pd.DataFrame:
-        if self._method == CreatinineMethod.MIN:
+        if self._method == CreatinineBaselineMethod.MIN:
             values = (
                 df[df[self._column] > 0]
                 .rolling(self._timeframe)
@@ -170,7 +192,7 @@ class AbsoluteCreatinineProbe(AbstractCreatinineProbe):
                 .first()
                 .ffill()[self._column]
             )
-        elif self._method == CreatinineMethod.FIRST:
+        elif self._method == CreatinineBaselineMethod.FIRST:
             values = (
                 df[df[self._column] > 0]
                 .rolling(self._timeframe)
@@ -196,7 +218,7 @@ class RelativeCreatinineProbe(AbstractCreatinineProbe):
     @dataset_as_df(df=DatasetType.CREATININE)
     @df_to_dataset(DatasetType.CREATININE)
     def probe(self, df: pd.DataFrame = None, **kwargs) -> pd.DataFrame:
-        if self._method == CreatinineMethod.MIN:
+        if self._method == CreatinineBaselineMethod.MIN:
             values = (
                 df[df[self._column] > 0]
                 .rolling(self._timeframe)
@@ -205,7 +227,7 @@ class RelativeCreatinineProbe(AbstractCreatinineProbe):
                 .first()
                 .ffill()[self._column]
             )
-        elif self._method == CreatinineMethod.FIRST:
+        elif self._method == CreatinineBaselineMethod.FIRST:
             values = (
                 df[df[self._column] > 0]
                 .rolling(self._timeframe)
