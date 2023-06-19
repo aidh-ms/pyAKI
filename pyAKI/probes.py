@@ -151,13 +151,13 @@ class AbstractCreatinineProbe(Probe, metaclass=ABCMeta):
 
     Attributes:
         column (str): The name of the column containing creatinine values.
-        timeframe (str): The timeframe over which creatinine values are analyzed.
+        baseline_timeframe (str): The baseline_timeframe over which creatinine values are analyzed.
         method (CreatinineBaselineMethod): The method used for creatinine baseline calculations.
 
     Example:
         class MyCreatinineProbe(AbstractCreCreatinineProbe):
-            def __init__(self, column="creatinine", timeframe="7d", method=CreatinineBaselineMethod.MIN):
-                super().__init__(column, timeframe, method)
+            def __init__(self, column="creatinine", baseline_timeframe="7d", method=CreatinineBaselineMethod.MIN):
+                super().__init__(column, baseline_timeframe, method)
                 # Additional initialization
 
             def probe(self, df, **kwargs):
@@ -167,17 +167,32 @@ class AbstractCreatinineProbe(Probe, metaclass=ABCMeta):
     def __init__(
         self,
         column: str = "creat",
-        timeframe: str = "7d",
+        baseline_timeframe: str = "7d",
         method: CreatinineBaselineMethod = CreatinineBaselineMethod.MIN,
     ) -> None:
         super().__init__()
 
         self._column = column
-        self._timeframe = timeframe
+        self._baseline_timeframe = baseline_timeframe
         self._method = method
 
 
 class AbsoluteCreatinineProbe(AbstractCreatinineProbe):
+    """
+    Probe class for absolute creatinine measurements.
+
+    This class represents a probe that analyzes absolute creatinine measurements.
+    It extends the `AbstractCreCreatinineProbe` class and provides specific
+    implementation for calculating and analyzing absolute creatinine values.
+
+    Attributes:
+        RESNAME (str): The name of the resulting stage column.
+
+    Example:
+        probe = AbsoluteCreatinineProbe(column="creatinine", baseline_timeframe="7d", method=CreatinineMethod.MIN)
+        df_result = probe.probe(df)
+    """
+
     RESNAME = "abs_creatinine_stage"
 
     @dataset_as_df(df=DatasetType.CREATININE)
@@ -186,7 +201,7 @@ class AbsoluteCreatinineProbe(AbstractCreatinineProbe):
         if self._method == CreatinineBaselineMethod.MIN:
             values = (
                 df[df[self._column] > 0]
-                .rolling(self._timeframe)
+                .rolling(self._baseline_timeframe)
                 .agg(lambda rows: rows[0])
                 .resample("1h")
                 .first()
@@ -195,7 +210,7 @@ class AbsoluteCreatinineProbe(AbstractCreatinineProbe):
         elif self._method == CreatinineBaselineMethod.FIRST:
             values = (
                 df[df[self._column] > 0]
-                .rolling(self._timeframe)
+                .rolling(self._baseline_timeframe)
                 .min()
                 .resample("1h")
                 .min()
@@ -221,7 +236,7 @@ class RelativeCreatinineProbe(AbstractCreatinineProbe):
         if self._method == CreatinineBaselineMethod.MIN:
             values = (
                 df[df[self._column] > 0]
-                .rolling(self._timeframe)
+                .rolling(self._baseline_timeframe)
                 .agg(lambda rows: rows[0])
                 .resample("1h")
                 .first()
@@ -230,7 +245,7 @@ class RelativeCreatinineProbe(AbstractCreatinineProbe):
         elif self._method == CreatinineBaselineMethod.FIRST:
             values = (
                 df[df[self._column] > 0]
-                .rolling(self._timeframe)
+                .rolling(self._baseline_timeframe)
                 .min()
                 .resample("1h")
                 .min()
