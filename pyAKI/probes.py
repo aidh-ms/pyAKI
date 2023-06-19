@@ -141,7 +141,7 @@ class CreatinineMethod(StrEnum):
     FIRST = auto()
 
 
-class AbstractCreCreatinineProbe(Probe, metaclass=ABCMeta):
+class AbstractCreatinineProbe(Probe, metaclass=ABCMeta):
     def __init__(
         self,
         column: str = "creat",
@@ -155,7 +155,7 @@ class AbstractCreCreatinineProbe(Probe, metaclass=ABCMeta):
         self._method = method
 
 
-class AbsoluteCreatinineProbe(AbstractCreCreatinineProbe):
+class AbsoluteCreatinineProbe(AbstractCreatinineProbe):
     RESNAME = "abs_creatinine_stage"
 
     @dataset_as_df(df=DatasetType.CREATININE)
@@ -190,7 +190,7 @@ class AbsoluteCreatinineProbe(AbstractCreCreatinineProbe):
         return df
 
 
-class RelativeCreatinineProbe(AbstractCreCreatinineProbe):
+class RelativeCreatinineProbe(AbstractCreatinineProbe):
     RESNAME = "rel_creatinine_stage"
 
     @dataset_as_df(df=DatasetType.CREATININE)
