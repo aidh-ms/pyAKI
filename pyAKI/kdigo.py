@@ -68,13 +68,13 @@ class Analyser:
             time_identifier (str, optional): The column name in the input data representing the time identifier.
                 Defaults to "charttime".
         """
-        if probes is None:
+        if probes is None:  # apply default probes if not provided
             probes = [
                 UrineOutputProbe(),
                 AbsoluteCreatinineProbe(),
                 RelativeCreatinineProbe(),
             ]
-        if preprocessors is None:
+        if preprocessors is None:  # apply default preprocessors if not provided
             preprocessors = [
                 UrineOutputPreProcessor(
                     stay_identifier=stay_identifier, time_identifier=time_identifier
@@ -117,6 +117,7 @@ class Analyser:
         Returns:
             pd.DataFrame: The analysis results for the specific stay.
         """
+
         data = [(name, data.loc[stay_id]) for name, data in self._data]
 
         for probe in self._probes:
