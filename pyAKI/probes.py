@@ -115,8 +115,7 @@ class UrineOutputProbe(Probe):
         weight = patient["weight"]
         # fmt: off
         df[self.RESNAME] = 0 # set all urineoutput_stage values to 0
-        # TODO: #13 check if this is correct
-        df.loc[(df.rolling(6).max()[self._column] / weight) < 0.5, self.RESNAME] = 1 # why are we using the maximum here?
+        df.loc[(df.rolling(6).max()[self._column] / weight) < 0.5, self.RESNAME] = 1
         df.loc[(df.rolling(12).max()[self._column] / weight) < 0.5, self.RESNAME] = 2
         df.loc[(df.rolling(24).max()[self._column] / weight) < 0.3, self.RESNAME] = 3
         df.loc[(df.rolling(12).max()[self._column] / weight) < self._anuria_limit, self.RESNAME] = 3
@@ -133,8 +132,8 @@ class CreatinineBaselineMethod(StrEnum):
     The available methods are `MIN` and `FIRST`.
 
     Attributes:
-        MIN: Represents the minimum method for creatinine calculations. Minimum creatinine value within the first 48 hours of ICU stay is used as baseline.
-        FIRST: Represents the first method for creatinine calculations. First creatinine value within the time series is used as baseline.
+        MIN: Represents the minimum method for creatinine calculations. Minimum creatinine value within the specified time window before observation is used as baseline.
+        FIRST: Represents the first method for creatinine calculations. First creatinine value within the specified time window before observation is used as baseline.
     """
 
     MIN = auto()
@@ -172,9 +171,44 @@ class AbstractCreatinineProbe(Probe, metaclass=ABCMeta):
     ) -> None:
         super().__init__()
 
-        self._column = column
-        self._baseline_timeframe = baseline_timeframe
-        self._method = method
+        self._column: str = column
+        self._baseline_timeframe: str = baseline_timeframe
+        self._method: CreatinineBaselineMethod = method
+
+    def creatinine_baseline(self, df: pd.DataFrame) -> pd.Series:
+        """
+        Calculate the creatinine baseline values.
+
+        This method calculates the creatinine baseline values based on the configured
+        parameters and the provided DataFrame.
+
+        Args:
+            df (pd.DataFrame): The DataFrame containing the creatinine data.
+
+        Returns:
+            pd.Series: The calculated creatinine baseline values.
+
+        """
+        if self._method == CreatinineBaselineMethod.MIN:
+            values: pd.Series = (
+                df[df[self._column] > 0]
+                .rolling(self._baseline_timeframe)
+                .agg(lambda rows: rows[0])
+                .resample("1h")
+                .first()
+                .ffill()[self._column]
+            )
+        elif self._method == CreatinineBaselineMethod.FIRST:
+            values: pd.Series = (
+                df[df[self._column] > 0]
+                .rolling(self._baseline_timeframe)
+                .min()
+                .resample("1h")
+                .min()
+                .ffill()[self._column]
+            )
+
+        return values
 
 
 class AbsoluteCreatinineProbe(AbstractCreatinineProbe):
@@ -198,28 +232,11 @@ class AbsoluteCreatinineProbe(AbstractCreatinineProbe):
     @dataset_as_df(df=DatasetType.CREATININE)
     @df_to_dataset(DatasetType.CREATININE)
     def probe(self, df: pd.DataFrame = None, **kwargs) -> pd.DataFrame:
-        if self._method == CreatinineBaselineMethod.MIN:
-            values = (
-                df[df[self._column] > 0]
-                .rolling(self._baseline_timeframe)
-                .agg(lambda rows: rows[0])
-                .resample("1h")
-                .first()
-                .ffill()[self._column]
-            )
-        elif self._method == CreatinineBaselineMethod.FIRST:
-            values = (
-                df[df[self._column] > 0]
-                .rolling(self._baseline_timeframe)
-                .min()
-                .resample("1h")
-                .min()
-                .ffill()[self._column]
-            )
+        baseline_values: pd.Series = self.creatinine_baseline(df)
 
         df[self.RESNAME] = 0
-        df.loc[(df[self._column] - values) > 0.3, self.RESNAME] = 1
-        df.loc[(df[self._column] - values) > 4, self.RESNAME] = 3
+        df.loc[(df[self._column] - baseline_values) > 0.3, self.RESNAME] = 1
+        df.loc[(df[self._column] - baseline_values) > 4, self.RESNAME] = 3
 
         df.loc[df[self._column] == 0, self.RESNAME] = None
         df[self.RESNAME] = df[self.RESNAME].ffill().fillna(0)
@@ -233,29 +250,12 @@ class RelativeCreatinineProbe(AbstractCreatinineProbe):
     @dataset_as_df(df=DatasetType.CREATININE)
     @df_to_dataset(DatasetType.CREATININE)
     def probe(self, df: pd.DataFrame = None, **kwargs) -> pd.DataFrame:
-        if self._method == CreatinineBaselineMethod.MIN:
-            values = (
-                df[df[self._column] > 0]
-                .rolling(self._baseline_timeframe)
-                .agg(lambda rows: rows[0])
-                .resample("1h")
-                .first()
-                .ffill()[self._column]
-            )
-        elif self._method == CreatinineBaselineMethod.FIRST:
-            values = (
-                df[df[self._column] > 0]
-                .rolling(self._baseline_timeframe)
-                .min()
-                .resample("1h")
-                .min()
-                .ffill()[self._column]
-            )
+        baseline_values = self.creatinine_baseline(df)
 
         df[self.RESNAME] = 0
-        df.loc[(df[self._column] / values) > 1.5, self.RESNAME] = 1
-        df.loc[(df[self._column] / values) > 2, self.RESNAME] = 2
-        df.loc[(df[self._column] / values) > 3, self.RESNAME] = 3
+        df.loc[(df[self._column] / baseline_values) > 1.5, self.RESNAME] = 1
+        df.loc[(df[self._column] / baseline_values) > 2, self.RESNAME] = 2
+        df.loc[(df[self._column] / baseline_values) > 3, self.RESNAME] = 3
 
         df.loc[df[self._column] == 0, self.RESNAME] = None
         df[self.RESNAME] = df[self.RESNAME].ffill().fillna(0)
