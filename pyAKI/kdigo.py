@@ -15,7 +15,7 @@ from preprocessors import (
 from utils import Dataset, DatasetType
 
 
-class Analyser:
+class Analyzer:
     def __init__(
         self,
         data: list[Dataset],
@@ -44,9 +44,9 @@ class Analyser:
         for preprocessor in preprocessors:
             data = preprocessor.process(data)
 
-        self._data = data
-        self._probes = probes
-        self._stay_identifier = stay_identifier
+        self._data: list[Dataset] = data
+        self._probes: list[Probe] = probes
+        self._stay_identifier: str = stay_identifier
 
     def process_stays(self) -> pd.DataFrame:
         pass  # TODO
@@ -55,7 +55,7 @@ class Analyser:
         data = [(name, data.loc[stay_id]) for name, data in self._data]
 
         for probe in self._probes:
-            data = probe.probe(data)
+            data: pd.DataFrame = probe.probe(data)
 
         (_, df) = data[0]
         for _, _df in data[1:]:
