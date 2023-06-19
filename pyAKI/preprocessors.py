@@ -11,15 +11,15 @@ class Preprocessor(ABC):
     ) -> None:
         super().__init__()
 
-        self._stay_identifier = stay_identifier
-        self._time_identifier = time_identifier
+        self._stay_identifier: str = stay_identifier
+        self._time_identifier: str = time_identifier
 
     def process(self, datasets: list[Dataset]) -> list[Dataset]:
         raise NotImplementedError()
 
 
-class TimeseriesResempler(Preprocessor):
-    DATASETS = [DatasetType.CREATININE, DatasetType.URINEOUTPUT]
+class TimeseriesResampler(Preprocessor):
+    DATASETS: list[int] = [DatasetType.CREATININE, DatasetType.URINEOUTPUT]
 
     def process(self, datasets: list[Dataset]) -> list[Dataset]:
         datasets = [
@@ -52,8 +52,8 @@ class UrineOutputPreProcessor(Preprocessor):
     ) -> None:
         super().__init__(stay_identifier, time_identifier)
 
-        self._interpolate = interpolate
-        self._threshold = threshold
+        self._interpolate: bool = interpolate
+        self._threshold: int | None = threshold
 
     @dataset_as_df(df=DatasetType.URINEOUTPUT)
     @df_to_dataset(DatasetType.URINEOUTPUT)
@@ -92,8 +92,8 @@ class CreatininePreProcessor(Preprocessor):
     ) -> None:
         super().__init__(stay_identifier, time_identifier)
 
-        self._ffill = ffill
-        self._threshold = threshold
+        self._ffill: bool = ffill
+        self._threshold: int | None = threshold
 
     @dataset_as_df(df=DatasetType.CREATININE)
     @df_to_dataset(DatasetType.CREATININE)

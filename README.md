@@ -5,11 +5,13 @@ Python package to detect AKI within time series data.
 The goal of this package is to establish well tested, comprehensive functions for the detection of Acute Kidney Injury (AKI) in time series data, according to the Kidney Disease Improving Global Outcomes (KDIGO) Criteria, established in 2012 [^kdigo].
 
 ## Installation
-```
+
+```shell
 pip install git+https://github.com/AI2MS/pyAKI
 ```
 
 ## Usage
+
 ```python
 from pyAKI import process_stay
 process_stay(stay_id: int,
