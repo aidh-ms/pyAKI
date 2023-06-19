@@ -49,7 +49,16 @@ class Analyser:
         self._stay_identifier = stay_identifier
 
     def process_stays(self) -> pd.DataFrame:
-        pass  # TODO
+        (_, df), *datasets = self._data
+        stay_ids = df.index.get_level_values("stay_id").unique()
+        for _, df in datasets:
+            stay_ids.join(df.index.get_level_values("stay_id").unique())
+
+        data = self.process_stay(stay_ids.values[0])
+        for stay_id in stay_ids.values[1:]:
+            data = pd.concat([data, self.process_stay(stay_id)])
+
+        return data
 
     def process_stay(self, stay_id: str) -> pd.DataFrame:
         data = [(name, data.loc[stay_id]) for name, data in self._data]
@@ -57,11 +66,11 @@ class Analyser:
         for probe in self._probes:
             data = probe.probe(data)
 
-        (_, df) = data[0]
-        for _, _df in data[1:]:
+        (_, df), *datasets = data
+        for _, _df in datasets:
             if isinstance(_df, pd.Series):
                 _df = pd.DataFrame([_df], index=df.index)
             df = df.merge(_df, how="outer", left_index=True, right_index=True)
 
         df["stage"] = df.filter(like="stage").max(axis=1)
-        return df
+        return df.set_index([pd.Index([stay_id] * len(df), name="stay_id"), df.index])
