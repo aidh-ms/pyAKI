@@ -90,11 +90,11 @@ class Analyser:
             pd.DataFrame: The analysis results for all stays.
         """
         (_, df), *datasets = self._data
-        stay_ids = df.index.get_level_values("stay_id").unique()
+        stay_ids: pd.Index = df.index.get_level_values("stay_id").unique()
         for _, df in datasets:
             stay_ids.join(df.index.get_level_values("stay_id").unique())
 
-        data = self.process_stay(stay_ids.values[0])
+        data: pd.DataFrame = self.process_stay(stay_ids.values[0])
         for stay_id in stay_ids.values[1:]:
             data = pd.concat([data, self.process_stay(stay_id)])
 
@@ -123,7 +123,9 @@ class Analyser:
         for _, _df in datasets:
             if isinstance(_df, pd.Series):
                 _df = pd.DataFrame([_df], index=df.index)
-            df = df.merge(_df, how="outer", left_index=True, right_index=True)
+            df: pd.DataFrame = df.merge(
+                _df, how="outer", left_index=True, right_index=True
+            )
 
         df["stage"] = df.filter(like="stage").max(axis=1)
         return df.set_index([pd.Index([stay_id] * len(df), name="stay_id"), df.index])
