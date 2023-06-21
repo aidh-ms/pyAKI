@@ -54,19 +54,6 @@ class Analyser:
     ) -> None:
         """
         Initialize the Analyser instance.
-
-        Args:
-            data (list[Dataset]): A list of Dataset objects containing the input data.
-            probes (list[Probe], optional): A list of Probe objects representing the analysis probes to apply.
-                If not provided, default probes including UrineOutputProbe, AbsoluteCreatinineProbe, and
-                RelativeCreatinineProbe will be used.
-            preprocessors (list[Preprocessor], optional): A list of Preprocessor objects representing the
-                preprocessors to apply on the input data. If not provided, default preprocessors including
-                UrineOutputPreProcessor, CreatininePreProcessor, and DemographicsPreProcessor will be used.
-            stay_identifier (str, optional): The column name in the input data representing the stay identifier.
-                Defaults to "stay_id".
-            time_identifier (str, optional): The column name in the input data representing the time identifier.
-                Defaults to "charttime".
         """
         if probes is None:  # apply default probes if not provided
             probes = [
