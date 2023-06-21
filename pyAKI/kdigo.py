@@ -80,6 +80,15 @@ class Analyser:
         self._stay_identifier: str = stay_identifier
 
     def process_stays(self) -> pd.DataFrame:
+        """
+        Process all stays in the input data.
+
+        This method processes all stays in the input data by applying the configured probes and preprocessors.
+        The analysis results for all stays are concatenated and returned as a single DataFrame.
+
+        Returns:
+            pd.DataFrame: The analysis results for all stays.
+        """
         (_, df), *datasets = self._data
         stay_ids = df.index.get_level_values("stay_id").unique()
         for _, df in datasets:
