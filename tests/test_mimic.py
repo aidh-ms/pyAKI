@@ -26,4 +26,4 @@ if __name__ == "__main__":
             Dataset(DatasetType.DEMOGRAPHICS, user_data),
         ]
     )
-    ana.process_stays()
+    ana.process_stays().to_csv(root_dir / "data" / "aki.csv")
