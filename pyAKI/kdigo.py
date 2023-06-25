@@ -84,7 +84,7 @@ class Analyser:
         """
         Process all stays in the input data.
 
-        This method processes all stays in the input data by applying the configured probes and preprocessors.
+        This method processes all stays in the input data by applying the configured probes.
         The analysis results for all stays are concatenated and returned as a single DataFrame.
 
         Returns:
@@ -118,7 +118,7 @@ class Analyser:
         data = [(name, data.loc[stay_id]) for name, data in self._data]
 
         for probe in self._probes:
-            data: pd.DataFrame = probe.probe(data)
+            data: Dataset = probe.probe(data)
 
         (_, df), *datasets = data
         for _, _df in datasets:

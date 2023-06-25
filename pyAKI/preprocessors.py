@@ -16,8 +16,8 @@ class Preprocessor(ABC):
         Initialize a new instance of the Preprocessor class.
 
         Parameters:
-            stay_identifier (str): The column name that identifies stays or admissions in the dataset. Defaults to MIMIC standard "stay_id".
-            time_identifier (str): The column name that identifies the timestamp or time variable in the dataset. Defaults to MIMIC standard "charttime".
+            stay_identifier (str, optional): The column name that identifies stays or admissions in the dataset. Defaults to MIMIC standard "stay_id".
+            time_identifier (str, optional): The column name that identifies the timestamp or time variable in the dataset. Defaults to MIMIC standard "charttime".
         """
         super().__init__()
 
@@ -86,15 +86,15 @@ class UrineOutputPreProcessor(Preprocessor):
         Initialize a new instance of the UrineOutputPreProcessor class.
 
         Parameters:
-            stay_identifier (str): The column name that identifies stays or admissions in the dataset. Defaults to MIMIC standard "stay_id".
-            time_identifier (str): The column name that identifies the timestamp or time variable in the dataset. Defaults to MIMIC standard "charttime".
-            interpolate (bool): Flag indicating whether to perform interpolation on missing values. Defaults to True.
-            threshold (int | None): The threshold value for limiting the interpolation range. Defaults to None.
+            stay_identifier (str, optional): The column name that identifies stays or admissions in the dataset. Defaults to MIMIC standard "stay_id".
+            time_identifier (str, optional): The column name that identifies the timestamp or time variable in the dataset. Defaults to MIMIC standard "charttime".
+            interpolate (bool, optional): Flag indicating whether to perform interpolation on missing values. Defaults to True.
+            threshold (int, optional): The threshold value for limiting the interpolation range. Defaults to None.
         """
         super().__init__(stay_identifier, time_identifier)
 
         self._interpolate: bool = interpolate
-        self._threshold: int | None = threshold
+        self._threshold: Optional[int] = threshold
 
     @dataset_as_df(df=DatasetType.URINEOUTPUT)
     @df_to_dataset(DatasetType.URINEOUTPUT)
@@ -146,15 +146,15 @@ class CreatininePreProcessor(Preprocessor):
         Initialize a new instance of the CreatininePreProcessor class.
 
         Parameters:
-            stay_identifier (str): The column name that identifies stays or admissions in the dataset. Defaults to "stay_id".
-            time_identifier (str): The column name that identifies the timestamp or time variable in the dataset. Defaults to "charttime".
-            ffill (bool): Flag indicating whether to perform forward filling on missing values. Defaults to True.
-            threshold (int | None): The threshold value for limiting the forward filling range. Defaults to None.
+            stay_identifier (str, optional): The column name that identifies stays or admissions in the dataset. Defaults to "stay_id".
+            time_identifier (str, optional): The column name that identifies the timestamp or time variable in the dataset. Defaults to "charttime".
+            ffill (bool, optional): Flag indicating whether to perform forward filling on missing values. Defaults to True.
+            threshold (int, optional): The threshold value for limiting the forward filling range. Defaults to None.
         """
         super().__init__(stay_identifier, time_identifier)
 
         self._ffill: bool = ffill
-        self._threshold: int | None = threshold
+        self._threshold: Optional[int] = threshold
 
     @dataset_as_df(df=DatasetType.CREATININE)
     @df_to_dataset(DatasetType.CREATININE)
