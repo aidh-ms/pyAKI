@@ -4,7 +4,8 @@ from pathlib import Path
 import pandas as pd
 
 sys.path.append(str(Path(__file__).parent.parent / "pyAKI"))
-from kdigo import Analyser, Dataset, DatasetType
+from kdigo import Analyser
+from utils import Dataset, DatasetType
 
 if __name__ == "__main__":
     root_dir: Path = Path(__file__).parent
