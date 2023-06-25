@@ -60,7 +60,7 @@ class Probe(ABC):
 
 class UrineOutputProbe(Probe):
     """
-    Subclass of Probe representing a probe for urine output analysis.
+    Subclass of Probe representing a probe calculating KDIGO stages according to urine output.
 
     This class specializes the abstract base class `Probe` to perform calculations of KDIGO stages based on urine output. Common KDIGO criteria apply.
     It overrides the `RESNAME` attribute to set the name of the result column.
@@ -175,6 +175,8 @@ class AbstractCreatinineProbe(Probe, metaclass=ABCMeta):
         self._baseline_timeframe: str = baseline_timeframe
         self._method: CreatinineBaselineMethod = method
 
+    @dataset_as_df(df=DatasetType.CREATININE)
+    @df_to_dataset(DatasetType.CREATININE)
     def creatinine_baseline(self, df: pd.DataFrame) -> pd.Series:
         """
         Calculate the creatinine baseline values.
@@ -213,11 +215,10 @@ class AbstractCreatinineProbe(Probe, metaclass=ABCMeta):
 
 class AbsoluteCreatinineProbe(AbstractCreatinineProbe):
     """
-    Probe class for absolute creatinine measurements.
+    Probe class for absolute creatinine criterion, according to KDIGO criteria.
 
-    This class represents a probe that analyzes absolute creatinine measurements.
-    It extends the `AbstractCreCreatinineProbe` class and provides specific
-    implementation for calculating and analyzing absolute creatinine values.
+    This class represents a probe that calculates AKI stages according to absolute rises in creatinine, according to the KDIGO criteria.
+    It extends the `AbstractCreCreatinineProbe` class.
 
     Attributes:
         RESNAME (str): The name of the resulting stage column.
@@ -232,6 +233,19 @@ class AbsoluteCreatinineProbe(AbstractCreatinineProbe):
     @dataset_as_df(df=DatasetType.CREATININE)
     @df_to_dataset(DatasetType.CREATININE)
     def probe(self, df: pd.DataFrame = None, **kwargs) -> pd.DataFrame:
+        """
+        Perform KDIGO stage calculation based on absolute creatinine elevations on the provided DataFrame.
+
+        This method calculates the KDIGO stage based on the provided DataFrame
+        and the configured baseline values. It calculates the stage according to KDIGO criteria.
+
+        Args:
+            df (pd.DataFrame): The DataFrame containing the creatinine data. It should have a column
+                with the name specified in the `column` attribute of the probe.
+
+        Returns:
+            pd.DataFrame: The modified DataFrame with the absolute creatinine stage column added.
+        """
         baseline_values: pd.Series = self.creatinine_baseline(df)
 
         df[self.RESNAME] = 0
@@ -245,12 +259,39 @@ class AbsoluteCreatinineProbe(AbstractCreatinineProbe):
 
 
 class RelativeCreatinineProbe(AbstractCreatinineProbe):
+    """
+    Probe class for relative creatinine measurements.
+
+    This class represents a probe calculates KDIGO stages based on relative creatinine elevations.
+
+    Attributes:
+        RESNAME (str): The name of the resulting stage column.
+
+    Example:
+        probe = RelativeCreatinineProbe(column="creatinine", baseline_timeframe="7d", method=CreatinineBaselineMethod.MIN)
+        df_result = probe.probe(df)
+    """
+
     RESNAME = "rel_creatinine_stage"
 
     @dataset_as_df(df=DatasetType.CREATININE)
     @df_to_dataset(DatasetType.CREATININE)
     def probe(self, df: pd.DataFrame = None, **kwargs) -> pd.DataFrame:
-        baseline_values = self.creatinine_baseline(df)
+        """
+        Perform calculation of relative creatinine elevations on the provided DataFrame.
+
+        This method calculates the relative creatinine stage based on the provided DataFrame
+        and the configured baseline values. It modifies the DataFrame by adding the relative
+        creatinine stage column with appropriate values based on the calculations.
+
+        Args:
+            df (pd.DataFrame): The DataFrame containing the creatinine data. It should have a column
+                with the name specified in the `column` attribute of the probe.
+
+        Returns:
+            pd.DataFrame: The modified DataFrame with the relative creatinine stage column added.
+        """
+        baseline_values: pd.Series = self.creatinine_baseline(df)
 
         df[self.RESNAME] = 0
         df.loc[(df[self._column] / baseline_values) > 1.5, self.RESNAME] = 1
