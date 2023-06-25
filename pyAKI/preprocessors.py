@@ -1,6 +1,7 @@
 from abc import ABC
 
 import pandas as pd
+from typing import Optional
 
 from utils import dataset_as_df, df_to_dataset, Dataset, DatasetType
 
@@ -79,7 +80,7 @@ class UrineOutputPreProcessor(Preprocessor):
         stay_identifier: str = "stay_id",
         time_identifier: str = "charttime",
         interpolate: bool = True,
-        threshold: int | None = None,
+        threshold: Optional[int] = None,
     ) -> None:
         """
         Initialize a new instance of the UrineOutputPreProcessor class.
@@ -139,7 +140,7 @@ class CreatininePreProcessor(Preprocessor):
         stay_identifier: str = "stay_id",
         time_identifier: str = "charttime",
         ffill: bool = True,
-        threshold: int | None = None,
+        threshold: Optional[int] = None,
     ) -> None:
         """
         Initialize a new instance of the CreatininePreProcessor class.

@@ -13,6 +13,7 @@ from preprocessors import (
     DemographicsPreProcessor,
 )
 from utils import Dataset
+from typing import Optional
 
 
 class Analyser:
@@ -47,8 +48,8 @@ class Analyser:
     def __init__(
         self,
         data: list[Dataset],
-        probes: list[Probe] | None = None,
-        preprocessors: list[Preprocessor] | None = None,
+        probes: Optional[list[Probe]] = None,
+        preprocessors: Optional[list[Preprocessor]] = None,
         stay_identifier: str = "stay_id",
         time_identifier: str = "charttime",
     ) -> None:
