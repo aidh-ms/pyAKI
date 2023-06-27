@@ -1,178 +1,132 @@
-import numpy as np
 import pandas as pd
-from scipy.ndimage import uniform_filter1d
+
+from probes import (
+    Probe,
+    UrineOutputProbe,
+    AbsoluteCreatinineProbe,
+    RelativeCreatinineProbe,
+)
+from preprocessors import (
+    Preprocessor,
+    UrineOutputPreProcessor,
+    CreatininePreProcessor,
+    DemographicsPreProcessor,
+)
+from utils import Dataset
+from typing import Optional
 
 
-def process_stay(
-    stay_id: int,
-    urine_output: pd.DataFrame,
-    creatinine: pd.DataFrame,
-    weight: float,
-    stay_identifier: str = "stay_id",
-    time_identifier: str = "charttime",
-) -> pd.DataFrame:
+class Analyser:
     """
-    Process a stay and annotate with KDIGO AKI stage
+    Class for data analysis using probes and preprocessors.
 
-    Parameters
-    ----------
-    stay_id: int
-        stay_identifier
-    urine_output: pd.DataFrame
-        DataFrame containing information about urine output in ml
-    creatinine: pd.DataFrame
-        DataFrame containing information about creatinine level
-    weight: float
-        weight in kg of the current subject
-    stay_identifier: str
-        stay label in `urine_output` and `creatinine`
-    time_identifier: str
-        timestamp label in `urine_output` and `creatinine`
+    This class provides functionality for analyzing data using a collection of probes and preprocessors.
+    It processes the input data through the specified preprocessors and applies the probes to perform
+    the analysis. The analysis results are returned as a DataFrame.
 
-    Returns
-    -------
-    pd.DataFrame
-        Containing the aki_stage and aki sub-stages for urine output, relative and absolute creatinine
+    Args:
+        data (list[Dataset]): A list of Dataset objects containing the input data.
+        probes (list[Probe], optional): A list of Probe objects representing the analysis probes to apply.
+            If not provided, default probes including UrineOutputProbe, AbsoluteCreatinineProbe, and
+            RelativeCreatinineProbe will be used.
+        preprocessors (list[Preprocessor], optional): A list of Preprocessor objects representing the
+            preprocessors to apply on the input data. If not provided, default preprocessors including
+            UrineOutputPreProcessor, CreatininePreProcessor, and DemographicsPreProcessor will be used.
+        stay_identifier (str, optional): The column name in the input data representing the stay identifier.
+            Defaults to "stay_id".
+        time_identifier (str, optional): The column name in the input data representing the time identifier.
+            Defaults to "charttime".
+
+    Example:
+        # Instantiate the Analyser class with custom data, probes, and preprocessors
+        analyser = Analyser(data=my_datasets, probes=[MyProbe()], preprocessors=[MyPreprocessor()])
+
+        # Process stays and obtain the analysis results
+        result_df = analyser.process_stays()
     """
-    if stay_id not in np.unique(urine_output.stay_id) or stay_id not in np.unique(
-        creatinine.stay_id
-    ):
-        raise ValueError("stay_id not found in input data")
-    urine_output = refactor_timeseries(
-        stay_id,
-        input_ts=urine_output,
-        stay_identifier=stay_identifier,
-        time_identifier=time_identifier,
-    )
-    creatinine = refactor_timeseries(
-        stay_id,
-        input_ts=creatinine,
-        stay_identifier=stay_identifier,
-        time_identifier=time_identifier,
-    )
-    df = urine_output.join(creatinine).fillna(0)
-    kdigo_uo_criterion(input_ts=df, weight=weight)
-    kdigo_rel_crea_criterion(input_ts=df, baseline=0.5)
-    # todo: kdigo abs crea criterion
-    df["aki_stage"] = np.maximum(df.kdigo_uo_criterion, df.kdigo_rel_crea_criterion)
-    return df
 
+    def __init__(
+        self,
+        data: list[Dataset],
+        probes: Optional[list[Probe]] = None,
+        preprocessors: Optional[list[Preprocessor]] = None,
+        stay_identifier: str = "stay_id",
+        time_identifier: str = "charttime",
+    ) -> None:
+        """
+        Initialize the Analyser instance.
+        """
+        if probes is None:  # apply default probes if not provided
+            probes = [
+                UrineOutputProbe(),
+                AbsoluteCreatinineProbe(),
+                RelativeCreatinineProbe(),
+            ]
+        if preprocessors is None:  # apply default preprocessors if not provided
+            preprocessors = [
+                UrineOutputPreProcessor(
+                    stay_identifier=stay_identifier, time_identifier=time_identifier
+                ),
+                CreatininePreProcessor(
+                    stay_identifier=stay_identifier, time_identifier=time_identifier
+                ),
+                DemographicsPreProcessor(stay_identifier=stay_identifier),
+            ]
+        # apply preprocessors to the input data
+        for preprocessor in preprocessors:
+            data = preprocessor.process(data)
 
-def refactor_timeseries(
-    stay_id: int,
-    input_ts: pd.DataFrame,
-    stay_identifier: str = "stay_id",
-    time_identifier: str = "charttime",
-):
-    input_ts = input_ts[input_ts[stay_identifier] == stay_id].drop(
-        columns=stay_identifier
-    )
-    input_ts[time_identifier] = pd.to_datetime(input_ts[time_identifier])
-    input_ts = input_ts.set_index(time_identifier)
-    return input_ts.resample("1H").sum()
+        self._data: list[Dataset] = data
+        self._probes: list[Probe] = probes
+        self._stay_identifier: str = stay_identifier
 
+    def process_stays(self) -> pd.DataFrame:
+        """
+        Process all stays in the input data.
 
-def kdigo_uo_criterion(
-    input_ts: pd.DataFrame,
-    weight: float,
-    mode: str = "constant_init",
-    cval: float = 0.0,
-) -> pd.DataFrame:
-    """
-    KDIGO urineoutput criterion
+        This method processes all stays in the input data by applying the configured probes.
+        The analysis results for all stays are concatenated and returned as a single DataFrame.
 
-    Stage 1: <0.5 ml/kg/h for 6-12h
-    Stage 2: <0.5 ml/kg/h for > 12h
-    Stage 3: <0.3 ml/kg/h for > 24h OR Anuria for > 12h
+        Returns:
+            pd.DataFrame: The analysis results for all stays.
+        """
+        (_, df), *datasets = self._data
+        stay_ids: pd.Index = df.index.get_level_values("stay_id").unique()
+        for _, df in datasets:
+            stay_ids.join(df.index.get_level_values("stay_id").unique())
 
-    Parameters
-    ----------
-    input_ts: pd.DataFrame
-        Index: Timestamp, hourly
-        urineoutput: Urine output in ml per hour
-    weight: flot
-        Patient weight in kg
-    mode: str, default = 'constant_init'
-        * see https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.uniform_filter1d.html
+        data: pd.DataFrame = self.process_stay(stay_ids.values[0])
+        for stay_id in stay_ids.values[1:]:
+            data = pd.concat([data, self.process_stay(stay_id)])
 
-        * constant_init:
-             Initial value of input_ts is used as constant
-    cval: float, default = 0.0
-        constant value if mode is `constant`
+        return data
 
-    Returns
-    -------
-    pd.DataFrame
-        Dataframe with kdigo_uo_criterion
-    """
-    if "urineoutput" not in input_ts.columns:
-        raise ValueError("Expected key `urineoutput` in input_ts.")
-    var_name = "kdigo_uo_criterion"
-    input_ts[var_name] = [0 for _ in range(len(input_ts))]
-    if mode == "constant_init":
-        mode = "constant"
-        cval = weight
-    for i in range(6, min(len(input_ts), 48)):
-        origin = int(i / 2) if i % 2 == 1 else int(i / 2) - 1
-        current_mean = uniform_filter1d(
-            input_ts.urineoutput, size=i, origin=origin, mode=mode, cval=cval
-        )
-        if i < 12:
-            input_ts[var_name] = np.maximum(
-                input_ts[var_name], (current_mean / weight < 0.5) * 1
-            )
-            continue
-        if 12 <= i < 24:
-            input_ts[var_name] = np.maximum(
-                input_ts[var_name], (current_mean / weight < 0.5) * 2
-            )
-            input_ts[var_name] = np.maximum(
-                input_ts[var_name], (current_mean / weight == 0) * 3
-            )
-            continue
-        if i >= 24:
-            input_ts[var_name] = np.maximum(
-                input_ts[var_name], (current_mean / weight < 0.3) * 3
-            )
-            input_ts[var_name] = np.maximum(
-                input_ts[var_name], (current_mean / weight == 0) * 3
+    def process_stay(self, stay_id: str) -> pd.DataFrame:
+        """
+        Process a specific stay in the input data by patient identificator.
+
+        This method processes a specific stay in the input data by applying the configured probes and preprocessors.
+        The analysis results for the stay are returned as a DataFrame.
+
+        Args:
+            stay_id (str): The identifier of the stay to process.
+
+        Returns:
+            pd.DataFrame: The analysis results for the specific stay.
+        """
+
+        data = [(name, data.loc[stay_id]) for name, data in self._data]
+
+        for probe in self._probes:
+            data: Dataset = probe.probe(data)
+
+        (_, df), *datasets = data
+        for _, _df in datasets:
+            if isinstance(_df, pd.Series):
+                _df = pd.DataFrame([_df], index=df.index)
+            df: pd.DataFrame = df.merge(
+                _df, how="outer", left_index=True, right_index=True
             )
 
-    return input_ts
-
-
-def kdigo_abs_crea_criterion():
-    raise NotImplemented()
-
-
-def kdigo_rel_crea_criterion(input_ts: pd.DataFrame, baseline: float) -> pd.DataFrame:
-    """
-    KDIGO relative serum creatinine criterion
-
-    Parameters
-    ----------
-    input_ts: pd.DataFrame
-        Index: Timestamp, hourly
-        creatinine: Creatinine in mg/dl in hourly intervals
-    baseline: float
-        Baseline serum creatinine
-        todo: Auto-Baseline export
-
-    Returns
-    -------
-    pd.DataFrame
-        Dataframe with kdigo_rel_crea_criterion
-    """
-    if "creat" not in input_ts.columns:
-        raise ValueError("Expected key `creat` in input_ts")
-    var_name = "kdigo_rel_crea_criterion"
-    input_ts[var_name] = [0 for _ in range(len(input_ts))]
-    crea_raise = input_ts.creat.to_numpy() / baseline
-    input_ts[var_name] = np.maximum(
-        input_ts[var_name], ((crea_raise > 1.5) & (crea_raise < 1.9)) * 1
-    )
-    input_ts[var_name] = np.maximum(
-        input_ts[var_name], ((crea_raise > 2.0) & (crea_raise < 2.9)) * 2
-    )
-    input_ts[var_name] = np.maximum(input_ts[var_name], ((crea_raise > 3.0)) * 3)
-    return input_ts
+        df["stage"] = df.filter(like="stage").max(axis=1)
+        return df.set_index([pd.Index([stay_id] * len(df), name="stay_id"), df.index])
