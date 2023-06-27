@@ -5,12 +5,14 @@ from probes import (
     UrineOutputProbe,
     AbsoluteCreatinineProbe,
     RelativeCreatinineProbe,
+    CRRTProbe,
 )
 from preprocessors import (
     Preprocessor,
     UrineOutputPreProcessor,
     CreatininePreProcessor,
     DemographicsPreProcessor,
+    CRRTPreProcessor,
 )
 from utils import Dataset
 from typing import Optional
@@ -61,6 +63,7 @@ class Analyser:
                 UrineOutputProbe(),
                 AbsoluteCreatinineProbe(),
                 RelativeCreatinineProbe(),
+                CRRTProbe(),
             ]
         if preprocessors is None:  # apply default preprocessors if not provided
             preprocessors = [
@@ -71,6 +74,9 @@ class Analyser:
                     stay_identifier=stay_identifier, time_identifier=time_identifier
                 ),
                 DemographicsPreProcessor(stay_identifier=stay_identifier),
+                CRRTPreProcessor(
+                    stay_identifier=stay_identifier, time_identifier=time_identifier
+                ),
             ]
         # apply preprocessors to the input data
         for preprocessor in preprocessors:
