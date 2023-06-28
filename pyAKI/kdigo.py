@@ -1,18 +1,18 @@
 import pandas as pd
 
-from probes import (
+from pyAKI.probes import (
     Probe,
     UrineOutputProbe,
     AbsoluteCreatinineProbe,
     RelativeCreatinineProbe,
 )
-from preprocessors import (
+from pyAKI.preprocessors import (
     Preprocessor,
     UrineOutputPreProcessor,
     CreatininePreProcessor,
     DemographicsPreProcessor,
 )
-from utils import Dataset, DatasetType
+from pyAKI.utils import Dataset, DatasetType
 
 
 class Analyser:

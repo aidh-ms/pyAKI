@@ -2,7 +2,7 @@ from abc import ABC
 
 import pandas as pd
 
-from utils import dataset_as_df, df_to_dataset, Dataset, DatasetType
+from pyAKI.utils import dataset_as_df, df_to_dataset, Dataset, DatasetType
 
 
 class Preprocessor(ABC):
