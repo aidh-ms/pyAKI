@@ -1,7 +1,7 @@
 from abc import ABC
+from typing import Optional
 
 import pandas as pd
-from typing import Optional
 
 from pyAKI.utils import dataset_as_df, df_to_dataset, Dataset, DatasetType
 
