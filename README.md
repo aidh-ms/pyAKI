@@ -25,7 +25,7 @@ process_stay(stay_id: int,
 ### Tests
 
 ```shell
-PYTHONPATH=. pytest
+PYTHONPATH=".:${PYTHONPATH}" python -m unittest discover
 ```
 
 ![kdigo_criteria](img/kdigo_criteria.png)

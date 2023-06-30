@@ -1,21 +1,23 @@
+from typing import Optional
+
 import pandas as pd
 
-from probes import (
+from pyAKI.probes import (
     Probe,
     UrineOutputProbe,
     AbsoluteCreatinineProbe,
     RelativeCreatinineProbe,
     CRRTProbe,
 )
-from preprocessors import (
+from pyAKI.preprocessors import (
     Preprocessor,
     UrineOutputPreProcessor,
     CreatininePreProcessor,
     DemographicsPreProcessor,
     CRRTPreProcessor,
 )
-from utils import Dataset
-from typing import Optional
+
+from pyAKI.utils import Dataset
 
 
 class Analyser:
@@ -104,7 +106,7 @@ class Analyser:
         data: pd.DataFrame = self.process_stay(stay_ids.values[0])
         for stay_id in stay_ids.values[1:]:
             data = pd.concat([data, self.process_stay(stay_id)])
-
+        data = data.drop(columns=["stay_id"])  # remove additional stay_id column
         return data
 
     def process_stay(self, stay_id: str) -> pd.DataFrame:

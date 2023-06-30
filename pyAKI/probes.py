@@ -3,8 +3,7 @@ from enum import StrEnum, auto
 
 import pandas as pd
 
-from utils import dataset_as_df, df_to_dataset, Dataset, DatasetType
-from typing import Any, Callable, Optional, Dict
+from pyAKI.utils import dataset_as_df, df_to_dataset, Dataset, DatasetType
 
 
 class Probe(ABC):
@@ -176,8 +175,6 @@ class AbstractCreatinineProbe(Probe, metaclass=ABCMeta):
         self._baseline_timeframe: str = baseline_timeframe
         self._method: CreatinineBaselineMethod = method
 
-    @dataset_as_df(df=DatasetType.CREATININE)
-    @df_to_dataset(DatasetType.CREATININE)
     def creatinine_baseline(self, df: pd.DataFrame) -> pd.Series:
         """
         Calculate the creatinine baseline values.
@@ -250,8 +247,8 @@ class AbsoluteCreatinineProbe(AbstractCreatinineProbe):
         baseline_values: pd.Series = self.creatinine_baseline(df)
 
         df[self.RESNAME] = 0
-        df.loc[(df[self._column] - baseline_values) > 0.3, self.RESNAME] = 1
-        df.loc[(df[self._column] - baseline_values) > 4, self.RESNAME] = 3
+        df.loc[(df[self._column] - baseline_values) >= 0.3, self.RESNAME] = 1
+        df.loc[(df[self._column] - baseline_values) >= 4, self.RESNAME] = 3
 
         df.loc[df[self._column] == 0, self.RESNAME] = None
         df[self.RESNAME] = df[self.RESNAME].ffill().fillna(0)
@@ -295,9 +292,9 @@ class RelativeCreatinineProbe(AbstractCreatinineProbe):
         baseline_values: pd.Series = self.creatinine_baseline(df)
 
         df[self.RESNAME] = 0
-        df.loc[(df[self._column] / baseline_values) > 1.5, self.RESNAME] = 1
-        df.loc[(df[self._column] / baseline_values) > 2, self.RESNAME] = 2
-        df.loc[(df[self._column] / baseline_values) > 3, self.RESNAME] = 3
+        df.loc[(df[self._column] / baseline_values) >= 1.5, self.RESNAME] = 1
+        df.loc[(df[self._column] / baseline_values) >= 2, self.RESNAME] = 2
+        df.loc[(df[self._column] / baseline_values) >= 3, self.RESNAME] = 3
 
         df.loc[df[self._column] == 0, self.RESNAME] = None
         df[self.RESNAME] = df[self.RESNAME].ffill().fillna(0)
