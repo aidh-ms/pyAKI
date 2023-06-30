@@ -199,3 +199,29 @@ class DemographicsPreProcessor(Preprocessor):
             pd.DataFrame: The processed demographics dataset as a pandas DataFrame.
         """
         return df.groupby(self._stay_identifier).last()
+
+
+class CRRTPreProcessor(Preprocessor):
+    """Preprocessor for processing the CRRT dataset."""
+
+    @dataset_as_df(df=DatasetType.CRRT)
+    @df_to_dataset(DatasetType.CRRT)
+    def process(self, df: pd.DataFrame = None) -> pd.DataFrame:
+        """
+        Process the CRRT dataset by upsampling the data and forward filling the last value. We expect the dataframe to contain a 1 for CRRT in progress, and 0 for CRRT not in progress.
+
+        Parameters:
+            df (pd.DataFrame): The input CRRT dataset as a pandas DataFrame.
+
+        Returns:
+            pd.DataFrame: The processed CRRT dataset as a pandas DataFrame.
+        """
+        df[self._time_identifier] = pd.to_datetime(df[self._time_identifier])
+
+        df = (
+            df.set_index(self._time_identifier)
+            .groupby(self._stay_identifier)
+            .resample("1H")
+            .last()
+        )
+        return df.ffill()

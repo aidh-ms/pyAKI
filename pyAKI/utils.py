@@ -11,6 +11,7 @@ class DatasetType(StrEnum):
     URINEOUTPUT = auto()
     CREATININE = auto()
     DEMOGRAPHICS = auto()
+    CRRT = auto()
 
 
 class Dataset(NamedTuple):

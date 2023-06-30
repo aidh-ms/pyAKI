@@ -11,12 +11,13 @@ if __name__ == "__main__":
     root_dir: Path = Path(__file__).parent
     data_dir: Path = root_dir / "data"
 
-    urine_output: pd.DataFrame = pd.read_csv(data_dir / "aki_urineoutput.csv")
-    creatinine: pd.DataFrame = pd.read_csv(data_dir / "aki_creatinine.csv")
+    urine_output: pd.DataFrame = pd.read_csv(data_dir / "urineoutput.csv")
+    creatinine: pd.DataFrame = pd.read_csv(data_dir / "creatinine.csv")
+    crrt: pd.DataFrame = pd.read_csv(data_dir / "crrt.csv")
     user_data = pd.DataFrame(
         data={
             "stay_id": urine_output["stay_id"].unique(),
-            "weight": [100 for _ in range(20)],
+            "weight": [100 for _ in range(len(urine_output["stay_id"].unique()))],
         }
     )
 
@@ -25,6 +26,7 @@ if __name__ == "__main__":
             Dataset(DatasetType.URINEOUTPUT, urine_output),
             Dataset(DatasetType.CREATININE, creatinine),
             Dataset(DatasetType.DEMOGRAPHICS, user_data),
+            Dataset(DatasetType.CRRT, crrt),
         ]
     )
     ana.process_stays().to_csv(root_dir / "data" / "aki.csv")
