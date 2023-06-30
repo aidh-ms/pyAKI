@@ -322,7 +322,7 @@ class CRRTProbe(Probe):
 
     RESNAME = "crrt_stage"
 
-    def __init__(self, column: str = "crrt") -> None:
+    def __init__(self, column: str = "crrt_status") -> None:
         """Initialize the probe."""
         super().__init__()
 
