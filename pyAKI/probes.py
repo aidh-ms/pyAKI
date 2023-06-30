@@ -1,6 +1,6 @@
 from abc import ABC, ABCMeta
 from enum import StrEnum, auto
-
+from typing import Optional, Dict
 import pandas as pd
 
 from pyAKI.utils import dataset_as_df, df_to_dataset, Dataset, DatasetType
