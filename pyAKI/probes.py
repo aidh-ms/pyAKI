@@ -97,7 +97,11 @@ class UrineOutputProbe(Probe):
     @dataset_as_df(df=DatasetType.URINEOUTPUT, patient=DatasetType.DEMOGRAPHICS)
     @df_to_dataset(DatasetType.URINEOUTPUT)
     def probe(
-        self, df: pd.DataFrame = None, patient: pd.DataFrame = None, **kwargs
+        self,
+        df: pd.DataFrame = None,
+        patient: pd.DataFrame = None,
+        method: str = "mean",
+        **kwargs,
     ) -> pd.DataFrame:
         """
         Perform urine output analysis on the provided DataFrame.
@@ -116,10 +120,18 @@ class UrineOutputProbe(Probe):
         # fmt: off
         df = df.copy()
         df[self.RESNAME] = 0 # set all urineoutput_stage values to 0
-        df.loc[(df.rolling(6).max()[self._column] / weight) < 0.5, self.RESNAME] = 1
-        df.loc[(df.rolling(12).max()[self._column] / weight) < 0.5, self.RESNAME] = 2
-        df.loc[(df.rolling(24).max()[self._column] / weight) < 0.3, self.RESNAME] = 3
-        df.loc[(df.rolling(12).max()[self._column] / weight) < self._anuria_limit, self.RESNAME] = 3
+        if method == "strict":
+            df.loc[(df.rolling(6).max()[self._column] / weight) < 0.5, self.RESNAME] = 1
+            df.loc[(df.rolling(12).max()[self._column] / weight) < 0.5, self.RESNAME] = 2
+            df.loc[(df.rolling(24).max()[self._column] / weight) < 0.3, self.RESNAME] = 3
+            df.loc[(df.rolling(12).max()[self._column] / weight) < self._anuria_limit, self.RESNAME] = 3
+        elif method == "mean":
+            df.loc[(df.rolling(6).mean()[self._column] / weight) < 0.5, self.RESNAME] = 1
+            df.loc[(df.rolling(12).mean()[self._column] / weight) < 0.5, self.RESNAME] = 2
+            df.loc[(df.rolling(24).mean()[self._column] / weight) < 0.3, self.RESNAME] = 3
+            df.loc[(df.rolling(12).mean()[self._column] / weight) < self._anuria_limit, self.RESNAME] = 3
+        else:
+            raise ValueError(f"Invalid method: {method}")
         # fmt: on
         return df
 
