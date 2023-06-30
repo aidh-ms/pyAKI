@@ -114,6 +114,7 @@ class UrineOutputProbe(Probe):
         """
         weight: pd.Series = patient["weight"]
         # fmt: off
+        df = df.copy()
         df[self.RESNAME] = 0 # set all urineoutput_stage values to 0
         df.loc[(df.rolling(6).max()[self._column] / weight) < 0.5, self.RESNAME] = 1
         df.loc[(df.rolling(12).max()[self._column] / weight) < 0.5, self.RESNAME] = 2
@@ -245,7 +246,7 @@ class AbsoluteCreatinineProbe(AbstractCreatinineProbe):
             pd.DataFrame: The modified DataFrame with the absolute creatinine stage column added.
         """
         baseline_values: pd.Series = self.creatinine_baseline(df)
-
+        df = df.copy()
         df[self.RESNAME] = 0
         df.loc[(df[self._column] - baseline_values) >= 0.3, self.RESNAME] = 1
         df.loc[(df[self._column] - baseline_values) >= 4, self.RESNAME] = 3
