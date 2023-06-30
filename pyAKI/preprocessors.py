@@ -1,9 +1,9 @@
 from abc import ABC
-
-import pandas as pd
 from typing import Optional
 
-from utils import dataset_as_df, df_to_dataset, Dataset, DatasetType
+import pandas as pd
+
+from pyAKI.utils import dataset_as_df, df_to_dataset, Dataset, DatasetType
 
 
 class Preprocessor(ABC):
