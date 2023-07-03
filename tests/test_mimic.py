@@ -13,6 +13,7 @@ if __name__ == "__main__":
 
     urine_output: pd.DataFrame = pd.read_csv(data_dir / "urineoutput.csv")
     creatinine: pd.DataFrame = pd.read_csv(data_dir / "creatinine.csv")
+    crrt: pd.DataFrame = pd.read_csv(data_dir / "crrt.csv")
     user_data = pd.DataFrame(
         data={
             "stay_id": urine_output["stay_id"].unique(),
@@ -25,6 +26,7 @@ if __name__ == "__main__":
             Dataset(DatasetType.URINEOUTPUT, urine_output),
             Dataset(DatasetType.CREATININE, creatinine),
             Dataset(DatasetType.DEMOGRAPHICS, user_data),
+            Dataset(DatasetType.CRRT, crrt),
         ]
     )
     ana.process_stays().to_csv(root_dir / "data" / "aki.csv")

@@ -7,12 +7,14 @@ from pyAKI.probes import (
     UrineOutputProbe,
     AbsoluteCreatinineProbe,
     RelativeCreatinineProbe,
+    CRRTProbe,
 )
 from pyAKI.preprocessors import (
     Preprocessor,
     UrineOutputPreProcessor,
     CreatininePreProcessor,
     DemographicsPreProcessor,
+    CRRTPreProcessor,
 )
 
 from pyAKI.utils import Dataset
@@ -63,6 +65,7 @@ class Analyser:
                 UrineOutputProbe(),
                 AbsoluteCreatinineProbe(),
                 RelativeCreatinineProbe(),
+                CRRTProbe(),
             ]
         if preprocessors is None:  # apply default preprocessors if not provided
             preprocessors = [
@@ -73,6 +76,9 @@ class Analyser:
                     stay_identifier=stay_identifier, time_identifier=time_identifier
                 ),
                 DemographicsPreProcessor(stay_identifier=stay_identifier),
+                CRRTPreProcessor(
+                    stay_identifier=stay_identifier, time_identifier=time_identifier
+                ),
             ]
         # apply preprocessors to the input data
         for preprocessor in preprocessors:
@@ -100,7 +106,7 @@ class Analyser:
         data: pd.DataFrame = self.process_stay(stay_ids.values[0])
         for stay_id in stay_ids.values[1:]:
             data = pd.concat([data, self.process_stay(stay_id)])
-        data = data.drop(columns=["stay_id"])  # remove additional stay_id column
+        # data = data.drop(columns=["stay_id"])  # remove additional stay_id column
         return data
 
     def process_stay(self, stay_id: str) -> pd.DataFrame:

@@ -1,6 +1,6 @@
 from abc import ABC, ABCMeta
 from enum import StrEnum, auto
-
+from typing import Optional, Dict
 import pandas as pd
 
 from pyAKI.utils import dataset_as_df, df_to_dataset, Dataset, DatasetType
@@ -112,7 +112,7 @@ class UrineOutputProbe(Probe):
         Returns:
             pd.DataFrame: The modified DataFrame with the urine output stage column added.
         """
-        weight = patient["weight"]
+        weight: pd.Series = patient["weight"]
         # fmt: off
         df = df.copy()
         df[self.RESNAME] = 0 # set all urineoutput_stage values to 0
@@ -299,5 +299,42 @@ class RelativeCreatinineProbe(AbstractCreatinineProbe):
 
         df.loc[df[self._column] == 0, self.RESNAME] = None
         df[self.RESNAME] = df[self.RESNAME].ffill().fillna(0)
+
+        return df
+
+
+class CRRTProbe(Probe):
+    """
+    Probe class for CRRT.
+
+    This class represents a probe that calculates CRRT. It will return a KDIGO stage 3 if the patient is on CRRT at any time during the ICU stay. It will return 0 otherwise.
+
+
+    Args:
+        df (pd.DataFrame): The DataFrame containing the CRRT data. It should have a column with the name specified in the `column` attribute of the probe.
+            It is expected that the DataFrame is indexed by patient ID and time by an hourly interval.
+            If the patient is on CRRT the value should be 1, otherwise 0.
+        column (str): The name of the column containing the CRRT data.
+
+        Returns:
+            pd.DataFrame: The modified DataFrame with the CRRT stage column added.
+    """
+
+    RESNAME = "crrt_stage"
+
+    def __init__(self, column: str = "crrt_status") -> None:
+        """Initialize the probe."""
+        super().__init__()
+
+        self._column: str = column
+
+    @dataset_as_df(df=DatasetType.CRRT)
+    @df_to_dataset(DatasetType.CRRT)
+    def probe(
+        self, df: pd.DataFrame = None, **kwargs: Optional[Dict[str, str]]
+    ) -> pd.DataFrame:
+        """Perform calculation of CRRT on the provided DataFrame."""
+        df[self.RESNAME] = 0
+        df.loc[df[self._column] == 1, self.RESNAME] = 3
 
         return df
