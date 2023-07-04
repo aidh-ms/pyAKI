@@ -58,6 +58,19 @@ class Probe(ABC):
         raise NotImplementedError()
 
 
+class UrineOutputMethod(StrEnum):
+    """
+    Enumeration class representing different methods for urine output calculations
+
+    Attributes:
+        STRICT (str): Strict method for urine output calculations. Using this method, the urine output stage is calculated based on the maximum urine output in the past 6, 12, and 24 hours.
+        MEAN (str), default: Mean method for urine output calculations.
+    """
+
+    STRICT = auto()
+    MEAN = auto()
+
+
 class UrineOutputProbe(Probe):
     """
     Subclass of Probe representing a probe calculating KDIGO stages according to urine output.
@@ -81,7 +94,12 @@ class UrineOutputProbe(Probe):
 
     RESNAME = "urineoutput_stage"
 
-    def __init__(self, column: str = "urineoutput", anuria_limit: float = 0.1) -> None:
+    def __init__(
+        self,
+        column: str = "urineoutput",
+        anuria_limit: float = 0.1,
+        method: UrineOutputMethod = UrineOutputMethod.MEAN,
+    ) -> None:
         """
         Initialize the UrineOutputProbe instance.
 
@@ -93,11 +111,15 @@ class UrineOutputProbe(Probe):
 
         self._column: str = column
         self._anuria_limit: float = anuria_limit
+        self._method: UrineOutputMethod = method
 
     @dataset_as_df(df=DatasetType.URINEOUTPUT, patient=DatasetType.DEMOGRAPHICS)
     @df_to_dataset(DatasetType.URINEOUTPUT)
     def probe(
-        self, df: pd.DataFrame = None, patient: pd.DataFrame = None, **kwargs
+        self,
+        df: pd.DataFrame = None,
+        patient: pd.DataFrame = None,
+        **kwargs,
     ) -> pd.DataFrame:
         """
         Perform urine output analysis on the provided DataFrame.
@@ -116,10 +138,18 @@ class UrineOutputProbe(Probe):
         # fmt: off
         df = df.copy()
         df[self.RESNAME] = 0 # set all urineoutput_stage values to 0
-        df.loc[(df.rolling(6).max()[self._column] / weight) < 0.5, self.RESNAME] = 1
-        df.loc[(df.rolling(12).max()[self._column] / weight) < 0.5, self.RESNAME] = 2
-        df.loc[(df.rolling(24).max()[self._column] / weight) < 0.3, self.RESNAME] = 3
-        df.loc[(df.rolling(12).max()[self._column] / weight) < self._anuria_limit, self.RESNAME] = 3
+        if self._method == UrineOutputMethod.STRICT:
+            df.loc[(df.rolling(6).max()[self._column] / weight) < 0.5, self.RESNAME] = 1
+            df.loc[(df.rolling(12).max()[self._column] / weight) < 0.5, self.RESNAME] = 2
+            df.loc[(df.rolling(24).max()[self._column] / weight) < 0.3, self.RESNAME] = 3
+            df.loc[(df.rolling(12).max()[self._column] / weight) < self._anuria_limit, self.RESNAME] = 3
+        elif self._method == UrineOutputMethod.MEAN:
+            df.loc[(df.rolling(6).mean()[self._column] / weight) < 0.5, self.RESNAME] = 1
+            df.loc[(df.rolling(12).mean()[self._column] / weight) < 0.5, self.RESNAME] = 2
+            df.loc[(df.rolling(24).mean()[self._column] / weight) < 0.3, self.RESNAME] = 3
+            df.loc[(df.rolling(12).mean()[self._column] / weight) < self._anuria_limit, self.RESNAME] = 3
+        else:
+            raise ValueError(f"Invalid method: {self._method}")
         # fmt: on
         return df
 
