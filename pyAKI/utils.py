@@ -62,16 +62,20 @@ def dataset_as_df(**mapping: dict[str, DatasetType]):
             ...
     """
 
-    in_mapping: dict[dict[str, DatasetType], str] = {v: k for k, v in mapping.items()}
+    in_mapping: dict[DatasetType, str] = {v: k for k, v in mapping.items()}
 
     def decorator(func):
         @wraps(func)
         def wrapper(self, datasets: list[Dataset], *args: list, **kwargs: dict):
+            print(*datasets)
             _mapping: dict[str, pd.DataFrame] = {
                 in_mapping[dtype]: df
                 for dtype, df in datasets
                 if dtype in in_mapping.keys()
             }
+
+            if len(in_mapping) != len(_mapping):
+                return datasets
 
             _dtype, _df = func(self, *args, **_mapping, **kwargs)
 
