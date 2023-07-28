@@ -198,7 +198,7 @@ class AbstractCreatinineProbe(Probe, metaclass=ABCMeta):
     def __init__(
         self,
         column: str = "creat",
-        baseline_timeframe: str = "7d",
+        baseline_timeframe: str = "3d",
         method: CreatinineBaselineMethod = CreatinineBaselineMethod.MIN,
     ) -> None:
         super().__init__()
@@ -240,6 +240,25 @@ class AbstractCreatinineProbe(Probe, metaclass=ABCMeta):
                 .min()
                 .ffill()[self._column]
             )
+
+        if self._method == CreatinineBaselineMethod.FIXED:
+            values = (
+                df[df[self._column] > 0]
+                .rolling(self._baseline_timeframe)
+                .min()
+                .resample("1h")
+                .min()
+                .ffill()[self._column]
+            )
+            min_value = values[
+                values.index
+                <= (values.index[0] + pd.Timedelta(self._baseline_timeframe))
+            ].min()
+            values[
+                values.index
+                > (values.index[0] + pd.Timedelta(self._baseline_timeframe))
+            ] = min_value
+            return values
 
 
 class AbsoluteCreatinineProbe(AbstractCreatinineProbe):
