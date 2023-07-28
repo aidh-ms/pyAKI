@@ -169,6 +169,7 @@ class CreatinineBaselineMethod(StrEnum):
 
     MIN = auto()
     FIRST = auto()
+    FIXED = auto()
 
 
 class AbstractCreatinineProbe(Probe, metaclass=ABCMeta):
@@ -220,8 +221,8 @@ class AbstractCreatinineProbe(Probe, metaclass=ABCMeta):
             pd.Series: The calculated creatinine baseline values.
 
         """
-        if self._method == CreatinineBaselineMethod.MIN:
-            values: pd.Series = (
+        if self._method == CreatinineBaselineMethod.FIRST:
+            return (
                 df[df[self._column] > 0]
                 .rolling(self._baseline_timeframe)
                 .agg(lambda rows: rows[0])
@@ -229,8 +230,9 @@ class AbstractCreatinineProbe(Probe, metaclass=ABCMeta):
                 .first()
                 .ffill()[self._column]
             )
-        elif self._method == CreatinineBaselineMethod.FIRST:
-            values: pd.Series = (
+
+        if self._method == CreatinineBaselineMethod.MIN:
+            return (
                 df[df[self._column] > 0]
                 .rolling(self._baseline_timeframe)
                 .min()
@@ -238,8 +240,6 @@ class AbstractCreatinineProbe(Probe, metaclass=ABCMeta):
                 .min()
                 .ffill()[self._column]
             )
-
-        return values
 
 
 class AbsoluteCreatinineProbe(AbstractCreatinineProbe):
