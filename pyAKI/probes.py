@@ -199,8 +199,8 @@ class AbstractCreatinineProbe(Probe, metaclass=ABCMeta):
     def __init__(
         self,
         column: str = "creat",
-        baseline_timeframe: str = "3d",
-        method: CreatinineBaselineMethod = CreatinineBaselineMethod.MIN,
+        baseline_timeframe: str = "7d",
+        method: CreatinineBaselineMethod = CreatinineBaselineMethod.FIXED,
     ) -> None:
         super().__init__()
 
