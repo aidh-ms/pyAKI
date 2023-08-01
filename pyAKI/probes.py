@@ -165,6 +165,7 @@ class CreatinineBaselineMethod(StrEnum):
     Attributes:
         MIN: Represents the minimum method for creatinine calculations. Minimum creatinine value within the specified time window before observation is used as baseline.
         FIRST: Represents the first method for creatinine calculations. First creatinine value within the specified time window before observation is used as baseline.
+        FIXED: Represents the fixed method for creatinine calculations. A fixed window (default 7 days) ist used for baseline calculation. Values from the window are used as baseline throughout the observation period.
     """
 
     MIN = auto()
