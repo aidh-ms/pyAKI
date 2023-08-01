@@ -5,6 +5,8 @@ import pandas as pd
 from pyAKI.probes import (
     RelativeCreatinineProbe,
     AbsoluteCreatinineProbe,
+    CreatinineBaselineMethod,
+    AbstractCreatinineProbe,
     Dataset,
     DatasetType,
 )
@@ -46,9 +48,9 @@ class TestRelCreatinineProbe(TestCase):
     def setUp(self) -> None:
         self.probe = RelativeCreatinineProbe(baseline_timeframe="1d")
 
-    def test_abs_creatinine_aki(self):
+    def test_rel_creatinine_aki(self):
         creatinine_df = pd.DataFrame(
-            data={"creat": [1] * 24 + [1.5] * 23 + [3] * 23 + [9] * 23},
+            data={"creat": [1] * 24 + [1.5] * 23 + [2] * 23 + [3] * 23},
             index=pd.period_range(
                 start="2023-01-01 00:00:00", end="2023-01-04 20:00:00", freq="h"
             ),
