@@ -67,7 +67,6 @@ def dataset_as_df(**mapping: dict[str, DatasetType]):
     def decorator(func):
         @wraps(func)
         def wrapper(self, datasets: list[Dataset], *args: list, **kwargs: dict):
-            print(*datasets)
             _mapping: dict[str, pd.DataFrame] = {
                 in_mapping[dtype]: df
                 for dtype, df in datasets
