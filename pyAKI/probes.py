@@ -1,7 +1,12 @@
+""" This module contains the Probe abstract base class and its subclasses,
+used for probing for the different KDIGO criteria."""
+
 from abc import ABC, ABCMeta
 from enum import StrEnum, auto
 from typing import Optional, Dict
+
 import pandas as pd
+
 
 from pyAKI.utils import dataset_as_df, df_to_dataset, Dataset, DatasetType
 
@@ -165,10 +170,12 @@ class CreatinineBaselineMethod(StrEnum):
     Attributes:
         MIN: Represents the minimum method for creatinine calculations. Minimum creatinine value within the specified time window before observation is used as baseline.
         FIRST: Represents the first method for creatinine calculations. First creatinine value within the specified time window before observation is used as baseline.
+        FIXED: Represents the fixed method for creatinine calculations. A fixed window (default 7 days) ist used for baseline calculation. Values from the window are used as baseline throughout the observation period.
     """
 
     MIN = auto()
     FIRST = auto()
+    FIXED = auto()
 
 
 class AbstractCreatinineProbe(Probe, metaclass=ABCMeta):
@@ -198,7 +205,7 @@ class AbstractCreatinineProbe(Probe, metaclass=ABCMeta):
         self,
         column: str = "creat",
         baseline_timeframe: str = "7d",
-        method: CreatinineBaselineMethod = CreatinineBaselineMethod.MIN,
+        method: CreatinineBaselineMethod = CreatinineBaselineMethod.FIXED,
     ) -> None:
         super().__init__()
 
@@ -220,8 +227,8 @@ class AbstractCreatinineProbe(Probe, metaclass=ABCMeta):
             pd.Series: The calculated creatinine baseline values.
 
         """
-        if self._method == CreatinineBaselineMethod.MIN:
-            values: pd.Series = (
+        if self._method == CreatinineBaselineMethod.FIRST:
+            return (
                 df[df[self._column] > 0]
                 .rolling(self._baseline_timeframe)
                 .agg(lambda rows: rows[0])
@@ -229,8 +236,9 @@ class AbstractCreatinineProbe(Probe, metaclass=ABCMeta):
                 .first()
                 .ffill()[self._column]
             )
-        elif self._method == CreatinineBaselineMethod.FIRST:
-            values: pd.Series = (
+
+        if self._method == CreatinineBaselineMethod.MIN:
+            return (
                 df[df[self._column] > 0]
                 .rolling(self._baseline_timeframe)
                 .min()
@@ -239,7 +247,25 @@ class AbstractCreatinineProbe(Probe, metaclass=ABCMeta):
                 .ffill()[self._column]
             )
 
-        return values
+        if self._method == CreatinineBaselineMethod.FIXED:
+            values = (
+                df[df[self._column] > 0]
+                .rolling(self._baseline_timeframe)
+                .min()
+                .resample("1h")
+                .min()
+                .ffill()[self._column]
+            )
+            min_value = values[
+                values.index
+                <= (values.index[0] + pd.Timedelta(self._baseline_timeframe))
+            ].min()  # calculate min value for first 7 days
+            values[
+                values.index
+                > (values.index[0] + pd.Timedelta(self._baseline_timeframe))
+            ] = min_value  # set all values after first 7 days to min value
+
+            return values
 
 
 class AbsoluteCreatinineProbe(AbstractCreatinineProbe):
