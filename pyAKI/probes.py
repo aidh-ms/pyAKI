@@ -1,7 +1,12 @@
+""" This module contains the Probe abstract base class and its subclasses,
+used for probing for the different KDIGO criteria."""
+
 from abc import ABC, ABCMeta
 from enum import StrEnum, auto
 from typing import Optional, Dict
+
 import pandas as pd
+
 
 from pyAKI.utils import dataset_as_df, df_to_dataset, Dataset, DatasetType
 
@@ -254,11 +259,12 @@ class AbstractCreatinineProbe(Probe, metaclass=ABCMeta):
             min_value = values[
                 values.index
                 <= (values.index[0] + pd.Timedelta(self._baseline_timeframe))
-            ].min()
+            ].min()  # calculate min value for first 7 days
             values[
                 values.index
                 > (values.index[0] + pd.Timedelta(self._baseline_timeframe))
-            ] = min_value
+            ] = min_value  # set all values after first 7 days to min value
+
             return values
 
 
