@@ -8,15 +8,6 @@ if __name__ == "__main__":
     crrt = pd.read_csv("tests/data/test_machine_crrt.csv")
     patient_data = pd.read_csv("tests/data/test_machine_weights.csv")
 
-    print(patient_data.head())
-    print(patient_data.info())
-    print(urine_output.head())
-    print(urine_output.info())
-    print(creatinine.head())
-    print(creatinine.info())
-    print(crrt.head())
-    print(crrt.info())
-
     ana = pyAKI.kdigo.Analyser(
         [
             pyAKI.utils.Dataset(pyAKI.utils.DatasetType.URINEOUTPUT, urine_output),
