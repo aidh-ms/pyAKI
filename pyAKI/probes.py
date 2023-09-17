@@ -279,7 +279,7 @@ class AbsoluteCreatinineProbe(AbstractCreatinineProbe):
         df = df.copy()
         df[self.RESNAME] = 0
         df.loc[(df[self._column] - baseline_values) >= 0.3, self.RESNAME] = 1
-        df.loc[(df[self._column] - baseline_values) >= 4, self.RESNAME] = 3
+        df.loc[df[self._column] >= 4, self.RESNAME] = 3
 
         df.loc[df[self._column] == 0, self.RESNAME] = None
         df[self.RESNAME] = df[self.RESNAME].ffill().fillna(0)
