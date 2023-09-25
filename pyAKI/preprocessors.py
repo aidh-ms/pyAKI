@@ -80,7 +80,7 @@ class UrineOutputPreProcessor(Preprocessor):
         stay_identifier: str = "stay_id",
         time_identifier: str = "charttime",
         interpolate: bool = True,
-        threshold: Optional[int] = None,
+        threshold: Optional[int] = 8,
     ) -> None:
         """
         Initialize a new instance of the UrineOutputPreProcessor class.
@@ -140,7 +140,7 @@ class CreatininePreProcessor(Preprocessor):
         stay_identifier: str = "stay_id",
         time_identifier: str = "charttime",
         ffill: bool = True,
-        threshold: Optional[int] = None,
+        threshold: Optional[int] = 72,
     ) -> None:
         """
         Initialize a new instance of the CreatininePreProcessor class.
