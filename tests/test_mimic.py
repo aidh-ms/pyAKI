@@ -20,6 +20,14 @@ if __name__ == "__main__":
             "weight": [100 for _ in range(len(urine_output["stay_id"].unique()))],
         }
     )
+    print(user_data.head())
+    print(user_data.info())
+    print(urine_output.head())
+    print(urine_output.info())
+    print(creatinine.head())
+    print(creatinine.info())
+    print(crrt.head())
+    print(crrt.info())
 
     ana: Analyser = Analyser(
         [

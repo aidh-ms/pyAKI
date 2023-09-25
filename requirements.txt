@@ -1,4 +1,4 @@
-pandas==2.0.3
-numpy==1.25.0
-scipy==1.11.1
+pandas==2.1.1
+numpy==1.26.0
+scipy==1.11.2
 pbr==5.11.1
