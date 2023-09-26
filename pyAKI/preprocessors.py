@@ -80,7 +80,7 @@ class UrineOutputPreProcessor(Preprocessor):
         stay_identifier: str = "stay_id",
         time_identifier: str = "charttime",
         interpolate: bool = True,
-        threshold: Optional[int] = 8,
+        threshold: Optional[int] = 1,
     ) -> None:
         """
         Initialize a new instance of the UrineOutputPreProcessor class.
