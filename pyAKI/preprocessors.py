@@ -2,6 +2,7 @@ from abc import ABC
 from typing import Optional
 
 import pandas as pd
+from pandas.api.types import is_datetime64_any_dtype
 
 from pyAKI.utils import dataset_as_df, df_to_dataset, Dataset, DatasetType
 
@@ -37,6 +38,28 @@ class Preprocessor(ABC):
         raise NotImplementedError()
 
 
+class TimeIndexCreator(Preprocessor):
+    DATASETS: list[DatasetType] = [
+        DatasetType.CREATININE,
+        DatasetType.URINEOUTPUT,
+        DatasetType.CRRT,
+    ]
+
+    def process(self, datasets: list[Dataset]) -> list[Dataset]:
+        _datasets = []
+        for dtype, df in datasets:
+            if dtype not in self.DATASETS:
+                _datasets.append(Dataset(dtype, df))
+                continue
+
+            if not is_datetime64_any_dtype(df[self._stay_identifier]):
+                df[self._time_identifier] = pd.to_datetime(df[self._time_identifier])
+
+            _datasets.append(Dataset(dtype, df.set_index(self._time_identifier)))
+
+        return _datasets
+
+
 class TimeseriesResampler(Preprocessor):
     """Preprocessor for resampling timeseries datasets."""
 
@@ -56,16 +79,10 @@ class TimeseriesResampler(Preprocessor):
             Dataset(dtype, df) for dtype, df in datasets if dtype in self.DATASETS
         ]
 
-        for _, df in datasets:
-            df[self._time_identifier] = pd.to_datetime(df[self._time_identifier])
-
         return [
             Dataset(
                 name,
-                df.set_index(self._time_identifier)
-                .groupby(self._stay_identifier)
-                .resample("1H")
-                .sum(),
+                df.groupby(self._stay_identifier).resample("1H").sum(),
             )
             for name, df in datasets
         ]
@@ -107,14 +124,8 @@ class UrineOutputPreProcessor(Preprocessor):
         Returns:
             pd.DataFrame: The processed urine output dataset as a pandas DataFrame.
         """
-        df[self._time_identifier] = pd.to_datetime(df[self._time_identifier])
 
-        df = (
-            df.set_index(self._time_identifier)
-            .groupby(self._stay_identifier)
-            .resample("1H")
-            .sum()
-        )
+        df = df.groupby(self._stay_identifier).resample("1H").sum()
         if not self._interpolate:
             return df
 
@@ -166,14 +177,7 @@ class CreatininePreProcessor(Preprocessor):
         Returns:
             pd.DataFrame: The processed creatinine dataset as a pandas DataFrame.
         """
-        df[self._time_identifier] = pd.to_datetime(df[self._time_identifier])
-
-        df = (
-            df.set_index(self._time_identifier)
-            .groupby(self._stay_identifier)
-            .resample("1H")
-            .mean()
-        )
+        df = df.groupby(self._stay_identifier).resample("1H").mean()
         if not self._ffill:
             return df
 
@@ -214,12 +218,5 @@ class CRRTPreProcessor(Preprocessor):
         Returns:
             pd.DataFrame: The processed CRRT dataset as a pandas DataFrame.
         """
-        df[self._time_identifier] = pd.to_datetime(df[self._time_identifier])
-
-        df = (
-            df.set_index(self._time_identifier, drop=True)
-            .groupby(self._stay_identifier)
-            .resample("1H")
-            .last()
-        )
+        df = df.groupby(self._stay_identifier).resample("1H").last()
         return df.ffill()
