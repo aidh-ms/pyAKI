@@ -65,8 +65,7 @@ class TimeseriesResampler(Preprocessor):
                 df.set_index(self._time_identifier)
                 .groupby(self._stay_identifier)
                 .resample("1H")
-                .sum()
-                .drop(columns=[self._stay_identifier]),
+                .sum(),
             )
             for name, df in datasets
         ]
@@ -89,7 +88,7 @@ class UrineOutputPreProcessor(Preprocessor):
             stay_identifier (str, optional): The column name that identifies stays or admissions in the dataset. Defaults to MIMIC standard "stay_id".
             time_identifier (str, optional): The column name that identifies the timestamp or time variable in the dataset. Defaults to MIMIC standard "charttime".
             interpolate (bool, optional): Flag indicating whether to perform interpolation on missing values. Defaults to True.
-            threshold (int, optional): The threshold value for limiting the interpolation range. Defaults to None.
+            threshold (int, optional): The threshold value for limiting the interpolation range. Defaults to 1.
         """
         super().__init__(stay_identifier, time_identifier)
 
@@ -115,7 +114,6 @@ class UrineOutputPreProcessor(Preprocessor):
             .groupby(self._stay_identifier)
             .resample("1H")
             .sum()
-            .drop(columns=[self._stay_identifier])
         )
         if not self._interpolate:
             return df
@@ -219,10 +217,9 @@ class CRRTPreProcessor(Preprocessor):
         df[self._time_identifier] = pd.to_datetime(df[self._time_identifier])
 
         df = (
-            df.set_index(self._time_identifier)
+            df.set_index(self._time_identifier, drop=True)
             .groupby(self._stay_identifier)
             .resample("1H")
             .last()
-            .drop(columns=[self._stay_identifier])
         )
         return df.ffill()
