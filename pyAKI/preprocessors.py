@@ -40,7 +40,7 @@ class Preprocessor(ABC):
 class TimeseriesResampler(Preprocessor):
     """Preprocessor for resampling timeseries datasets."""
 
-    DATASETS: list[int] = [DatasetType.CREATININE, DatasetType.URINEOUTPUT]
+    DATASETS: list[DatasetType] = [DatasetType.CREATININE, DatasetType.URINEOUTPUT]
 
     def process(self, datasets: list[Dataset]) -> list[Dataset]:
         """
@@ -56,7 +56,7 @@ class TimeseriesResampler(Preprocessor):
             Dataset(dtype, df) for dtype, df in datasets if dtype in self.DATASETS
         ]
 
-        for name, df in datasets:
+        for _, df in datasets:
             df[self._time_identifier] = pd.to_datetime(df[self._time_identifier])
 
         return [
@@ -223,5 +223,6 @@ class CRRTPreProcessor(Preprocessor):
             .groupby(self._stay_identifier)
             .resample("1H")
             .last()
+            .drop(columns=[self._stay_identifier])
         )
         return df.ffill()
