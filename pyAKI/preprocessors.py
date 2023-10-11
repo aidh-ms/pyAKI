@@ -60,34 +60,6 @@ class TimeIndexCreator(Preprocessor):
         return _datasets
 
 
-class TimeseriesResampler(Preprocessor):
-    """Preprocessor for resampling timeseries datasets."""
-
-    DATASETS: list[DatasetType] = [DatasetType.CREATININE, DatasetType.URINEOUTPUT]
-
-    def process(self, datasets: list[Dataset]) -> list[Dataset]:
-        """
-        Process the given list of datasets by resampling the timeseries datasets to a fixed time resolution.
-
-        Parameters:
-            datasets (list[Dataset]): The list of datasets to be processed.
-
-        Returns:
-            list[Dataset]: The processed datasets.
-        """
-        datasets = [
-            Dataset(dtype, df) for dtype, df in datasets if dtype in self.DATASETS
-        ]
-
-        return [
-            Dataset(
-                name,
-                df.groupby(self._stay_identifier).resample("1H").sum(),
-            )
-            for name, df in datasets
-        ]
-
-
 class UrineOutputPreProcessor(Preprocessor):
     """Preprocessor for processing the urine output dataset."""
 
