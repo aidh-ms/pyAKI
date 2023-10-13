@@ -2,6 +2,7 @@ from typing import NamedTuple
 from enum import StrEnum, auto
 from functools import wraps
 
+import numpy as np
 import pandas as pd
 
 
@@ -118,3 +119,7 @@ def df_to_dataset(dtype: DatasetType):
         return wrapper
 
     return decorator
+
+
+def approx_gte(x: pd.Series, y: pd.Series) -> bool:
+    return (x >= y).values | np.isclose(x, y)
