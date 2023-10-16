@@ -7,14 +7,14 @@ from pyAKI.probes import (
     UrineOutputProbe,
     AbsoluteCreatinineProbe,
     RelativeCreatinineProbe,
-    CRRTProbe,
+    RRTProbe,
 )
 from pyAKI.preprocessors import (
     Preprocessor,
     UrineOutputPreProcessor,
     CreatininePreProcessor,
     DemographicsPreProcessor,
-    CRRTPreProcessor,
+    RRTPreProcessor,
 )
 
 from pyAKI.utils import Dataset
@@ -65,7 +65,7 @@ class Analyser:
                 UrineOutputProbe(),
                 AbsoluteCreatinineProbe(),
                 RelativeCreatinineProbe(),
-                CRRTProbe(),
+                RRTProbe(),
             ]
         if preprocessors is None:  # apply default preprocessors if not provided
             preprocessors = [
@@ -76,7 +76,7 @@ class Analyser:
                     stay_identifier=stay_identifier, time_identifier=time_identifier
                 ),
                 DemographicsPreProcessor(stay_identifier=stay_identifier),
-                CRRTPreProcessor(
+                RRTPreProcessor(
                     stay_identifier=stay_identifier, time_identifier=time_identifier
                 ),
             ]

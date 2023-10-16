@@ -359,37 +359,37 @@ class RelativeCreatinineProbe(AbstractCreatinineProbe):
         return df
 
 
-class CRRTProbe(Probe):
+class RRTProbe(Probe):
     """
-    Probe class for CRRT.
+    Probe class for RRT.
 
-    This class represents a probe that calculates CRRT. It will return a KDIGO stage 3 if the patient is on CRRT at any time during the ICU stay. It will return 0 otherwise.
+    This class represents a probe that calculates RRT. It will return a KDIGO stage 3 if the patient is on RRT at any time during the ICU stay. It will return 0 otherwise.
 
 
     Args:
-        df (pd.DataFrame): The DataFrame containing the CRRT data. It should have a column with the name specified in the `column` attribute of the probe.
+        df (pd.DataFrame): The DataFrame containing the RRT data. It should have a column with the name specified in the `column` attribute of the probe.
             It is expected that the DataFrame is indexed by patient ID and time by an hourly interval.
-            If the patient is on CRRT the value should be 1, otherwise 0.
-        column (str): The name of the column containing the CRRT data.
+            If the patient is on RRT the value should be 1, otherwise 0.
+        column (str): The name of the column containing the RRT data.
 
         Returns:
-            pd.DataFrame: The modified DataFrame with the CRRT stage column added.
+            pd.DataFrame: The modified DataFrame with the RRT stage column added.
     """
 
-    RESNAME = "crrt_stage"
+    RESNAME = "rrt_stage"
 
-    def __init__(self, column: str = "crrt_status") -> None:
+    def __init__(self, column: str = "rrt_status") -> None:
         """Initialize the probe."""
         super().__init__()
 
         self._column: str = column
 
-    @dataset_as_df(df=DatasetType.CRRT)
-    @df_to_dataset(DatasetType.CRRT)
+    @dataset_as_df(df=DatasetType.RRT)
+    @df_to_dataset(DatasetType.RRT)
     def probe(
         self, df: pd.DataFrame = None, **kwargs: Optional[Dict[str, str]]
     ) -> pd.DataFrame:
-        """Perform calculation of CRRT on the provided DataFrame."""
+        """Perform calculation of RRT on the provided DataFrame."""
         df[self.RESNAME] = 0
         df.loc[df[self._column] == 1, self.RESNAME] = 3
 
