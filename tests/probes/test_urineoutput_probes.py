@@ -7,10 +7,12 @@ from pyAKI.probes import (
     Dataset,
     DatasetType,
 )
+from .set_up import setup_validation_data
 
 
 class TestUrineOutputProbe(TestCase):
     def setUp(self) -> None:
+        self.validation_data, self.validation_data_unlabelled = setup_validation_data()
         self.probe = UrineOutputProbe()
 
     def test_anuria(self):
@@ -172,4 +174,25 @@ class TestUrineOutputProbe(TestCase):
                 ),
             ),
             check_index=False,
+        )
+
+    def test_validation_data(self):
+        _, df = self.probe.probe(
+            [
+                Dataset(
+                    DatasetType.URINEOUTPUT,
+                    self.validation_data_unlabelled[["stay_id", "urineoutput"]],
+                ),
+                Dataset(
+                    DatasetType.DEMOGRAPHICS,
+                    self.validation_data_unlabelled[["stay_id", "weight"]]
+                    .groupby("stay_id")
+                    .first(),
+                ),
+            ]
+        )[0]
+
+        pd.testing.assert_series_equal(
+            df["urineoutput_stage"].astype(float),
+            self.validation_data["urineoutput_stage"],
         )
