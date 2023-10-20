@@ -6,6 +6,7 @@ from enum import StrEnum, auto
 from typing import Optional, Dict
 
 import pandas as pd
+import numpy as np
 
 
 from pyAKI.utils import dataset_as_df, df_to_dataset, Dataset, DatasetType
@@ -392,5 +393,7 @@ class CRRTProbe(Probe):
         """Perform calculation of CRRT on the provided DataFrame."""
         df[self.RESNAME] = 0
         df.loc[df[self._column] == 1, self.RESNAME] = 3
+        # transfer nans
+        df.loc[df[self._column].isna(), self.RESNAME] = np.nan
 
         return df

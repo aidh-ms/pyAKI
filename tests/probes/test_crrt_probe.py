@@ -39,13 +39,18 @@ class TestCRRTProbe(TestCase):
             [
                 Dataset(
                     DatasetType.CRRT,
-                    self.validation_data_unlabelled[["stay_id", "crrt_status"]],
+                    self.validation_data_unlabelled[
+                        ["stay_id", "charttime", "crrt_status"]
+                    ],
                 )
             ]
         )[0]
 
+        calculated_labels = df["crrt_stage"].astype(float)
+        true_labels = self.validation_data["crrt_stage"]
+
         pd.testing.assert_series_equal(
-            df["crrt_stage"].astype(float),
-            self.validation_data["crrt_stage"],
+            calculated_labels,
+            true_labels,
             check_index=False,
         )
