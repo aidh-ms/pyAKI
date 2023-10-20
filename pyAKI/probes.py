@@ -142,7 +142,6 @@ class UrineOutputProbe(Probe):
         """
         weight: pd.Series = patient["weight"]
         # fmt: off
-        df = df.copy()
         df[self.RESNAME] = 0 # set all urineoutput_stage values to 0
         if self._method == UrineOutputMethod.STRICT:
             df.loc[(df.rolling(6).max()[self._column] / weight) < 0.5, self.RESNAME] = 1
@@ -157,6 +156,9 @@ class UrineOutputProbe(Probe):
         else:
             raise ValueError(f"Invalid method: {self._method}")
         # fmt: on
+
+        df.loc[pd.isna(df[self._column]), self.RESNAME] = np.nan
+
         return df
 
 
