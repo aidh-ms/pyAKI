@@ -305,14 +305,14 @@ class AbsoluteCreatinineProbe(AbstractCreatinineProbe):
         baseline_values: pd.Series = self.creatinine_baseline(df)
         df = df.copy()
         df[self.RESNAME] = 0
-        df.loc[(df[self._column] - baseline_values) >= 0.3, self.RESNAME] = 1
-        df.loc[df[self._column] >= 4, self.RESNAME] = 3
-
         df.loc[approx_gte((df[self._column] - baseline_values), 0.3), self.RESNAME] = 1
         df.loc[approx_gte(df[self._column], 4), self.RESNAME] = 3
 
-        df.loc[df[self._column] == 0, self.RESNAME] = None
-        df[self.RESNAME] = df[self.RESNAME].ffill().fillna(0)
+        # df.loc[df[self._column] == 0, self.RESNAME] = None
+        # df[self.RESNAME] = df[self.RESNAME].ffill().fillna(0)
+        df.loc[pd.isna(df[self._column]), self.RESNAME] = np.nan
+
+        df["baseline"] = baseline_values
 
         return df
 
@@ -357,8 +357,9 @@ class RelativeCreatinineProbe(AbstractCreatinineProbe):
         df.loc[approx_gte((df[self._column] / baseline_values), 2), self.RESNAME] = 2
         df.loc[approx_gte((df[self._column] / baseline_values), 3), self.RESNAME] = 3
 
-        df.loc[df[self._column] == 0, self.RESNAME] = None
-        df[self.RESNAME] = df[self.RESNAME].ffill().fillna(0)
+        # df.loc[df[self._column] == 0, self.RESNAME] = None
+        # df[self.RESNAME] = df[self.RESNAME].ffill().fillna(0)
+        df.loc[pd.isna(df[self._column]), self.RESNAME] = np.nan
 
         return df
 

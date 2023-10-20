@@ -69,6 +69,7 @@ class TestAbsCreatinineProbe(TestCase):
 
 class TestRelCreatinineProbe(TestCase):
     def setUp(self) -> None:
+        self.validation_data, self.validation_data_unlabelled = setup_validation_data()
         self.probe = RelativeCreatinineProbe(baseline_timeframe="1d")
 
     def test_rel_creatinine_aki(self):
@@ -99,15 +100,19 @@ class TestRelCreatinineProbe(TestCase):
         )
 
     def test_validation_data(self):
-        _type, df = self.probe.probe(
+        analyser = Analyser(
             [
                 Dataset(
                     DatasetType.CREATININE,
-                    self.validation_data_unlabelled[["stay_id", "creat"]],
+                    self.validation_data_unlabelled[["creat"]],
                 ),
-                Dataset(DatasetType.DEMOGRAPHICS, pd.DataFrame()),
-            ]
-        )[0]
+            ],
+            probes=[self.probe],
+            preprocessors=[],
+        )
+
+        df = analyser.process_stays()
+
         pd.testing.assert_series_equal(
             df["rel_creatinine_stage"],
             self.validation_data["rel_creatinine_stage"],
