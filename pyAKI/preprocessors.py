@@ -42,7 +42,7 @@ class TimeIndexCreator(Preprocessor):
     DATASETS: list[DatasetType] = [
         DatasetType.CREATININE,
         DatasetType.URINEOUTPUT,
-        DatasetType.CRRT,
+        DatasetType.RRT,
     ]
 
     def process(self, datasets: list[Dataset]) -> list[Dataset]:
@@ -175,20 +175,20 @@ class DemographicsPreProcessor(Preprocessor):
         return df.groupby(self._stay_identifier).last()
 
 
-class CRRTPreProcessor(Preprocessor):
-    """Preprocessor for processing the CRRT dataset."""
+class RRTPreProcessor(Preprocessor):
+    """Preprocessor for processing the RRT dataset."""
 
-    @dataset_as_df(df=DatasetType.CRRT)
-    @df_to_dataset(DatasetType.CRRT)
+    @dataset_as_df(df=DatasetType.RRT)
+    @df_to_dataset(DatasetType.RRT)
     def process(self, df: pd.DataFrame = None) -> pd.DataFrame:
         """
-        Process the CRRT dataset by upsampling the data and forward filling the last value. We expect the dataframe to contain a 1 for CRRT in progress, and 0 for CRRT not in progress.
+        Process the RRT dataset by upsampling the data and forward filling the last value. We expect the dataframe to contain a 1 for RRT in progress, and 0 for RRT not in progress.
 
         Parameters:
-            df (pd.DataFrame): The input CRRT dataset as a pandas DataFrame.
+            df (pd.DataFrame): The input RRT dataset as a pandas DataFrame.
 
         Returns:
-            pd.DataFrame: The processed CRRT dataset as a pandas DataFrame.
+            pd.DataFrame: The processed RRT dataset as a pandas DataFrame.
         """
         df = df.groupby(self._stay_identifier).resample("1H").last()
         return df.ffill()

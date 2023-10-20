@@ -1,34 +1,34 @@
 from unittest import TestCase
 import pandas as pd
 
-from pyAKI.probes import CRRTProbe, Dataset, DatasetType
+from pyAKI.probes import RRTProbe, Dataset, DatasetType
 from pyAKI.kdigo import Analyser
 
 from .set_up import setup_validation_data
 
 
-class TestCRRTProbe(TestCase):
+class TestRRTProbe(TestCase):
     def setUp(self) -> None:
         self.validation_data, self.validation_data_unlabelled = setup_validation_data()
-        self.probe = CRRTProbe()
+        self.probe = RRTProbe()
 
-    def test_crrt_probe(self):
-        crrt_df = pd.DataFrame(
+    def test_rrt_probe(self):
+        rrt_df = pd.DataFrame(
             data={
-                "crrt_status": [0] * 24 + [1] * 23 + [0] * 23 + [1] * 23,
+                "rrt_status": [0] * 24 + [1] * 23 + [0] * 23 + [1] * 23,
             },
             index=pd.period_range(
                 start="2023-01-01 00:00:00", end="2023-01-04 20:00:00", freq="h"
             ),
         )
 
-        _, df = self.probe.probe([Dataset(DatasetType.CRRT, crrt_df)])[0]
+        _, df = self.probe.probe([Dataset(DatasetType.RRT, rrt_df)])[0]
 
         pd.testing.assert_series_equal(
-            df["crrt_stage"],
+            df["rrt_stage"],
             pd.Series(
                 data=[0] * 24 + [3] * 23 + [0] * 23 + [3] * 23,
-                name="crrt_stage",
+                name="rrt_stage",
                 index=pd.period_range(
                     start="2023-01-01 00:00:00", end="2023-01-04 20:00:00", freq="h"
                 ),
@@ -41,18 +41,18 @@ class TestCRRTProbe(TestCase):
         analyser = Analyser(
             [
                 Dataset(
-                    DatasetType.CRRT,
-                    self.validation_data_unlabelled[["crrt_status"]],
+                    DatasetType.RRT,
+                    self.validation_data_unlabelled[["rrt_status"]],
                 ),
             ],
-            probes=[CRRTProbe()],
+            probes=[RRTProbe()],
             preprocessors=[],
         )
 
         df = analyser.process_stays()
 
-        calculated_labels = df["crrt_stage"].astype(float)
-        true_labels = self.validation_data["crrt_stage"]
+        calculated_labels = df["rrt_stage"].astype(float)
+        true_labels = self.validation_data["rrt_stage"]
 
         pd.testing.assert_series_equal(
             calculated_labels,
