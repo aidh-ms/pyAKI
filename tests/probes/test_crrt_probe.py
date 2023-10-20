@@ -2,6 +2,8 @@ from unittest import TestCase
 import pandas as pd
 
 from pyAKI.probes import CRRTProbe, Dataset, DatasetType
+from pyAKI.kdigo import Analyser
+
 from .set_up import setup_validation_data
 
 
@@ -30,21 +32,24 @@ class TestCRRTProbe(TestCase):
                 index=pd.period_range(
                     start="2023-01-01 00:00:00", end="2023-01-04 20:00:00", freq="h"
                 ),
+                dtype=float,
             ),
             check_index=False,
         )
 
     def test_validation_data(self):
-        _, df = self.probe.probe(
+        analyser = Analyser(
             [
                 Dataset(
                     DatasetType.CRRT,
-                    self.validation_data_unlabelled[
-                        ["stay_id", "charttime", "crrt_status"]
-                    ],
-                )
-            ]
-        )[0]
+                    self.validation_data_unlabelled[["crrt_status"]],
+                ),
+            ],
+            probes=[CRRTProbe()],
+            preprocessors=[],
+        )
+
+        df = analyser.process_stays()
 
         calculated_labels = df["crrt_stage"].astype(float)
         true_labels = self.validation_data["crrt_stage"]
