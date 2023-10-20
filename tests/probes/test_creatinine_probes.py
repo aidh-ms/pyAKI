@@ -54,7 +54,7 @@ class TestAbsCreatinineProbe(TestCase):
                     self.validation_data_unlabelled[["creat"]],
                 ),
             ],
-            probes=[self.probe],
+            probes=[AbsoluteCreatinineProbe()],
             preprocessors=[],
         )
 
@@ -107,7 +107,7 @@ class TestRelCreatinineProbe(TestCase):
                     self.validation_data_unlabelled[["creat"]],
                 ),
             ],
-            probes=[self.probe],
+            probes=[RelativeCreatinineProbe()],
             preprocessors=[],
         )
 
