@@ -10,6 +10,7 @@ from pyAKI.probes import (
     Dataset,
     DatasetType,
 )
+from pyAKI.kdigo import Analyser
 from .set_up import setup_validation_data
 
 
@@ -46,15 +47,19 @@ class TestAbsCreatinineProbe(TestCase):
         )
 
     def test_validation_data(self):
-        _type, df = self.probe.probe(
+        analyser = Analyser(
             [
                 Dataset(
                     DatasetType.CREATININE,
-                    self.validation_data_unlabelled[["stay_id", "creat"]],
+                    self.validation_data_unlabelled[["creat"]],
                 ),
-                Dataset(DatasetType.DEMOGRAPHICS, pd.DataFrame()),
-            ]
-        )[0]
+            ],
+            probes=[self.probe],
+            preprocessors=[],
+        )
+
+        df = analyser.process_stays()
+
         pd.testing.assert_series_equal(
             df["abs_creatinine_stage"],
             self.validation_data["abs_creatinine_stage"],
