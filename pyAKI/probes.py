@@ -393,7 +393,8 @@ class CRRTProbe(Probe):
         """Perform calculation of CRRT on the provided DataFrame."""
         df[self.RESNAME] = 0
         df.loc[df[self._column] == 1, self.RESNAME] = 3
+
         # transfer nans
-        df.loc[df[self._column].isna(), self.RESNAME] = np.nan
+        df.loc[pd.isna(df[self._column]), self.RESNAME] = np.nan
 
         return df
