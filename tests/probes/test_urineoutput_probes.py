@@ -7,10 +7,14 @@ from pyAKI.probes import (
     Dataset,
     DatasetType,
 )
+from pyAKI.kdigo import Analyser
+
+from .set_up import setup_validation_data
 
 
 class TestUrineOutputProbe(TestCase):
     def setUp(self) -> None:
+        self.validation_data, self.validation_data_unlabelled = setup_validation_data()
         self.probe = UrineOutputProbe()
 
     def test_anuria(self):
@@ -65,6 +69,7 @@ class TestUrineOutputProbe(TestCase):
                         "2023-01-01 11:00:00",
                     ]
                 ),
+                dtype=float,
             ),
             check_index=False,
         )
@@ -170,6 +175,32 @@ class TestUrineOutputProbe(TestCase):
                         "2023-01-01 23:00:00",
                     ]
                 ),
+                dtype=float,
             ),
             check_index=False,
+        )
+
+    def test_validation_data(self):
+        analyser = Analyser(
+            [
+                Dataset(
+                    DatasetType.URINEOUTPUT,
+                    self.validation_data_unlabelled[["urineoutput"]],
+                ),
+                Dataset(
+                    DatasetType.DEMOGRAPHICS,
+                    self.validation_data_unlabelled[["weight"]]
+                    .groupby("stay_id")
+                    .first(),
+                ),
+            ],
+            probes=[UrineOutputProbe()],
+            preprocessors=[],
+        )
+
+        df = analyser.process_stays()
+
+        pd.testing.assert_series_equal(
+            df["urineoutput_stage"].astype(float),
+            self.validation_data["urineoutput_stage"],
         )

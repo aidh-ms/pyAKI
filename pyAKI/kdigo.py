@@ -11,6 +11,7 @@ from pyAKI.probes import (
 )
 from pyAKI.preprocessors import (
     Preprocessor,
+    TimeIndexCreator,
     UrineOutputPreProcessor,
     CreatininePreProcessor,
     DemographicsPreProcessor,
@@ -69,6 +70,9 @@ class Analyser:
             ]
         if preprocessors is None:  # apply default preprocessors if not provided
             preprocessors = [
+                TimeIndexCreator(
+                    stay_identifier=stay_identifier, time_identifier=time_identifier
+                ),
                 UrineOutputPreProcessor(
                     stay_identifier=stay_identifier, time_identifier=time_identifier
                 ),
