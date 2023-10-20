@@ -1,4 +1,4 @@
-stay_id,charttime,urineoutput,urineoutput_stage,creat,abs_creatinine_stage,rel_creatinine_stage,weight,crrt_status,crrt_stage,stage,rel_creatinien_stage
+stay_id,charttime,urineoutput,urineoutput_stage,creat,abs_creatinine_stage,rel_creatinine_stage,weight,crrt_status,crrt_stage,stage,
 30849778,2153-02-12 22:00:00,,,0.7,0.0,0.0,54.7,0.0,0.0,0.0,
 30849778,2153-02-12 23:00:00,,,0.7,0.0,0.0,54.7,0.0,0.0,0.0,
 30849778,2153-02-13 00:00:00,,,0.7,0.0,0.0,54.7,0.0,0.0,0.0,
