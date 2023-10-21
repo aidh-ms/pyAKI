@@ -2,6 +2,7 @@ from typing import NamedTuple
 from enum import StrEnum, auto
 from functools import wraps
 
+import numpy as np
 import pandas as pd
 
 
@@ -11,7 +12,7 @@ class DatasetType(StrEnum):
     URINEOUTPUT = auto()
     CREATININE = auto()
     DEMOGRAPHICS = auto()
-    CRRT = auto()
+    RRT = auto()
 
 
 class Dataset(NamedTuple):
@@ -38,46 +39,58 @@ class Dataset(NamedTuple):
 
 def dataset_as_df(**mapping: dict[str, DatasetType]):
     """
-    Decorator that converts datasets into DataFrames based on the provided mapping.
+    Decorator factory for methods that process datasets with dataframes.
 
-    This decorator is intended to be used with a method that operates on multiple datasets.
-    It wraps the method and performs the conversion of datasets into DataFrames according
-    to the specified mapping. The mapping should be provided as keyword arguments, where
-    the keys are strings representing the dataset names and the values are the corresponding
-    dataset types defined in the DatasetType enumeration.
+    This decorator is intended to be used with methods in a class that handle datasets
+    consisting of dataframes. It allows you to specify a mapping of dataset types to
+    corresponding dataframe names. The decorator then replaces the dataframes of the
+    specified types with the results of the decorated method.
 
     Args:
-        mapping: A dictionary representing the mapping of dataset names to dataset types.
+        **mapping (dict[str, DatasetType]): A mapping of dataset type names to their
+            corresponding `DatasetType`. Dataset types not found in this mapping will
+            be ignored.
 
     Returns:
-        A decorated function that takes a list of Dataset objects and additional arguments,
-        performs the conversion of datasets into DataFrames, calls the wrapped function
-        with the converted DataFrames, and returns a list of Dataset objects with updated
-        DataFrames.
+        decorator: A decorator that can be applied to methods in a class. The decorated
+            method is expected to accept a list of `Dataset` objects and optional
+            additional arguments and keyword arguments.
 
     Example:
-        @dataset_as_df(creatinine=DatasetType.CREATININE, demographics=DatasetType.DEMOGRAPHICS)
-        def process_datasets(self, datasets: list[Dataset], *args: list, **kwargs: dict):
-            # Process datasets using the converted DataFrames
-            ...
-    """
+        Suppose you have a method `process_data` that takes a list of `Dataset` objects
+        and a `mapping` as specified in the decorator:
 
+        @dataset_as_df(data=DatasetType.DATA, labels=DatasetType.LABELS)
+        def process_data(self, data: pd.DataFrame, labels: pd.DataFrame):
+            # Your data processing logic here
+            return processed_data, labels
+
+        When you call `process_data` with a list of `Dataset` objects containing data
+        and labels, the decorator will automatically replace the dataframes based on
+        the mapping and pass them to the method:
+
+        processed_datasets = my_instance.process_data(datasets)
+    """
+    # swap keys and values in the mapping
     in_mapping: dict[DatasetType, str] = {v: k for k, v in mapping.items()}
 
     def decorator(func):
         @wraps(func)
         def wrapper(self, datasets: list[Dataset], *args: list, **kwargs: dict):
+            # map the dataset types to corresponding DataFrames
             _mapping: dict[str, pd.DataFrame] = {
                 in_mapping[dtype]: df
                 for dtype, df in datasets
                 if dtype in in_mapping.keys()
             }
-
+            # check if all datasets are mapped, otherwise return the original datasets
             if len(in_mapping) != len(_mapping):
                 return datasets
 
+            # call the wrapped function with the converted DataFrames
             _dtype, _df = func(self, *args, **_mapping, **kwargs)
 
+            # return the updated datasets
             return [
                 Dataset(dtype, _df if dtype == _dtype else df) for dtype, df in datasets
             ]
@@ -118,3 +131,7 @@ def df_to_dataset(dtype: DatasetType):
         return wrapper
 
     return decorator
+
+
+def approx_gte(x: pd.Series, y: pd.Series) -> bool:
+    return (x >= y).values | np.isclose(x, y)

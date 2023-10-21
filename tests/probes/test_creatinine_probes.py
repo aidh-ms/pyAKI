@@ -10,10 +10,14 @@ from pyAKI.probes import (
     Dataset,
     DatasetType,
 )
+from pyAKI.kdigo import Analyser
+
+from .set_up import setup_validation_data
 
 
 class TestAbsCreatinineProbe(TestCase):
     def setUp(self) -> None:
+        self.validation_data, self.validation_data_unlabelled = setup_validation_data()
         self.probe = AbsoluteCreatinineProbe(baseline_timeframe="1d")
 
     def test_abs_creatinine_aki(self):
@@ -43,9 +47,30 @@ class TestAbsCreatinineProbe(TestCase):
             check_index=False,
         )
 
+    def test_validation_data(self):
+        analyser = Analyser(
+            [
+                Dataset(
+                    DatasetType.CREATININE,
+                    self.validation_data_unlabelled[["creat"]],
+                ),
+            ],
+            probes=[AbsoluteCreatinineProbe()],
+            preprocessors=[],
+        )
+
+        df = analyser.process_stays()
+
+        pd.testing.assert_series_equal(
+            df["abs_creatinine_stage"],
+            self.validation_data["abs_creatinine_stage"],
+            check_index=False,
+        )
+
 
 class TestRelCreatinineProbe(TestCase):
     def setUp(self) -> None:
+        self.validation_data, self.validation_data_unlabelled = setup_validation_data()
         self.probe = RelativeCreatinineProbe(baseline_timeframe="1d")
 
     def test_rel_creatinine_aki(self):
@@ -72,6 +97,26 @@ class TestRelCreatinineProbe(TestCase):
                     start="2023-01-01 00:00:00", end="2023-01-04 20:00:00", freq="h"
                 ),
             ),
+            check_index=False,
+        )
+
+    def test_validation_data(self):
+        analyser = Analyser(
+            [
+                Dataset(
+                    DatasetType.CREATININE,
+                    self.validation_data_unlabelled[["creat"]],
+                ),
+            ],
+            probes=[RelativeCreatinineProbe()],
+            preprocessors=[],
+        )
+
+        df = analyser.process_stays()
+
+        pd.testing.assert_series_equal(
+            df["rel_creatinine_stage"],
+            self.validation_data["rel_creatinine_stage"],
             check_index=False,
         )
 

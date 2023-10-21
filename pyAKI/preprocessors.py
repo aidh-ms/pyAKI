@@ -2,6 +2,7 @@ from abc import ABC
 from typing import Optional
 
 import pandas as pd
+from pandas.api.types import is_datetime64_any_dtype
 
 from pyAKI.utils import dataset_as_df, df_to_dataset, Dataset, DatasetType
 
@@ -37,39 +38,26 @@ class Preprocessor(ABC):
         raise NotImplementedError()
 
 
-class TimeseriesResampler(Preprocessor):
-    """Preprocessor for resampling timeseries datasets."""
-
-    DATASETS: list[int] = [DatasetType.CREATININE, DatasetType.URINEOUTPUT]
+class TimeIndexCreator(Preprocessor):
+    DATASETS: list[DatasetType] = [
+        DatasetType.CREATININE,
+        DatasetType.URINEOUTPUT,
+        DatasetType.RRT,
+    ]
 
     def process(self, datasets: list[Dataset]) -> list[Dataset]:
-        """
-        Process the given list of datasets by resampling the timeseries datasets to a fixed time resolution.
+        _datasets = []
+        for dtype, df in datasets:
+            if dtype not in self.DATASETS:
+                _datasets.append(Dataset(dtype, df))
+                continue
 
-        Parameters:
-            datasets (list[Dataset]): The list of datasets to be processed.
+            if not is_datetime64_any_dtype(df[self._stay_identifier]):
+                df[self._time_identifier] = pd.to_datetime(df[self._time_identifier])
 
-        Returns:
-            list[Dataset]: The processed datasets.
-        """
-        datasets = [
-            Dataset(dtype, df) for dtype, df in datasets if dtype in self.DATASETS
-        ]
+            _datasets.append(Dataset(dtype, df.set_index(self._time_identifier)))
 
-        for name, df in datasets:
-            df[self._time_identifier] = pd.to_datetime(df[self._time_identifier])
-
-        return [
-            Dataset(
-                name,
-                df.set_index(self._time_identifier)
-                .groupby(self._stay_identifier)
-                .resample("1H")
-                .sum()
-                .drop(columns=[self._stay_identifier]),
-            )
-            for name, df in datasets
-        ]
+        return _datasets
 
 
 class UrineOutputPreProcessor(Preprocessor):
@@ -89,7 +77,7 @@ class UrineOutputPreProcessor(Preprocessor):
             stay_identifier (str, optional): The column name that identifies stays or admissions in the dataset. Defaults to MIMIC standard "stay_id".
             time_identifier (str, optional): The column name that identifies the timestamp or time variable in the dataset. Defaults to MIMIC standard "charttime".
             interpolate (bool, optional): Flag indicating whether to perform interpolation on missing values. Defaults to True.
-            threshold (int, optional): The threshold value for limiting the interpolation range. Defaults to None.
+            threshold (int, optional): The threshold value for limiting the interpolation range. Defaults to 1.
         """
         super().__init__(stay_identifier, time_identifier)
 
@@ -108,15 +96,8 @@ class UrineOutputPreProcessor(Preprocessor):
         Returns:
             pd.DataFrame: The processed urine output dataset as a pandas DataFrame.
         """
-        df[self._time_identifier] = pd.to_datetime(df[self._time_identifier])
 
-        df = (
-            df.set_index(self._time_identifier)
-            .groupby(self._stay_identifier)
-            .resample("1H")
-            .sum()
-            .drop(columns=[self._stay_identifier])
-        )
+        df = df.groupby(self._stay_identifier).resample("1H").sum()
         if not self._interpolate:
             return df
 
@@ -168,14 +149,7 @@ class CreatininePreProcessor(Preprocessor):
         Returns:
             pd.DataFrame: The processed creatinine dataset as a pandas DataFrame.
         """
-        df[self._time_identifier] = pd.to_datetime(df[self._time_identifier])
-
-        df = (
-            df.set_index(self._time_identifier)
-            .groupby(self._stay_identifier)
-            .resample("1H")
-            .mean()
-        )
+        df = df.groupby(self._stay_identifier).resample("1H").mean()
         if not self._ffill:
             return df
 
@@ -201,27 +175,20 @@ class DemographicsPreProcessor(Preprocessor):
         return df.groupby(self._stay_identifier).last()
 
 
-class CRRTPreProcessor(Preprocessor):
-    """Preprocessor for processing the CRRT dataset."""
+class RRTPreProcessor(Preprocessor):
+    """Preprocessor for processing the RRT dataset."""
 
-    @dataset_as_df(df=DatasetType.CRRT)
-    @df_to_dataset(DatasetType.CRRT)
+    @dataset_as_df(df=DatasetType.RRT)
+    @df_to_dataset(DatasetType.RRT)
     def process(self, df: pd.DataFrame = None) -> pd.DataFrame:
         """
-        Process the CRRT dataset by upsampling the data and forward filling the last value. We expect the dataframe to contain a 1 for CRRT in progress, and 0 for CRRT not in progress.
+        Process the RRT dataset by upsampling the data and forward filling the last value. We expect the dataframe to contain a 1 for RRT in progress, and 0 for RRT not in progress.
 
         Parameters:
-            df (pd.DataFrame): The input CRRT dataset as a pandas DataFrame.
+            df (pd.DataFrame): The input RRT dataset as a pandas DataFrame.
 
         Returns:
-            pd.DataFrame: The processed CRRT dataset as a pandas DataFrame.
+            pd.DataFrame: The processed RRT dataset as a pandas DataFrame.
         """
-        df[self._time_identifier] = pd.to_datetime(df[self._time_identifier])
-
-        df = (
-            df.set_index(self._time_identifier)
-            .groupby(self._stay_identifier)
-            .resample("1H")
-            .last()
-        )
+        df = df.groupby(self._stay_identifier).resample("1H").last()
         return df.ffill()
