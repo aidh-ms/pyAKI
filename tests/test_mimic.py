@@ -1,9 +1,7 @@
-import sys
 from pathlib import Path
 
 import pandas as pd
 
-sys.path.append(str(Path(__file__).parent.parent))
 from pyAKI.kdigo import Analyser
 from pyAKI.utils import Dataset, DatasetType
 
