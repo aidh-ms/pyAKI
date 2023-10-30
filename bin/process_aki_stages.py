@@ -1,4 +1,5 @@
 #! /usr/bin/env python3
+"""pyAKI CLI tool"""
 
 import typer
 
@@ -17,6 +18,25 @@ def main(
     rrt_file: str = "rrt.csv",
     demographics_file: str = "demographics.csv",
 ):
+    """
+    CLI tool to process AKI stages from time series data.
+
+    CLI tool to process AKI stages from time series data. The tool expects
+    the following files to be present in the given path: urineoutput.csv, creatinine.csv, rrt.csv, demographics.csv.
+
+    Parameters
+    ----------
+    path : str
+        Path to the folder containing the data files.
+    urineoutput_file : str, optional
+        Name of the file containing urine output data, by default "urineoutput.csv"
+    creatinine_file : str, optional
+        name of the file containing creatinine data, by default "creatinine.csv"
+    rrt_file : str, optional
+        Name of the file containing rrt data, by default "rrt.csv"
+    demographics_file : str, optional
+        Name of the file containing demographic data of the patient like the patients weight, by default "demographics.csv"
+    """
     root_dir = Path(path)
     datasets = []
 
