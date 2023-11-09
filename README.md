@@ -1,3 +1,5 @@
+[![Coverage Status](https://coveralls.io/repos/github/AI2MS/pyAKI/badge.svg?branch=main)](https://coveralls.io/github/AI2MS/pyAKI?branch=main)
+
 # pyAKI
 
 Python package to detect AKI within time series data.
