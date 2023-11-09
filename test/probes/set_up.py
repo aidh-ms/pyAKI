@@ -2,7 +2,7 @@ import pandas as pd
 
 
 def setup_validation_data():
-    validation_data = pd.read_csv("tests/data/validation_data.csv")
+    validation_data = pd.read_csv("test/data/validation_data.csv")
     # coerce stay_id to int
     validation_data["stay_id"] = validation_data["stay_id"].astype(int)
     # convert charttime to datetime
