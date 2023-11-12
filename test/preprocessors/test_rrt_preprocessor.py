@@ -1,5 +1,7 @@
 from unittest import TestCase
 import pandas as pd
+import numpy as np
+
 
 from pyAKI.preprocessors import RRTPreProcessor
 from pyAKI.utils import Dataset, DatasetType
@@ -13,7 +15,7 @@ class TestRRTPreProcessor(TestCase):
         rrt_df = pd.DataFrame(
             data={
                 "stay_id": [1, 1, 1],
-                "rrt_status": [0, 1, pd.NA],
+                "rrt_status": [0, 1, np.nan],
             },
             index=pd.to_datetime(
                 [
@@ -42,6 +44,7 @@ class TestRRTPreProcessor(TestCase):
                     ],
                     names=("stay_id", ""),
                 ),
+                dtype=float,
             ),
             check_index=False,
         )
