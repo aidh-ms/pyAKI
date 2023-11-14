@@ -1,9 +1,13 @@
+import logging
+
 from typing import NamedTuple
 from enum import StrEnum, auto
 from functools import wraps
 
 import numpy as np
 import pandas as pd
+
+logger = logging.getLogger(__name__)
 
 
 class DatasetType(StrEnum):
@@ -85,6 +89,10 @@ def dataset_as_df(**mapping: dict[str, DatasetType]):
             }
             # check if all datasets are mapped, otherwise return the original datasets
             if len(in_mapping) != len(_mapping):
+                logger.warning(
+                    "Skip %s because one or more datasets are missing to probe",
+                    self.__class__.__name__,
+                )
                 return datasets
 
             # call the wrapped function with the converted DataFrames
