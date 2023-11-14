@@ -68,7 +68,7 @@ class UrineOutputPreProcessor(Preprocessor):
         stay_identifier: str = "stay_id",
         time_identifier: str = "charttime",
         interpolate: bool = True,
-        threshold: Optional[int] = 1,
+        threshold: int = 1,
     ) -> None:
         """
         Initialize a new instance of the UrineOutputPreProcessor class.
@@ -82,7 +82,7 @@ class UrineOutputPreProcessor(Preprocessor):
         super().__init__(stay_identifier, time_identifier)
 
         self._interpolate: bool = interpolate
-        self._threshold: Optional[int] = threshold
+        self._threshold: int = threshold
 
     @dataset_as_df(df=DatasetType.URINEOUTPUT)
     @df_to_dataset(DatasetType.URINEOUTPUT)
@@ -121,7 +121,7 @@ class CreatininePreProcessor(Preprocessor):
         stay_identifier: str = "stay_id",
         time_identifier: str = "charttime",
         ffill: bool = True,
-        threshold: Optional[int] = 72,
+        threshold: int = 72,
     ) -> None:
         """
         Initialize a new instance of the CreatininePreProcessor class.

@@ -389,9 +389,7 @@ class RRTProbe(Probe):
 
     @dataset_as_df(df=DatasetType.RRT)
     @df_to_dataset(DatasetType.RRT)
-    def probe(
-        self, df: pd.DataFrame = None, **kwargs: Optional[Dict[str, str]]
-    ) -> pd.DataFrame:
+    def probe(self, df: pd.DataFrame = None) -> pd.DataFrame:
         """Perform calculation of RRT on the provided DataFrame."""
         df[self.RESNAME] = 0
         df.loc[df[self._column] == 1, self.RESNAME] = 3
