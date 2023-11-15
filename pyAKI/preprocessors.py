@@ -86,7 +86,7 @@ class UrineOutputPreProcessor(Preprocessor):
 
     @dataset_as_df(df=DatasetType.URINEOUTPUT)
     @df_to_dataset(DatasetType.URINEOUTPUT)
-    def process(self, df: pd.DataFrame = None) -> pd.DataFrame:
+    def process(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Process the urine output dataset by resampling, interpolating missing values, and applying threshold-based adjustments.
 
@@ -97,7 +97,7 @@ class UrineOutputPreProcessor(Preprocessor):
             pd.DataFrame: The processed urine output dataset as a pandas DataFrame.
         """
 
-        df = df.groupby(self._stay_identifier).resample("1H").sum()
+        df = df.groupby(self._stay_identifier).resample("1H").sum()  # type: ignore
         if not self._interpolate:
             return df
 
@@ -139,7 +139,7 @@ class CreatininePreProcessor(Preprocessor):
 
     @dataset_as_df(df=DatasetType.CREATININE)
     @df_to_dataset(DatasetType.CREATININE)
-    def process(self, df: pd.DataFrame = None) -> pd.DataFrame:
+    def process(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Process the creatinine dataset by resampling and performing forward filling on missing values.
 
@@ -149,7 +149,7 @@ class CreatininePreProcessor(Preprocessor):
         Returns:
             pd.DataFrame: The processed creatinine dataset as a pandas DataFrame.
         """
-        df = df.groupby(self._stay_identifier).resample("1H").mean()
+        df = df.groupby(self._stay_identifier).resample("1H").mean()  # type: ignore
         if not self._ffill:
             return df
 
@@ -162,7 +162,7 @@ class DemographicsPreProcessor(Preprocessor):
 
     @dataset_as_df(df=DatasetType.DEMOGRAPHICS)
     @df_to_dataset(DatasetType.DEMOGRAPHICS)
-    def process(self, df: pd.DataFrame = None) -> pd.DataFrame:
+    def process(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Process the demographics dataset by aggregating the data based on stay identifiers.
 
@@ -180,7 +180,7 @@ class RRTPreProcessor(Preprocessor):
 
     @dataset_as_df(df=DatasetType.RRT)
     @df_to_dataset(DatasetType.RRT)
-    def process(self, df: pd.DataFrame = None) -> pd.DataFrame:
+    def process(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Process the RRT dataset by upsampling the data and forward filling the last value. We expect the dataframe to contain a 1 for RRT in progress, and 0 for RRT not in progress.
 
@@ -190,5 +190,5 @@ class RRTPreProcessor(Preprocessor):
         Returns:
             pd.DataFrame: The processed RRT dataset as a pandas DataFrame.
         """
-        df = df.groupby(self._stay_identifier).resample("1H").last()
+        df = df.groupby(self._stay_identifier).resample("1H").last()  # type: ignore
         return df.ffill()

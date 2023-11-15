@@ -42,7 +42,7 @@ class Probe(ABC):
 
     RESNAME: str = ""  # name of the column that will be added to the dataframe
 
-    def probe(self, datasets: list[Dataset], **kwargs) -> pd.DataFrame:
+    def probe(self, datasets: list[Dataset], **kwargs) -> list[Dataset]:
         """
         Abstract method to be implemented by subclasses.
 
