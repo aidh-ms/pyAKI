@@ -84,6 +84,10 @@ class Analyser:
                     stay_identifier=stay_identifier, time_identifier=time_identifier
                 ),
             ]
+
+        # validate datasets
+        self.validate_data(data)
+
         # apply preprocessors to the input data
         for preprocessor in preprocessors:
             data = preprocessor.process(data)
@@ -91,6 +95,11 @@ class Analyser:
         self._data: list[Dataset] = data
         self._probes: list[Probe] = probes
         self._stay_identifier: str = stay_identifier
+
+    def validate_data(self, datasets: list[Dataset]) -> None:
+        for dtype, df in datasets:
+            if (df < 0).values.any():
+                raise ValueError(f"Dataset of Type {dtype} contains negative data")
 
     def process_stays(self) -> pd.DataFrame:
         """

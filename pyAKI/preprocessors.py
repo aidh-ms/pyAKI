@@ -98,10 +98,11 @@ class UrineOutputPreProcessor(Preprocessor):
         """
 
         df = df.groupby(self._stay_identifier).resample("1H").sum()  # type: ignore
+        df[df["urineoutput"] == 0] = None
+
         if not self._interpolate:
             return df
 
-        df[df["urineoutput"] == 0] = None
         mask = df["urineoutput"].isnull()
         df["urineoutput"] /= (
             (mask.cumsum() - mask.cumsum().where(~mask).ffill().fillna(0))
