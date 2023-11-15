@@ -127,10 +127,10 @@ class Analyser:
             pd.DataFrame: The analysis results for the specific stay.
         """
 
-        data_sets = [(name, data.loc[stay_id]) for name, data in self._data]
+        datasets = [(name, data.loc[stay_id]) for name, data in self._data]
 
         for probe in self._probes:
-            data: Dataset = probe.probe(data_sets)
+            data: Dataset = probe.probe(datasets)
 
         (_, df), *datasets = data
         for _, _df in datasets:
