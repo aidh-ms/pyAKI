@@ -137,5 +137,5 @@ def df_to_dataset(dtype: DatasetType):
     return decorator
 
 
-def approx_gte(x: pd.Series, y: pd.Series) -> Union[bool, np.ndarray]:
+def approx_gte(x: pd.Series, y: Union[pd.Series, float]) -> Union[bool, np.ndarray]:
     return np.logical_or(np.asarray(x >= y), np.isclose(x, y))

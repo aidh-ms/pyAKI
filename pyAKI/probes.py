@@ -3,12 +3,12 @@ used for probing for the different KDIGO criteria."""
 
 from abc import ABC, ABCMeta
 from enum import StrEnum, auto
-from typing import Optional, Dict
+from typing import List, Union
 
 import pandas as pd
 import numpy as np
 
-
+import logging
 from pyAKI.utils import dataset_as_df, df_to_dataset, approx_gte, Dataset, DatasetType
 
 
@@ -43,7 +43,7 @@ class Probe(ABC):
 
     RESNAME: str = ""  # name of the column that will be added to the dataframe
 
-    def probe(self, datasets: list[Dataset], **kwargs) -> pd.DataFrame:
+    def probe(self, datasets: List[Dataset], **kwargs) -> pd.DataFrame:
         """
         Abstract method to be implemented by subclasses.
 
@@ -123,10 +123,10 @@ class UrineOutputProbe(Probe):
     @df_to_dataset(DatasetType.URINEOUTPUT)
     def probe(
         self,
-        df: pd.DataFrame = None,
-        patient: pd.DataFrame = None,
+        df: Union[pd.DataFrame, None] = None,
+        patient: Union[pd.DataFrame, None] = None,
         **kwargs,
-    ) -> pd.DataFrame:
+    ) -> Union[pd.DataFrame, None]:
         """
         Perform urine output analysis on the provided DataFrame.
 
@@ -140,26 +140,38 @@ class UrineOutputProbe(Probe):
         Returns:
             pd.DataFrame: The modified DataFrame with the urine output stage column added.
         """
-        weight: pd.Series = patient["weight"]
-        # fmt: off
-        df[self.RESNAME] = 0 # set all urineoutput_stage values to 0
-        if self._method == UrineOutputMethod.STRICT:
-            df.loc[(df.rolling(6).max()[self._column] / weight) < 0.5, self.RESNAME] = 1
-            df.loc[(df.rolling(12).max()[self._column] / weight) < 0.5, self.RESNAME] = 2
-            df.loc[(df.rolling(24).max()[self._column] / weight) < 0.3, self.RESNAME] = 3
-            df.loc[(df.rolling(12).max()[self._column] / weight) < self._anuria_limit, self.RESNAME] = 3
-        elif self._method == UrineOutputMethod.MEAN:
-            df.loc[(df.rolling(6).mean()[self._column] / weight) < 0.5, self.RESNAME] = 1
-            df.loc[(df.rolling(12).mean()[self._column] / weight) < 0.5, self.RESNAME] = 2
-            df.loc[(df.rolling(24).mean()[self._column] / weight) < 0.3, self.RESNAME] = 3
-            df.loc[(df.rolling(12).mean()[self._column] / weight) < self._anuria_limit, self.RESNAME] = 3
+        if patient is None:
+            logging.warning(
+                "No patient data provided. Urine output stage cannot be calculated."
+            )
+            return None
         else:
-            raise ValueError(f"Invalid method: {self._method}")
-        # fmt: on
+            weight: pd.Series = patient["weight"]
+        if df is None:
+            logging.warning(
+                "No urine output data provided. Urine output stage cannot be calculated."
+            )
+            return None
+        if patient is not None and df is not None:
+            # fmt: off
+            df[self.RESNAME] = 0 # set all urineoutput_stage values to 0
+            if self._method == UrineOutputMethod.STRICT:
+                df.loc[(df.rolling(6).max()[self._column] / weight) < 0.5, self.RESNAME] = 1
+                df.loc[(df.rolling(12).max()[self._column] / weight) < 0.5, self.RESNAME] = 2
+                df.loc[(df.rolling(24).max()[self._column] / weight) < 0.3, self.RESNAME] = 3
+                df.loc[(df.rolling(12).max()[self._column] / weight) < self._anuria_limit, self.RESNAME] = 3
+            elif self._method == UrineOutputMethod.MEAN:
+                df.loc[(df.rolling(6).mean()[self._column] / weight) < 0.5, self.RESNAME] = 1
+                df.loc[(df.rolling(12).mean()[self._column] / weight) < 0.5, self.RESNAME] = 2
+                df.loc[(df.rolling(24).mean()[self._column] / weight) < 0.3, self.RESNAME] = 3
+                df.loc[(df.rolling(12).mean()[self._column] / weight) < self._anuria_limit, self.RESNAME] = 3
+            else:
+                raise ValueError(f"Invalid method: {self._method}")
+            # fmt: on
 
-        df.loc[pd.isna(df[self._column]), self.RESNAME] = np.nan
+            df.loc[pd.isna(df[self._column]), self.RESNAME] = np.nan
 
-        return df
+            return df
 
 
 class CreatinineBaselineMethod(StrEnum):
@@ -216,7 +228,7 @@ class AbstractCreatinineProbe(Probe, metaclass=ABCMeta):
         self._baseline_timeframe: str = baseline_timeframe
         self._method: CreatinineBaselineMethod = method
 
-    def creatinine_baseline(self, df: pd.DataFrame) -> pd.Series:
+    def creatinine_baseline(self, df: pd.DataFrame) -> Union[pd.Series, None]:
         """
         Calculate the creatinine baseline values.
 
@@ -228,8 +240,8 @@ class AbstractCreatinineProbe(Probe, metaclass=ABCMeta):
 
         Returns:
             pd.Series: The calculated creatinine baseline values.
-
         """
+
         if self._method == CreatinineBaselineMethod.FIRST:
             return (
                 df[df[self._column] > 0]
@@ -251,7 +263,7 @@ class AbstractCreatinineProbe(Probe, metaclass=ABCMeta):
             )
 
         if self._method == CreatinineBaselineMethod.FIXED:
-            values = (
+            values: pd.Series = (
                 df[df[self._column] > 0]
                 .rolling(self._baseline_timeframe)
                 .min()
@@ -259,7 +271,7 @@ class AbstractCreatinineProbe(Probe, metaclass=ABCMeta):
                 .min()
                 .ffill()[self._column]
             )
-            min_value = values[
+            min_value: pd.DatetimeIndex = values[
                 values.index
                 <= (values.index[0] + pd.Timedelta(self._baseline_timeframe))
             ].min()  # calculate min value for first 7 days
@@ -290,7 +302,9 @@ class AbsoluteCreatinineProbe(AbstractCreatinineProbe):
 
     @dataset_as_df(df=DatasetType.CREATININE)
     @df_to_dataset(DatasetType.CREATININE)
-    def probe(self, df: pd.DataFrame = None, **kwargs) -> pd.DataFrame:
+    def probe(
+        self, df: Union[pd.DataFrame, None] = None, **kwargs
+    ) -> Union[pd.DataFrame, None]:
         """
         Perform KDIGO stage calculation based on absolute creatinine elevations on the provided DataFrame.
 
@@ -304,15 +318,21 @@ class AbsoluteCreatinineProbe(AbstractCreatinineProbe):
         Returns:
             pd.DataFrame: The modified DataFrame with the absolute creatinine stage column added.
         """
-        baseline_values: pd.Series = self.creatinine_baseline(df)
+        if df is None:
+            logging.warning("No creatinine data provided.")
+            return None
+        else:
+            baseline_values: pd.Series = self.creatinine_baseline(df)
 
-        df[self.RESNAME] = 0.0
-        df.loc[approx_gte((df[self._column] - baseline_values), 0.3), self.RESNAME] = 1
-        df.loc[approx_gte(df[self._column], 4), self.RESNAME] = 3
+            df[self.RESNAME] = 0.0
+            df.loc[
+                approx_gte((df[self._column] - baseline_values), 0.3), self.RESNAME
+            ] = 1
+            df.loc[approx_gte(df[self._column], 4), self.RESNAME] = 3
 
-        df.loc[pd.isna(df[self._column]), self.RESNAME] = np.nan
+            df.loc[pd.isna(df[self._column]), self.RESNAME] = np.nan
 
-        return df
+            return df
 
 
 class RelativeCreatinineProbe(AbstractCreatinineProbe):
@@ -333,7 +353,9 @@ class RelativeCreatinineProbe(AbstractCreatinineProbe):
 
     @dataset_as_df(df=DatasetType.CREATININE)
     @df_to_dataset(DatasetType.CREATININE)
-    def probe(self, df: pd.DataFrame = None, **kwargs) -> pd.DataFrame:
+    def probe(
+        self, df: Union[pd.DataFrame, None] = None, **kwargs
+    ) -> Union[pd.DataFrame, None]:
         """
         Perform calculation of relative creatinine elevations on the provided DataFrame.
 
@@ -348,18 +370,26 @@ class RelativeCreatinineProbe(AbstractCreatinineProbe):
         Returns:
             pd.DataFrame: The modified DataFrame with the relative creatinine stage column added.
         """
-        baseline_values: pd.Series = self.creatinine_baseline(df)
+        if df is None:
+            logging.warning("No creatinine data provided.")
+            return None
+        else:
+            baseline_values: pd.Series = self.creatinine_baseline(df)
 
-        df[self.RESNAME] = 0
-        df.loc[
-            approx_gte((df[self._column] / baseline_values), 1.5), self.RESNAME
-        ] = 1.0
-        df.loc[approx_gte((df[self._column] / baseline_values), 2), self.RESNAME] = 2
-        df.loc[approx_gte((df[self._column] / baseline_values), 3), self.RESNAME] = 3
+            df[self.RESNAME] = 0
+            df.loc[
+                approx_gte((df[self._column] / baseline_values), 1.5), self.RESNAME
+            ] = 1.0
+            df.loc[
+                approx_gte((df[self._column] / baseline_values), 2), self.RESNAME
+            ] = 2
+            df.loc[
+                approx_gte((df[self._column] / baseline_values), 3), self.RESNAME
+            ] = 3
 
-        df.loc[pd.isna(df[self._column]), self.RESNAME] = np.nan
+            df.loc[pd.isna(df[self._column]), self.RESNAME] = np.nan
 
-        return df
+            return df
 
 
 class RRTProbe(Probe):
@@ -389,12 +419,16 @@ class RRTProbe(Probe):
 
     @dataset_as_df(df=DatasetType.RRT)
     @df_to_dataset(DatasetType.RRT)
-    def probe(self, df: pd.DataFrame = None) -> pd.DataFrame:
+    def probe(self, df: Union[pd.DataFrame, None] = None) -> Union[pd.DataFrame, None]:
         """Perform calculation of RRT on the provided DataFrame."""
-        df[self.RESNAME] = 0
-        df.loc[df[self._column] == 1, self.RESNAME] = 3
+        if df is None:
+            logging.warning("No RRT data provided.")
+            return None
+        else:
+            df[self.RESNAME] = 0
+            df.loc[df[self._column] == 1, self.RESNAME] = 3
 
-        # transfer nans
-        df.loc[pd.isna(df[self._column]), self.RESNAME] = np.nan
+            # transfer nans
+            df.loc[pd.isna(df[self._column]), self.RESNAME] = np.nan
 
-        return df
+            return df
