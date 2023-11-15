@@ -142,7 +142,7 @@ class UrineOutputProbe(Probe):
         """
         weight: pd.Series = patient["weight"]
         # fmt: off
-        df[self.RESNAME] = 0 # set all urineoutput_stage values to 0
+        df.loc[:, self.RESNAME] = 0 # set all urineoutput_stage values to 0
         if self._method == UrineOutputMethod.STRICT:
             df.loc[(df.rolling(6).max()[self._column] / weight) < 0.5, self.RESNAME] = 1
             df.loc[(df.rolling(12).max()[self._column] / weight) < 0.5, self.RESNAME] = 2
@@ -306,7 +306,7 @@ class AbsoluteCreatinineProbe(AbstractCreatinineProbe):
         """
         baseline_values: pd.Series = self.creatinine_baseline(df)
 
-        df[self.RESNAME] = 0.0
+        df.loc[:, self.RESNAME] = 0
         df.loc[approx_gte((df[self._column] - baseline_values), 0.3), self.RESNAME] = 1
         df.loc[approx_gte(df[self._column], 4), self.RESNAME] = 3
 
@@ -350,7 +350,7 @@ class RelativeCreatinineProbe(AbstractCreatinineProbe):
         """
         baseline_values: pd.Series = self.creatinine_baseline(df)
 
-        df[self.RESNAME] = 0
+        df.loc[:, self.RESNAME] = 0
         df.loc[
             approx_gte((df[self._column] / baseline_values), 1.5), self.RESNAME
         ] = 1.0
@@ -393,7 +393,7 @@ class RRTProbe(Probe):
         self, df: pd.DataFrame = None, **kwargs: Optional[Dict[str, str]]
     ) -> pd.DataFrame:
         """Perform calculation of RRT on the provided DataFrame."""
-        df[self.RESNAME] = 0
+        df.loc[:, self.RESNAME] = 0
         df.loc[df[self._column] == 1, self.RESNAME] = 3
 
         # transfer nans

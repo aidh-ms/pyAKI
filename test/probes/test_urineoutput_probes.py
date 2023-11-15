@@ -2,11 +2,7 @@ from unittest import TestCase
 
 import pandas as pd
 
-from pyAKI.probes import (
-    UrineOutputProbe,
-    Dataset,
-    DatasetType,
-)
+from pyAKI.probes import UrineOutputProbe, Dataset, DatasetType, UrineOutputMethod
 from pyAKI.kdigo import Analyser
 
 from .set_up import setup_validation_data
@@ -203,4 +199,34 @@ class TestUrineOutputProbe(TestCase):
         pd.testing.assert_series_equal(
             df["urineoutput_stage"].astype(float),
             self.validation_data["urineoutput_stage"],
+        )
+
+    def test_aki_strict(self):
+        urine_output_df = pd.DataFrame(
+            data={"urineoutput": [100] + [25] * 24},
+            index=pd.period_range(
+                start="2023-01-01 00:00:00", end="2023-01-02 00:00:00", freq="h"
+            ),
+        )
+
+        demographics = pd.Series(data={"weight": 100})
+
+        _, df = UrineOutputProbe(method=UrineOutputMethod.STRICT).probe(
+            [
+                Dataset(DatasetType.URINEOUTPUT, urine_output_df),
+                Dataset(DatasetType.DEMOGRAPHICS, demographics),
+            ]
+        )[0]
+
+        pd.testing.assert_series_equal(
+            df["urineoutput_stage"],
+            pd.Series(
+                data=[0] * 6 + [1] * 6 + [2] * 12 + [3],
+                name="urineoutput_stage",
+                index=pd.period_range(
+                    start="2023-01-01 00:00:00", end="2023-01-02 00:00:00", freq="h"
+                ),
+                dtype=float,
+            ),
+            check_index=False,
         )
