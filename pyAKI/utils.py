@@ -1,4 +1,4 @@
-from typing import NamedTuple
+from typing import NamedTuple, Union
 from enum import StrEnum, auto
 from functools import wraps
 
@@ -72,11 +72,13 @@ def dataset_as_df(**mapping: dict[str, DatasetType]):
         processed_datasets = my_instance.process_data(datasets)
     """
     # swap keys and values in the mapping
-    in_mapping: dict[DatasetType, str] = {v: k for k, v in mapping.items()}
+    in_mapping: dict[dict[str, DatasetType], str] = {v: k for k, v in mapping.items()}
 
     def decorator(func):
         @wraps(func)
-        def wrapper(self, datasets: list[Dataset], *args: list, **kwargs: dict):
+        def wrapper(
+            self, datasets: list[Dataset], *args: list, **kwargs: dict
+        ) -> list[Dataset]:
             # map the dataset types to corresponding DataFrames
             _mapping: dict[str, pd.DataFrame] = {
                 in_mapping[dtype]: df
@@ -125,7 +127,7 @@ def df_to_dataset(dtype: DatasetType):
 
     def decorator(func):
         @wraps(func)
-        def wrapper(self, *args: list, **kwargs: dict):
+        def wrapper(self, *args: list, **kwargs: dict) -> Dataset:
             return Dataset(dtype, func(self, *args, **kwargs))
 
         return wrapper
@@ -133,5 +135,5 @@ def df_to_dataset(dtype: DatasetType):
     return decorator
 
 
-def approx_gte(x: pd.Series, y: pd.Series) -> bool:
-    return (x >= y).values | np.isclose(x, y)
+def approx_gte(x: pd.Series, y: pd.Series) -> Union[bool, np.ndarray]:
+    return np.logical_or(np.asarray(x >= y), np.isclose(x, y))
