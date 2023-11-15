@@ -1,4 +1,4 @@
-from typing import NamedTuple, Union
+from typing import NamedTuple, Union, Dict, List, cast
 from enum import StrEnum, auto
 from functools import wraps
 
@@ -37,7 +37,7 @@ class Dataset(NamedTuple):
     df: pd.DataFrame
 
 
-def dataset_as_df(**mapping: dict[str, DatasetType]):
+def dataset_as_df(**mapping: Dict[str, DatasetType]):
     """
     Decorator factory for methods that process datasets with dataframes.
 
@@ -72,15 +72,17 @@ def dataset_as_df(**mapping: dict[str, DatasetType]):
         processed_datasets = my_instance.process_data(datasets)
     """
     # swap keys and values in the mapping
-    in_mapping: dict[dict[str, DatasetType], str] = {v: k for k, v in mapping.items()}
+    in_mapping: Dict[DatasetType, str] = {}
+    for k, v in mapping.items():
+        in_mapping[cast(DatasetType, v)] = k
+
+    # in_mapping: Dict[DatasetType, str] = {v: k for k, v in mapping.items()}
 
     def decorator(func):
         @wraps(func)
-        def wrapper(
-            self, datasets: list[Dataset], *args: list, **kwargs: dict
-        ) -> list[Dataset]:
+        def wrapper(self, datasets: List[Dataset], *args, **kwargs) -> List[Dataset]:
             # map the dataset types to corresponding DataFrames
-            _mapping: dict[str, pd.DataFrame] = {
+            _mapping: Dict[str, pd.DataFrame] = {
                 in_mapping[dtype]: df
                 for dtype, df in datasets
                 if dtype in in_mapping.keys()
