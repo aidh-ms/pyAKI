@@ -136,18 +136,23 @@ class Analyser:
             pd.DataFrame: The analysis results for the specific stay.
         """
 
-        data = [(name, data.loc[stay_id]) for name, data in self._data]
+        datasets: list[Dataset] = [
+            Dataset(dtype, data.loc[stay_id]) for dtype, data in self._data  # type: ignore
+        ]
 
         for probe in self._probes:
-            data: Dataset = probe.probe(data)
+            datasets = probe.probe(datasets)
 
-        (_, df), *datasets = data
+        (_, df), *datasets = datasets
         for _, _df in datasets:
             if isinstance(_df, pd.Series):
                 _df = pd.DataFrame([_df], index=df.index)
-            df: pd.DataFrame = df.merge(
-                _df, how="outer", left_index=True, right_index=True
-            )
+            df = df.merge(_df, how="outer", left_index=True, right_index=True)
 
         df["stage"] = df.filter(like="stage").max(axis=1)
-        return df.set_index([pd.Index([stay_id] * len(df), name="stay_id"), df.index])
+        return df.set_index(
+            pd.MultiIndex.from_arrays(
+                [[stay_id] * len(df), df.index.values],
+                names=(self._stay_identifier, df.index.name),
+            )
+        )
