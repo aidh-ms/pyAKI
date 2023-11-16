@@ -146,8 +146,6 @@ class UrineOutputProbe(Probe):
         # fmt: off
         df.loc[:, self.RESNAME] = np.nan # set all urineoutput_stage values to NaN
         df.loc[df.rolling(6).min()[self._column] >= 0, self.RESNAME] = 0
-        for ix in range(5):
-            df.loc[df.index.values[ix], self.RESNAME] = np.nan if np.isnan(df.rolling(ix + 1).min()[self._column].iloc[ix]) else 0
         
         if self._method == UrineOutputMethod.STRICT:
             df.loc[(df.rolling(6).max()[self._column] / weight) < 0.5, self.RESNAME] = 1

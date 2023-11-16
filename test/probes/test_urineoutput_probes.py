@@ -48,7 +48,7 @@ class TestUrineOutputProbe(TestCase):
         pd.testing.assert_series_equal(
             df["urineoutput_stage"],
             pd.Series(
-                data=[0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 3],
+                data=[np.nan, np.nan, np.nan, np.nan, np.nan, 1, 1, 1, 1, 1, 1, 3],
                 name="urineoutput_stage",
                 index=pd.DatetimeIndex(
                     data=[
@@ -118,11 +118,11 @@ class TestUrineOutputProbe(TestCase):
             df["urineoutput_stage"],
             pd.Series(
                 data=[
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
+                    np.nan,
+                    np.nan,
+                    np.nan,
+                    np.nan,
+                    np.nan,
                     1,
                     1,
                     1,
@@ -222,7 +222,7 @@ class TestUrineOutputProbe(TestCase):
         pd.testing.assert_series_equal(
             df["urineoutput_stage"],
             pd.Series(
-                data=[0] * 6 + [1] * 6 + [2] * 12 + [3],
+                data=[np.nan] * 5 + [0] + [1] * 6 + [2] * 12 + [3],
                 name="urineoutput_stage",
                 index=pd.period_range(
                     start="2023-01-01 00:00:00", end="2023-01-02 00:00:00", freq="h"
@@ -259,7 +259,7 @@ class TestUrineOutputProbe(TestCase):
         pd.testing.assert_series_equal(
             df_mean["urineoutput_stage"],
             pd.Series(
-                data=[0] * 6 + [np.nan] * 11 + [0],
+                data=[np.nan] * 5 + [0] + [np.nan] * 11 + [0],
                 name="urineoutput_stage",
                 index=pd.period_range(
                     start="2023-01-01 00:00:00", end="2023-01-01 17:00:00", freq="h"
@@ -272,7 +272,7 @@ class TestUrineOutputProbe(TestCase):
         pd.testing.assert_series_equal(
             df_strict["urineoutput_stage"],
             pd.Series(
-                data=[0] * 6 + [np.nan] * 11 + [0],
+                data=[np.nan] * 5 + [0] + [np.nan] * 11 + [0],
                 name="urineoutput_stage",
                 index=pd.period_range(
                     start="2023-01-01 00:00:00", end="2023-01-01 17:00:00", freq="h"
