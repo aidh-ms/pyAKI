@@ -1,6 +1,7 @@
 from unittest import TestCase
 
 import pandas as pd
+import numpy as np
 
 from pyAKI.probes import UrineOutputProbe, Dataset, DatasetType, UrineOutputMethod
 from pyAKI.kdigo import Analyser
@@ -225,6 +226,56 @@ class TestUrineOutputProbe(TestCase):
                 name="urineoutput_stage",
                 index=pd.period_range(
                     start="2023-01-01 00:00:00", end="2023-01-02 00:00:00", freq="h"
+                ),
+                dtype=float,
+            ),
+            check_index=False,
+        )
+
+    def test_nan_values(self):
+        urine_output_df = pd.DataFrame(
+            data={"urineoutput": [100] * 6 + [np.nan] * 6 + [100] * 6},
+            index=pd.period_range(
+                start="2023-01-01 00:00:00", end="2023-01-01 17:00:00", freq="h"
+            ),
+        )
+
+        demographics = pd.Series(data={"weight": 100})
+
+        _, df_mean = UrineOutputProbe(method=UrineOutputMethod.MEAN).probe(
+            [
+                Dataset(DatasetType.URINEOUTPUT, urine_output_df),
+                Dataset(DatasetType.DEMOGRAPHICS, demographics),
+            ]
+        )[0]
+
+        _, df_strict = UrineOutputProbe(method=UrineOutputMethod.STRICT).probe(
+            [
+                Dataset(DatasetType.URINEOUTPUT, urine_output_df),
+                Dataset(DatasetType.DEMOGRAPHICS, demographics),
+            ]
+        )[0]
+
+        pd.testing.assert_series_equal(
+            df_mean["urineoutput_stage"],
+            pd.Series(
+                data=[0] * 6 + [np.nan] * 11 + [0],
+                name="urineoutput_stage",
+                index=pd.period_range(
+                    start="2023-01-01 00:00:00", end="2023-01-01 17:00:00", freq="h"
+                ),
+                dtype=float,
+            ),
+            check_index=False,
+        )
+
+        pd.testing.assert_series_equal(
+            df_strict["urineoutput_stage"],
+            pd.Series(
+                data=[0] * 6 + [np.nan] * 11 + [0],
+                name="urineoutput_stage",
+                index=pd.period_range(
+                    start="2023-01-01 00:00:00", end="2023-01-01 17:00:00", freq="h"
                 ),
                 dtype=float,
             ),
