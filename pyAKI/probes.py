@@ -144,7 +144,9 @@ class UrineOutputProbe(Probe):
 
         weight: pd.Series = patient["weight"]
         # fmt: off
-        df.loc[:, self.RESNAME] = 0 # set all urineoutput_stage values to 0
+        df.loc[:, self.RESNAME] = np.nan # set all urineoutput_stage values to NaN
+        df.loc[df.rolling(6).min()[self._column] >= 0, self.RESNAME] = 0
+        
         if self._method == UrineOutputMethod.STRICT:
             df.loc[(df.rolling(6).max()[self._column] / weight) < 0.5, self.RESNAME] = 1
             df.loc[(df.rolling(12).max()[self._column] / weight) < 0.5, self.RESNAME] = 2
