@@ -238,7 +238,7 @@ class AbstractCreatinineProbe(Probe, metaclass=ABCMeta):
             return (
                 df[df[self._column] > 0]
                 .rolling(self._baseline_timeframe)
-                .agg(lambda rows: rows[0])
+                .agg(lambda rows: rows.iloc[0])
                 .resample("1h")
                 .first()
                 .ffill()[self._column]
