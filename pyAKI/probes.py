@@ -178,11 +178,15 @@ class CreatinineBaselineMethod(StrEnum):
         MIN: Represents the minimum method for creatinine calculations. Minimum creatinine value within the specified time window before observation is used as baseline.
         FIRST: Represents the first method for creatinine calculations. First creatinine value within the specified time window before observation is used as baseline.
         FIXED: Represents the fixed method for creatinine calculations. A fixed window (default 7 days) ist used for baseline calculation. Values from the window are used as baseline throughout the observation period.
+        CONSTAN: Represents the constant method for creatinine calculations. The user should provide a dataframe with the constant baseline values, e.g. from a previous stay or a pre-surgery value.
+        CALCULATED: Represents the calculated method for creatinine calculations. The user needs to provide additional demographic data of the patient: Gender, Age and Height. A modified version of the Gockcrofft-Gault formula is used to calculate the baseline creatinine value.
     """
 
     MIN = auto()
     FIRST = auto()
     FIXED = auto()
+    CONSTANT = auto()
+    CALCULATED = auto()
 
 
 class AbstractCreatinineProbe(Probe, metaclass=ABCMeta):
@@ -213,12 +217,14 @@ class AbstractCreatinineProbe(Probe, metaclass=ABCMeta):
         column: str = "creat",
         baseline_timeframe: str = "7d",
         method: CreatinineBaselineMethod = CreatinineBaselineMethod.FIXED,
+        baseline_constant: None | pd.Series = None,
     ) -> None:
         super().__init__()
 
         self._column: str = column
         self._baseline_timeframe: str = baseline_timeframe
         self._method: CreatinineBaselineMethod = method
+        self._baseline_constant: None | pd.Series = baseline_constant
 
     def creatinine_baseline(self, df: pd.DataFrame) -> pd.Series:
         """
@@ -273,6 +279,14 @@ class AbstractCreatinineProbe(Probe, metaclass=ABCMeta):
             ] = min_value  # set all values after first 7 days to min value
 
             return values
+
+        if self._method == CreatinineBaselineMethod.CONSTANT:
+            if self._baseline_constant is None:
+                raise ValueError(
+                    "Baseline constant method requires baseline constant values. Please provide a pd.Series containing baseline values for creatinine."
+                )
+            else:
+                return self._baseline_constant
 
 
 class AbsoluteCreatinineProbe(AbstractCreatinineProbe):
