@@ -220,6 +220,9 @@ class AbstractCreatinineProbe(Probe, metaclass=ABCMeta):
         column: str = "creat",
         baseline_constant_column: str = "baseline_constant",
         patient_weight_column: str = "weight",
+        patient_age_column: str = "age",
+        patient_height_column: str = "height",
+        patient_gender_column: str = "gender",
         baseline_timeframe: str = "7d",
         expected_clearance: float = 72,
         method: CreatinineBaselineMethod = CreatinineBaselineMethod.FIXED,
@@ -229,10 +232,13 @@ class AbstractCreatinineProbe(Probe, metaclass=ABCMeta):
         self._column: str = column
         self._baseline_constant_column: str = baseline_constant_column
         self._patient_weight_column: str = patient_weight_column
+        self._patient_age_column: str = patient_age_column
+        self._patient_height_column: str = patient_height_column
+        self._patient_gender_column: str = patient_gender_column
 
         self._baseline_timeframe: str = baseline_timeframe
-        self._method: CreatinineBaselineMethod = method
         self._expected_clearance: float = expected_clearance
+        self._method: CreatinineBaselineMethod = method
 
     def creatinine_baseline(self, df: pd.DataFrame, patient: pd.DataFrame) -> pd.Series:
         """
@@ -300,29 +306,37 @@ class AbstractCreatinineProbe(Probe, metaclass=ABCMeta):
                 name=self._column,
             )
 
-        # if se'lf._method == CreatinineBaselineMethod.CALCULATED:
-        #     if self._patient[weight_col] == None:
-        #         raise ValueError(
-        #             "Calculated baseline method requires patient weight. Please provide a pd.Series containing patient weight."
-        #         )
-        #     if self._patient[age_col] == None:
-        #         raise ValueError(
-        #             "Calculated baseline method requires patient age. Please provide a pd.Series containing patient age."
-        #         )
-        #     if self._patient[height_col] == None:
-        #         raise ValueError(
-        #             "Calculated baseline method requires patient height. Please provide a pd.Series containing patient height."
-        #         )
-        #     if self._patient[gender_col]] == None:
-        #         raise ValueError(
-        #             "Calculated baseline method requires patient gender. Please provide a pd.Series containing patient gender."
-        #         )
-        #     else:
-        #         a = (140 - self._patient[age_col]) * self._patient[weight_col]
-        #         if self._patient[gender_col] == "F":
-        #             a = a * 0.85
-        #         b = 72 * self._expected_clearance
-        #         return a/b'
+        if self._method == CreatinineBaselineMethod.CALCULATED:
+            columns = [
+                self._patient_weight_column,
+                self._patient_age_column,
+                self._patient_height_column,
+                self._patient_gender_column,
+            ]
+            for column in columns:
+                if column not in patient:
+                    raise ValueError(
+                        f"Calculated baseline method requires patient {column}. Please provide a pd.Series containing patient {column}."
+                    )
+
+            weight = patient[self._patient_weight_column]
+            height = patient[self._patient_height_column]
+            gender = patient[self._patient_gender_column]
+            age = patient[self._patient_age_column]
+
+            ibw = (50.0 if gender == "M" else 45.5) + 2.3 * height / 2.54 - 60
+            abw = ibw + 0.4 * (weight - ibw)
+
+            # fmt: off
+            return pd.Series(
+                [
+                    ((140 - age) * abw * (1 if gender == "M" else 0.85)) /
+                    (70 * self._expected_clearance)
+                ] * len(df),
+                index=df.index,
+                name=self._column,
+            )
+            # fmt: on
 
 
 class AbsoluteCreatinineProbe(AbstractCreatinineProbe):
