@@ -88,6 +88,7 @@ class TestRelCreatinineProbe(TestCase):
         _type, df = self.probe.probe(
             [
                 Dataset(DatasetType.CREATININE, creatinine_df),
+                Dataset(DatasetType.DEMOGRAPHICS, pd.DataFrame()),
             ]
         )[0]
 
