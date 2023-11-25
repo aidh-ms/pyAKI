@@ -54,6 +54,10 @@ class TestAbsCreatinineProbe(TestCase):
                     DatasetType.CREATININE,
                     self.validation_data_unlabelled[["creat"]],
                 ),
+                Dataset(
+                    DatasetType.DEMOGRAPHICS,
+                    self.validation_data_unlabelled[["weight"]],
+                ),
             ],
             probes=[AbsoluteCreatinineProbe()],
             preprocessors=[],
@@ -106,6 +110,10 @@ class TestRelCreatinineProbe(TestCase):
                 Dataset(
                     DatasetType.CREATININE,
                     self.validation_data_unlabelled[["creat"]],
+                ),
+                Dataset(
+                    DatasetType.DEMOGRAPHICS,
+                    self.validation_data_unlabelled[["weight"]],
                 ),
             ],
             probes=[RelativeCreatinineProbe()],
@@ -166,6 +174,32 @@ class TestBaselineCreatinine(TestCase):
 
         self._test_helper(probe, series)
 
+    def test_constant_baseline(self):
+        probe = AbstractCreatinineProbe(method=CreatinineBaselineMethod.CONSTANT)
+
+        series = pd.Series(
+            data=[1.0] * 93,
+            name="creat",
+            index=pd.period_range(
+                start="2023-01-01 00:00:00", end="2023-01-04 20:00:00", freq="h"
+            ),
+        )
+
+        self._test_helper(probe, series)
+
+    def test_calculated_baseline(self):
+        probe = AbstractCreatinineProbe(method=CreatinineBaselineMethod.CALCULATED)
+
+        series = pd.Series(
+            data=[2.9159636295463067] * 93,
+            name="creat",
+            index=pd.period_range(
+                start="2023-01-01 00:00:00", end="2023-01-04 20:00:00", freq="h"
+            ),
+        )
+
+        self._test_helper(probe, series)
+
     def _test_helper(self, probe, series):
         creatinine_df = pd.DataFrame(
             data={"creat": [1] * 24 + [1.5] * 23 + [2] * 23 + [3] * 23},
@@ -174,8 +208,21 @@ class TestBaselineCreatinine(TestCase):
             ),
         )
 
+        patient_df = pd.Series(
+            {
+                "baseline_constant": 1.0,
+                "weight": 90,
+                "age": 25,
+                "height": 180,
+                "gender": "M",
+            }
+        )
+
         pd.testing.assert_series_equal(
-            probe.creatinine_baseline(creatinine_df),
+            probe.creatinine_baseline(
+                creatinine_df,
+                patient_df,
+            ),
             series,
             check_index=False,
         )
