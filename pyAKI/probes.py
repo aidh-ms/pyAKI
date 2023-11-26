@@ -3,12 +3,11 @@ used for probing for the different KDIGO criteria."""
 
 from abc import ABC, ABCMeta
 from enum import StrEnum, auto
-from typing import Optional, Dict
 
 import pandas as pd
 import numpy as np
 
-
+import logging
 from pyAKI.utils import dataset_as_df, df_to_dataset, approx_gte, Dataset, DatasetType
 
 
@@ -43,7 +42,7 @@ class Probe(ABC):
 
     RESNAME: str = ""  # name of the column that will be added to the dataframe
 
-    def probe(self, datasets: list[Dataset], **kwargs) -> pd.DataFrame:
+    def probe(self, datasets: list[Dataset], **kwargs) -> list[Dataset]:
         """
         Abstract method to be implemented by subclasses.
 
@@ -103,6 +102,7 @@ class UrineOutputProbe(Probe):
     def __init__(
         self,
         column: str = "urineoutput",
+        patient_weight_column: str = "weight",
         anuria_limit: float = 0.1,
         method: UrineOutputMethod = UrineOutputMethod.MEAN,
     ) -> None:
@@ -116,6 +116,8 @@ class UrineOutputProbe(Probe):
         super().__init__()
 
         self._column: str = column
+        self._patient_weight_column: str = patient_weight_column
+
         self._anuria_limit: float = anuria_limit
         self._method: UrineOutputMethod = method
 
@@ -123,8 +125,8 @@ class UrineOutputProbe(Probe):
     @df_to_dataset(DatasetType.URINEOUTPUT)
     def probe(
         self,
-        df: pd.DataFrame = None,
-        patient: pd.DataFrame = None,
+        df: pd.DataFrame,
+        patient: pd.DataFrame,
         **kwargs,
     ) -> pd.DataFrame:
         """
@@ -140,9 +142,14 @@ class UrineOutputProbe(Probe):
         Returns:
             pd.DataFrame: The modified DataFrame with the urine output stage column added.
         """
-        weight: pd.Series = patient["weight"]
+        if self._patient_weight_column not in patient:
+            raise ValueError("Missing weight for stay")
+
+        weight: pd.Series = patient[self._patient_weight_column]
         # fmt: off
-        df[self.RESNAME] = 0 # set all urineoutput_stage values to 0
+        df.loc[:, self.RESNAME] = np.nan # set all urineoutput_stage values to NaN
+        df.loc[df.rolling(6).min()[self._column] >= 0, self.RESNAME] = 0
+        
         if self._method == UrineOutputMethod.STRICT:
             df.loc[(df.rolling(6).max()[self._column] / weight) < 0.5, self.RESNAME] = 1
             df.loc[(df.rolling(12).max()[self._column] / weight) < 0.5, self.RESNAME] = 2
@@ -174,11 +181,15 @@ class CreatinineBaselineMethod(StrEnum):
         MIN: Represents the minimum method for creatinine calculations. Minimum creatinine value within the specified time window before observation is used as baseline.
         FIRST: Represents the first method for creatinine calculations. First creatinine value within the specified time window before observation is used as baseline.
         FIXED: Represents the fixed method for creatinine calculations. A fixed window (default 7 days) ist used for baseline calculation. Values from the window are used as baseline throughout the observation period.
+        CONSTAN: Represents the constant method for creatinine calculations. The user should provide a dataframe with the constant baseline values, e.g. from a previous stay or a pre-surgery value.
+        CALCULATED: Represents the calculated method for creatinine calculations. The user needs to provide additional demographic data of the patient: Gender, Age and Height. A modified version of the Gockcrofft-Gault formula is used to calculate the baseline creatinine value.
     """
 
     MIN = auto()
     FIRST = auto()
     FIXED = auto()
+    CONSTANT = auto()
+    CALCULATED = auto()
 
 
 class AbstractCreatinineProbe(Probe, metaclass=ABCMeta):
@@ -207,16 +218,29 @@ class AbstractCreatinineProbe(Probe, metaclass=ABCMeta):
     def __init__(
         self,
         column: str = "creat",
+        baseline_constant_column: str = "baseline_constant",
+        patient_weight_column: str = "weight",
+        patient_age_column: str = "age",
+        patient_height_column: str = "height",
+        patient_gender_column: str = "gender",
         baseline_timeframe: str = "7d",
+        expected_clearance: float = 72,
         method: CreatinineBaselineMethod = CreatinineBaselineMethod.FIXED,
     ) -> None:
         super().__init__()
 
         self._column: str = column
+        self._baseline_constant_column: str = baseline_constant_column
+        self._patient_weight_column: str = patient_weight_column
+        self._patient_age_column: str = patient_age_column
+        self._patient_height_column: str = patient_height_column
+        self._patient_gender_column: str = patient_gender_column
+
         self._baseline_timeframe: str = baseline_timeframe
+        self._expected_clearance: float = expected_clearance
         self._method: CreatinineBaselineMethod = method
 
-    def creatinine_baseline(self, df: pd.DataFrame) -> pd.Series:
+    def creatinine_baseline(self, df: pd.DataFrame, patient: pd.DataFrame) -> pd.Series:
         """
         Calculate the creatinine baseline values.
 
@@ -228,13 +252,13 @@ class AbstractCreatinineProbe(Probe, metaclass=ABCMeta):
 
         Returns:
             pd.Series: The calculated creatinine baseline values.
-
         """
+
         if self._method == CreatinineBaselineMethod.FIRST:
             return (
                 df[df[self._column] > 0]
                 .rolling(self._baseline_timeframe)
-                .agg(lambda rows: rows[0])
+                .agg(lambda rows: rows.iloc[0])
                 .resample("1h")
                 .first()
                 .ffill()[self._column]
@@ -251,7 +275,7 @@ class AbstractCreatinineProbe(Probe, metaclass=ABCMeta):
             )
 
         if self._method == CreatinineBaselineMethod.FIXED:
-            values = (
+            values: pd.Series = (
                 df[df[self._column] > 0]
                 .rolling(self._baseline_timeframe)
                 .min()
@@ -259,7 +283,7 @@ class AbstractCreatinineProbe(Probe, metaclass=ABCMeta):
                 .min()
                 .ffill()[self._column]
             )
-            min_value = values[
+            min_value: pd.DatetimeIndex = values[
                 values.index
                 <= (values.index[0] + pd.Timedelta(self._baseline_timeframe))
             ].min()  # calculate min value for first 7 days
@@ -269,6 +293,50 @@ class AbstractCreatinineProbe(Probe, metaclass=ABCMeta):
             ] = min_value  # set all values after first 7 days to min value
 
             return values
+
+        if self._method == CreatinineBaselineMethod.CONSTANT:
+            if self._baseline_constant_column not in patient:
+                raise ValueError(
+                    "Baseline constant method requires baseline constant values. Please provide a pd.Series containing baseline values for creatinine."
+                )
+
+            return pd.Series(
+                [patient[self._baseline_constant_column]] * len(df),
+                index=df.index,
+                name=self._column,
+            )
+
+        if self._method == CreatinineBaselineMethod.CALCULATED:
+            columns = [
+                self._patient_weight_column,
+                self._patient_age_column,
+                self._patient_height_column,
+                self._patient_gender_column,
+            ]
+            for column in columns:
+                if column not in patient:
+                    raise ValueError(
+                        f"Calculated baseline method requires patient {column}. Please provide a pd.Series containing patient {column}."
+                    )
+
+            weight = patient[self._patient_weight_column]
+            height = patient[self._patient_height_column]
+            gender = patient[self._patient_gender_column]
+            age = patient[self._patient_age_column]
+
+            ibw = (50.0 if gender == "M" else 45.5) + 2.3 * height / 2.54 - 60
+            abw = ibw + 0.4 * (weight - ibw)
+
+            # fmt: off
+            return pd.Series(
+                [
+                    ((140 - age) * abw * (1 if gender == "M" else 0.85)) /
+                    (70 * self._expected_clearance)
+                ] * len(df),
+                index=df.index,
+                name=self._column,
+            )
+            # fmt: on
 
 
 class AbsoluteCreatinineProbe(AbstractCreatinineProbe):
@@ -288,9 +356,9 @@ class AbsoluteCreatinineProbe(AbstractCreatinineProbe):
 
     RESNAME = "abs_creatinine_stage"
 
-    @dataset_as_df(df=DatasetType.CREATININE)
+    @dataset_as_df(df=DatasetType.CREATININE, patient=DatasetType.DEMOGRAPHICS)
     @df_to_dataset(DatasetType.CREATININE)
-    def probe(self, df: pd.DataFrame = None, **kwargs) -> pd.DataFrame:
+    def probe(self, df: pd.DataFrame, patient: pd.DataFrame, **kwargs) -> pd.DataFrame:
         """
         Perform KDIGO stage calculation based on absolute creatinine elevations on the provided DataFrame.
 
@@ -304,9 +372,9 @@ class AbsoluteCreatinineProbe(AbstractCreatinineProbe):
         Returns:
             pd.DataFrame: The modified DataFrame with the absolute creatinine stage column added.
         """
-        baseline_values: pd.Series = self.creatinine_baseline(df)
+        baseline_values: pd.Series = self.creatinine_baseline(df, patient)
 
-        df[self.RESNAME] = 0.0
+        df.loc[:, self.RESNAME] = 0
         df.loc[approx_gte((df[self._column] - baseline_values), 0.3), self.RESNAME] = 1
         df.loc[approx_gte(df[self._column], 4), self.RESNAME] = 3
 
@@ -331,9 +399,9 @@ class RelativeCreatinineProbe(AbstractCreatinineProbe):
 
     RESNAME = "rel_creatinine_stage"
 
-    @dataset_as_df(df=DatasetType.CREATININE)
+    @dataset_as_df(df=DatasetType.CREATININE, patient=DatasetType.DEMOGRAPHICS)
     @df_to_dataset(DatasetType.CREATININE)
-    def probe(self, df: pd.DataFrame = None, **kwargs) -> pd.DataFrame:
+    def probe(self, df: pd.DataFrame, patient: pd.DataFrame, **kwargs) -> pd.DataFrame:
         """
         Perform calculation of relative creatinine elevations on the provided DataFrame.
 
@@ -348,9 +416,9 @@ class RelativeCreatinineProbe(AbstractCreatinineProbe):
         Returns:
             pd.DataFrame: The modified DataFrame with the relative creatinine stage column added.
         """
-        baseline_values: pd.Series = self.creatinine_baseline(df)
+        baseline_values: pd.Series = self.creatinine_baseline(df, patient)
 
-        df[self.RESNAME] = 0
+        df.loc[:, self.RESNAME] = 0
         df.loc[
             approx_gte((df[self._column] / baseline_values), 1.5), self.RESNAME
         ] = 1.0
@@ -389,11 +457,9 @@ class RRTProbe(Probe):
 
     @dataset_as_df(df=DatasetType.RRT)
     @df_to_dataset(DatasetType.RRT)
-    def probe(
-        self, df: pd.DataFrame = None, **kwargs: Optional[Dict[str, str]]
-    ) -> pd.DataFrame:
+    def probe(self, df: pd.DataFrame) -> pd.DataFrame:
         """Perform calculation of RRT on the provided DataFrame."""
-        df[self.RESNAME] = 0
+        df.loc[:, self.RESNAME] = 0
         df.loc[df[self._column] == 1, self.RESNAME] = 3
 
         # transfer nans

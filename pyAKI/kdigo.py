@@ -88,6 +88,10 @@ class Analyser:
                     stay_identifier=stay_identifier, time_identifier=time_identifier
                 ),
             ]
+
+        # validate datasets
+        self.validate_data(data)
+
         # apply preprocessors to the input data
         logger.info("Start preprocessing")
         for preprocessor in preprocessors:
@@ -98,6 +102,11 @@ class Analyser:
         self._data: list[Dataset] = data
         self._probes: list[Probe] = probes
         self._stay_identifier: str = stay_identifier
+
+    def validate_data(self, datasets: list[Dataset]) -> None:
+        for dtype, df in datasets:
+            if (df < 0).values.any():
+                raise ValueError(f"Dataset of Type {dtype} contains negative data")
 
     def process_stays(self) -> pd.DataFrame:
         """
@@ -138,18 +147,23 @@ class Analyser:
         """
         logger.debug("Processing stay with id: %s", stay_id)
 
-        data = [(name, data.loc[stay_id]) for name, data in self._data]
+        datasets: list[Dataset] = [
+            Dataset(dtype, data.loc[stay_id]) for dtype, data in self._data  # type: ignore
+        ]
 
         for probe in self._probes:
-            data: Dataset = probe.probe(data)
+            datasets = probe.probe(datasets)
 
-        (_, df), *datasets = data
+        (_, df), *datasets = datasets
         for _, _df in datasets:
             if isinstance(_df, pd.Series):
                 _df = pd.DataFrame([_df], index=df.index)
-            df: pd.DataFrame = df.merge(
-                _df, how="outer", left_index=True, right_index=True
-            )
+            df = df.merge(_df, how="outer", left_index=True, right_index=True)
 
         df["stage"] = df.filter(like="stage").max(axis=1)
-        return df.set_index([pd.Index([stay_id] * len(df), name="stay_id"), df.index])
+        return df.set_index(
+            pd.MultiIndex.from_arrays(
+                [[stay_id] * len(df), df.index.values],
+                names=(self._stay_identifier, df.index.name),
+            )
+        )

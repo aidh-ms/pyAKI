@@ -68,7 +68,7 @@ class UrineOutputPreProcessor(Preprocessor):
         stay_identifier: str = "stay_id",
         time_identifier: str = "charttime",
         interpolate: bool = True,
-        threshold: Optional[int] = 1,
+        threshold: int = 1,
     ) -> None:
         """
         Initialize a new instance of the UrineOutputPreProcessor class.
@@ -82,11 +82,11 @@ class UrineOutputPreProcessor(Preprocessor):
         super().__init__(stay_identifier, time_identifier)
 
         self._interpolate: bool = interpolate
-        self._threshold: Optional[int] = threshold
+        self._threshold: int = threshold
 
     @dataset_as_df(df=DatasetType.URINEOUTPUT)
     @df_to_dataset(DatasetType.URINEOUTPUT)
-    def process(self, df: pd.DataFrame = None) -> pd.DataFrame:
+    def process(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Process the urine output dataset by resampling, interpolating missing values, and applying threshold-based adjustments.
 
@@ -97,11 +97,12 @@ class UrineOutputPreProcessor(Preprocessor):
             pd.DataFrame: The processed urine output dataset as a pandas DataFrame.
         """
 
-        df = df.groupby(self._stay_identifier).resample("1H").sum()
+        df = df.groupby(self._stay_identifier).resample("1H").sum()  # type: ignore
+        df[df["urineoutput"] == 0] = None
+
         if not self._interpolate:
             return df
 
-        df[df["urineoutput"] == 0] = None
         mask = df["urineoutput"].isnull()
         df["urineoutput"] /= (
             (mask.cumsum() - mask.cumsum().where(~mask).ffill().fillna(0))
@@ -121,7 +122,7 @@ class CreatininePreProcessor(Preprocessor):
         stay_identifier: str = "stay_id",
         time_identifier: str = "charttime",
         ffill: bool = True,
-        threshold: Optional[int] = 72,
+        threshold: int = 72,
     ) -> None:
         """
         Initialize a new instance of the CreatininePreProcessor class.
@@ -139,7 +140,7 @@ class CreatininePreProcessor(Preprocessor):
 
     @dataset_as_df(df=DatasetType.CREATININE)
     @df_to_dataset(DatasetType.CREATININE)
-    def process(self, df: pd.DataFrame = None) -> pd.DataFrame:
+    def process(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Process the creatinine dataset by resampling and performing forward filling on missing values.
 
@@ -149,7 +150,7 @@ class CreatininePreProcessor(Preprocessor):
         Returns:
             pd.DataFrame: The processed creatinine dataset as a pandas DataFrame.
         """
-        df = df.groupby(self._stay_identifier).resample("1H").mean()
+        df = df.groupby(self._stay_identifier).resample("1H").mean()  # type: ignore
         if not self._ffill:
             return df
 
@@ -162,7 +163,7 @@ class DemographicsPreProcessor(Preprocessor):
 
     @dataset_as_df(df=DatasetType.DEMOGRAPHICS)
     @df_to_dataset(DatasetType.DEMOGRAPHICS)
-    def process(self, df: pd.DataFrame = None) -> pd.DataFrame:
+    def process(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Process the demographics dataset by aggregating the data based on stay identifiers.
 
@@ -180,7 +181,7 @@ class RRTPreProcessor(Preprocessor):
 
     @dataset_as_df(df=DatasetType.RRT)
     @df_to_dataset(DatasetType.RRT)
-    def process(self, df: pd.DataFrame = None) -> pd.DataFrame:
+    def process(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Process the RRT dataset by upsampling the data and forward filling the last value. We expect the dataframe to contain a 1 for RRT in progress, and 0 for RRT not in progress.
 
@@ -190,5 +191,5 @@ class RRTPreProcessor(Preprocessor):
         Returns:
             pd.DataFrame: The processed RRT dataset as a pandas DataFrame.
         """
-        df = df.groupby(self._stay_identifier).resample("1H").last()
+        df = df.groupby(self._stay_identifier).resample("1H").last()  # type: ignore
         return df.ffill()
