@@ -1,0 +1,28 @@
+cff-version: 1.2.0
+title: pyAKI
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Christian
+    family-names: Porschen
+    email: c_pors01@uni-muenster.de
+    affiliation: Universität Münster
+    orcid: 'https://orcid.org/0000-0001-5355-4531'
+  - given-names: Jan
+    family-names: Ernsting
+  - given-names: Paul
+    family-names: Brauckmann
+identifiers:
+  - type: url
+    value: 'https://github.com/aidh-ms/pyAKI/releases/tag/v0.1.0'
+repository-code: 'https://github.com/aidh-ms/pyAKI/'
+abstract: Python package to detect AKI within time series data.
+keywords:
+  - aki
+  - disease detection
+license: MIT
+commit: 49be7db
+version: 0.1.0
+date-released: '2023-09-25'
