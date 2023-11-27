@@ -29,7 +29,3 @@ process_stay(stay_id: int,
 ```shell
 PYTHONPATH=".:${PYTHONPATH}" python -m unittest discover
 ```
-
-![kdigo_criteria](img/kdigo_criteria.png)
-
-[^kdigo]: Khwaja A. KDIGO clinical practice guidelines for acute kidney injury. Nephron Clin Pract. 2012;120(4):c179-84. doi: 10.1159/000339789. Epub 2012 Aug 7. PMID: 22890468.
