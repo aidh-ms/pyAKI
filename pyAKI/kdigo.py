@@ -1,3 +1,5 @@
+import logging
+
 from typing import Optional
 
 import pandas as pd
@@ -19,6 +21,8 @@ from pyAKI.preprocessors import (
 )
 
 from pyAKI.utils import Dataset
+
+logger = logging.getLogger(__name__)
 
 
 class Analyser:
@@ -89,8 +93,11 @@ class Analyser:
         self.validate_data(data)
 
         # apply preprocessors to the input data
+        logger.info("Start preprocessing")
         for preprocessor in preprocessors:
             data = preprocessor.process(data)
+
+        logger.info("Finish preprocessing")
 
         self._data: list[Dataset] = data
         self._probes: list[Probe] = probes
@@ -111,6 +118,8 @@ class Analyser:
         Returns:
             pd.DataFrame: The analysis results for all stays.
         """
+        logger.info("Start probing")
+
         (_, df), *datasets = self._data
         stay_ids: pd.Index = df.index.get_level_values("stay_id").unique()
         for _, df in datasets:
@@ -119,7 +128,8 @@ class Analyser:
         data: pd.DataFrame = self.process_stay(stay_ids.values[0])
         for stay_id in stay_ids.values[1:]:
             data = pd.concat([data, self.process_stay(stay_id)])
-        # data = data.drop(columns=["stay_id"])  # remove additional stay_id column
+
+        logger.info("Finish probing")
         return data
 
     def process_stay(self, stay_id: str) -> pd.DataFrame:
@@ -135,6 +145,7 @@ class Analyser:
         Returns:
             pd.DataFrame: The analysis results for the specific stay.
         """
+        logger.debug("Processing stay with id: %s", stay_id)
 
         datasets: list[Dataset] = [
             Dataset(dtype, data.loc[stay_id]) for dtype, data in self._data  # type: ignore
