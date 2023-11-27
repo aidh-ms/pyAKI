@@ -29,5 +29,5 @@ process_stay(stay_id: int,
 ```shell
 PYTHONPATH=".:${PYTHONPATH}" python -m unittest discover
 ```
-
-[^kdigo]Improving Global Outcomes (KDIGO) Acute Kidney Injury Work Group. KDIGO Clinical Practice Guideline for Acute Kidney Injury. Kidney inter., Suppl. 2012; 2: 1–138.
+![](img/kdigo_criteria.png)
+[^kdigo]: Improving Global Outcomes (KDIGO) Acute Kidney Injury Work Group. KDIGO Clinical Practice Guideline for Acute Kidney Injury. Kidney inter., Suppl. 2012; 2: 1–138.
