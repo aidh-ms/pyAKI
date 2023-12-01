@@ -178,11 +178,16 @@ class CreatinineBaselineMethod(StrEnum):
     The available methods are `MIN` and `FIRST`.
 
     Attributes:
-        ROLLING_MIN: Represents the minimum method for creatinine calculations. Minimum creatinine value within the specified time window before observation is used as baseline.
-        ROLLING_FIRST: Represents the first method for creatinine calculations. First creatinine value within the specified time window before observation is used as baseline.
-        FIXED_FIRST: Represents the fixed method for creatinine calculations. A fixed window (default 7 days) ist used for baseline calculation. Values from the window are used as baseline throughout the observation period.
-        CONSTAN: Represents the constant method for creatinine calculations. The user should provide a dataframe with the constant baseline values, e.g. from a previous stay or a pre-surgery value.
-        CALCULATED: Represents the calculated method for creatinine calculations. The user needs to provide additional demographic data of the patient: Gender, Age and Height. A modified version of the Gockcrofft-Gault formula is used to calculate the baseline creatinine value.
+        ROLLING_MIN: Minimum of a rolling window following the timepoint of observation is used as baseline.
+        ROLLING_FIRST: First value of a rolling window following the timepoint of observation is used as baseline.
+        ROLLING_MEAN: Mean of a rolling window following the timepoint of observation is used as baseline.
+        FIXED_MIN: Minimum of the first n days of observation is used as baseline.
+        FIXED_MEAN: Mean of the first n days of observation is used as baseline.
+        OVERALL_FIRST: First observed value is used as baseline.
+        OVERALL_MEAN: Mean of all observed values is used as baseline.
+        OVERALL_MIN: Minimum of all observed values is used as baseline.
+        CONSTANT: A constant value is used as baseline.
+        CALCULATED: A calculated value is used as baseline, based off of the Cockcroft-Gault-Formula using the Adjusted Body Weight.
     """
 
     ROLLING_MIN = auto()
