@@ -311,39 +311,23 @@ class AbstractCreatinineProbe(Probe, metaclass=ABCMeta):
         if self._method == CreatinineBaselineMethod.FIXED_MEAN:
             time_delta = pd.to_timedelta(self._baseline_timeframe)
             end_time = df.index[0] + time_delta
-            values: pd.Series = df[df[self._column] > 0].loc[:end_time].mean()
-            values = pd.Series(
-                [values[self._column]] * len(df),
-                index=df.index,
-                name=self._column,
-            )
+            value = df[df.index <= end_time][self._column].mean()
+            values = self._to_df_length(df, value)
             return values
 
         if self._method == CreatinineBaselineMethod.OVERALL_FIRST:
             value = df[df[self._column] > 0].iloc[0][self._column]
-            values = pd.Series(
-                [value] * len(df),
-                index=df.index,
-                name=self._column,
-            )
+            values = self._to_df_length(df, value)
             return values
 
         if self._method == CreatinineBaselineMethod.OVERALL_MIN:
             value = df[df[self._column] > 0][self._column].min()
-            values = pd.Series(
-                [value] * len(df),
-                index=df.index,
-                name=self._column,
-            )
+            values = self._to_df_length(df, value)
             return values
 
         if self._method == CreatinineBaselineMethod.OVERALL_MEAN:
             value = df[df[self._column] > 0][self._column].mean()
-            values = pd.Series(
-                [value] * len(df),
-                index=df.index,
-                name=self._column,
-            )
+            values = self._to_df_length(df, value)
             return values
 
         if self._method == CreatinineBaselineMethod.CONSTANT:
@@ -389,6 +373,15 @@ class AbstractCreatinineProbe(Probe, metaclass=ABCMeta):
                 name=self._column,
             )
             # fmt: on
+
+    def _to_df_length(self, df: pd.DataFrame, value: float) -> pd.Series:
+        """Helper function to create a series, the same length as the data frame."""
+        values = pd.Series(
+            [value] * len(df),
+            index=df.index,
+            name=self._column,
+        )
+        return values
 
 
 class AbsoluteCreatinineProbe(AbstractCreatinineProbe):
