@@ -178,16 +178,26 @@ class CreatinineBaselineMethod(StrEnum):
     The available methods are `MIN` and `FIRST`.
 
     Attributes:
-        MIN: Represents the minimum method for creatinine calculations. Minimum creatinine value within the specified time window before observation is used as baseline.
-        FIRST: Represents the first method for creatinine calculations. First creatinine value within the specified time window before observation is used as baseline.
-        FIXED: Represents the fixed method for creatinine calculations. A fixed window (default 7 days) ist used for baseline calculation. Values from the window are used as baseline throughout the observation period.
-        CONSTAN: Represents the constant method for creatinine calculations. The user should provide a dataframe with the constant baseline values, e.g. from a previous stay or a pre-surgery value.
-        CALCULATED: Represents the calculated method for creatinine calculations. The user needs to provide additional demographic data of the patient: Gender, Age and Height. A modified version of the Gockcrofft-Gault formula is used to calculate the baseline creatinine value.
+        ROLLING_MIN: Minimum of a rolling window following the timepoint of observation is used as baseline.
+        ROLLING_FIRST: First value of a rolling window following the timepoint of observation is used as baseline.
+        ROLLING_MEAN: Mean of a rolling window following the timepoint of observation is used as baseline.
+        FIXED_MIN: Minimum of the first n days of observation is used as baseline.
+        FIXED_MEAN: Mean of the first n days of observation is used as baseline.
+        OVERALL_FIRST: First observed value is used as baseline.
+        OVERALL_MEAN: Mean of all observed values is used as baseline.
+        OVERALL_MIN: Minimum of all observed values is used as baseline.
+        CONSTANT: A constant value is used as baseline.
+        CALCULATED: A calculated value is used as baseline, based off of the Cockcroft-Gault-Formula using the Adjusted Body Weight.
     """
 
-    MIN = auto()
-    FIRST = auto()
-    FIXED = auto()
+    ROLLING_MIN = auto()
+    ROLLING_FIRST = auto()
+    ROLLING_MEAN = auto()
+    FIXED_MIN = auto()
+    FIXED_MEAN = auto()
+    OVERALL_FIRST = auto()
+    OVERALL_MEAN = auto()
+    OVERALL_MIN = auto()
     CONSTANT = auto()
     CALCULATED = auto()
 
@@ -225,7 +235,7 @@ class AbstractCreatinineProbe(Probe, metaclass=ABCMeta):
         patient_gender_column: str = "gender",
         baseline_timeframe: str = "7d",
         expected_clearance: float = 72,
-        method: CreatinineBaselineMethod = CreatinineBaselineMethod.FIXED,
+        method: CreatinineBaselineMethod = CreatinineBaselineMethod.FIXED_MIN,
     ) -> None:
         super().__init__()
 
@@ -254,7 +264,7 @@ class AbstractCreatinineProbe(Probe, metaclass=ABCMeta):
             pd.Series: The calculated creatinine baseline values.
         """
 
-        if self._method == CreatinineBaselineMethod.FIRST:
+        if self._method == CreatinineBaselineMethod.ROLLING_FIRST:
             return (
                 df[df[self._column] > 0]
                 .rolling(self._baseline_timeframe)
@@ -264,7 +274,7 @@ class AbstractCreatinineProbe(Probe, metaclass=ABCMeta):
                 .ffill()[self._column]
             )
 
-        if self._method == CreatinineBaselineMethod.MIN:
+        if self._method == CreatinineBaselineMethod.ROLLING_MIN:
             return (
                 df[df[self._column] > 0]
                 .rolling(self._baseline_timeframe)
@@ -273,8 +283,17 @@ class AbstractCreatinineProbe(Probe, metaclass=ABCMeta):
                 .min()
                 .ffill()[self._column]
             )
+        if self._method == CreatinineBaselineMethod.ROLLING_MEAN:
+            return (
+                df[df[self._column] > 0]
+                .rolling(self._baseline_timeframe)
+                .mean()
+                .resample("1h")
+                .mean()
+                .ffill()[self._column]
+            )
 
-        if self._method == CreatinineBaselineMethod.FIXED:
+        if self._method == CreatinineBaselineMethod.FIXED_MIN:
             values: pd.Series = (
                 df[df[self._column] > 0]
                 .rolling(self._baseline_timeframe)
@@ -292,6 +311,28 @@ class AbstractCreatinineProbe(Probe, metaclass=ABCMeta):
                 > (values.index[0] + pd.Timedelta(self._baseline_timeframe))
             ] = min_value  # set all values after first 7 days to min value
 
+            return values
+
+        if self._method == CreatinineBaselineMethod.FIXED_MEAN:
+            time_delta = pd.to_timedelta(self._baseline_timeframe)
+            end_time = df.index[0] + time_delta
+            value = df[df.index <= end_time][self._column].mean()
+            values = self._to_df_length(df, value)
+            return values
+
+        if self._method == CreatinineBaselineMethod.OVERALL_FIRST:
+            value = df[df[self._column] > 0].iloc[0][self._column]
+            values = self._to_df_length(df, value)
+            return values
+
+        if self._method == CreatinineBaselineMethod.OVERALL_MIN:
+            value = df[df[self._column] > 0][self._column].min()
+            values = self._to_df_length(df, value)
+            return values
+
+        if self._method == CreatinineBaselineMethod.OVERALL_MEAN:
+            value = df[df[self._column] > 0][self._column].mean()
+            values = self._to_df_length(df, value)
             return values
 
         if self._method == CreatinineBaselineMethod.CONSTANT:
@@ -337,6 +378,15 @@ class AbstractCreatinineProbe(Probe, metaclass=ABCMeta):
                 name=self._column,
             )
             # fmt: on
+
+    def _to_df_length(self, df: pd.DataFrame, value: float) -> pd.Series:
+        """Helper function to create a series, the same length as the data frame."""
+        values = pd.Series(
+            [value] * len(df),
+            index=df.index,
+            name=self._column,
+        )
+        return values
 
 
 class AbsoluteCreatinineProbe(AbstractCreatinineProbe):
