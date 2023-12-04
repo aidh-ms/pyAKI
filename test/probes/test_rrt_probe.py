@@ -4,7 +4,7 @@ import pandas as pd
 from pyAKI.probes import RRTProbe, Dataset, DatasetType
 from pyAKI.kdigo import Analyser
 
-from .set_up import setup_validation_data
+from ..set_up import setup_validation_data
 
 
 class TestRRTProbe(TestCase):
