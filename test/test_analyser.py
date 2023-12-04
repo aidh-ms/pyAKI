@@ -12,6 +12,14 @@ class TestAnalyser(TestCase):
         self.validation_data, self.validation_data_unlabelled = setup_validation_data()
         self.validation_data_unlabelled.reset_index(inplace=True)
         self.validation_data_unlabelled.drop(columns=["Unnamed: 11"], inplace=True)
+        self.validation_data.drop(columns=["Unnamed: 11"], inplace=True)
+        self.result_cols = [
+            "urineoutput_stage",
+            "abs_creatinine_stage",
+            "rel_creatinine_stage",
+            "rrt_stage",
+            "stage",
+        ]
 
     def test_validation_data(self):
         rrt_df = pd.DataFrame(
@@ -36,31 +44,39 @@ class TestAnalyser(TestCase):
             )
 
     def test_full_analyser(self):
-        print(self.validation_data_unlabelled.head())
         results = Analyser(
             [
                 Dataset(
                     DatasetType.URINEOUTPUT,
                     self.validation_data_unlabelled[
                         ["stay_id", "charttime", "urineoutput"]
-                    ],
+                    ].dropna(),
                 ),
                 Dataset(
                     DatasetType.CREATININE,
-                    self.validation_data_unlabelled[["stay_id", "charttime", "creat"]],
+                    self.validation_data_unlabelled[
+                        ["stay_id", "charttime", "creat"]
+                    ].dropna(),
                 ),
                 Dataset(
                     DatasetType.DEMOGRAPHICS,
-                    self.validation_data_unlabelled[["stay_id", "weight"]],
+                    self.validation_data_unlabelled[["stay_id", "weight"]].dropna(),
                 ),
                 Dataset(
                     DatasetType.RRT,
                     self.validation_data_unlabelled[
                         ["stay_id", "charttime", "rrt_status"]
-                    ],
+                    ].dropna(),
                 ),
             ]
         ).process_stays()
+        results.drop(columns=["stay_id_x", "stay_id_y", "stay_id"], inplace=True)
+        self.assertEqual(results.shape[1], self.validation_data.shape[1])
+        self.assertEqual(results.shape[0], self.validation_data.shape[0])
 
-        self.assertEqual(len(results["stay_id"].unique()), 15)
-        self.assertEqual(results.shape[1], 12)
+        results_grouped = results.groupby("stay_id").max()
+        validation_grouped = self.validation_data.groupby("stay_id").max()
+
+        pd.testing.assert_frame_equal(
+            results_grouped[self.result_cols], validation_grouped[self.result_cols]
+        )

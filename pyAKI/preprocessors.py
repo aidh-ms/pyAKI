@@ -80,7 +80,6 @@ class UrineOutputPreProcessor(Preprocessor):
             threshold (int, optional): The threshold value for limiting the interpolation range. Defaults to 1.
         """
         super().__init__(stay_identifier, time_identifier)
-
         self._interpolate: bool = interpolate
         self._threshold: int = threshold
 
