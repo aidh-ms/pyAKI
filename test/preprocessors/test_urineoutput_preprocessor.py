@@ -49,7 +49,7 @@ class TestUrineOutputPreProcessor(TestCase):
         )
 
     def test_interpolate_preprocessor(self):
-        preprocessor = UrineOutputPreProcessor(interpolate=True)
+        preprocessor = UrineOutputPreProcessor(interpolate=True, threshold=1)
 
         ou_df = pd.DataFrame(
             data={
