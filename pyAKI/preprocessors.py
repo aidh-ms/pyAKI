@@ -68,7 +68,7 @@ class UrineOutputPreProcessor(Preprocessor):
         stay_identifier: str = "stay_id",
         time_identifier: str = "charttime",
         interpolate: bool = True,
-        threshold: int = 1,
+        threshold: int = 6,
     ) -> None:
         """
         Initialize a new instance of the UrineOutputPreProcessor class.
@@ -77,7 +77,7 @@ class UrineOutputPreProcessor(Preprocessor):
             stay_identifier (str, optional): The column name that identifies stays or admissions in the dataset. Defaults to MIMIC standard "stay_id".
             time_identifier (str, optional): The column name that identifies the timestamp or time variable in the dataset. Defaults to MIMIC standard "charttime".
             interpolate (bool, optional): Flag indicating whether to perform interpolation on missing values. Defaults to True.
-            threshold (int, optional): The threshold value for limiting the interpolation range. Defaults to 1.
+            threshold (int, optional): The threshold value for limiting the interpolation range. Defaults to 6.
         """
         super().__init__(stay_identifier, time_identifier)
 
