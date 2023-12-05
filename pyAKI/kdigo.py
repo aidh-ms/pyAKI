@@ -151,7 +151,9 @@ class Analyser:
         logger.debug("Processing stay with id: %s", stay_id)
 
         datasets: list[Dataset] = [
-            Dataset(dtype, data.loc[stay_id]) for dtype, data in self._data  # type: ignore
+            Dataset(dtype, data.loc[stay_id])
+            for dtype, data in self._data  # type: ignore
+            if stay_id in data.index
         ]
 
         for probe in self._probes:
