@@ -6,7 +6,7 @@ import numpy as np
 from pyAKI.probes import UrineOutputProbe, Dataset, DatasetType, UrineOutputMethod
 from pyAKI.kdigo import Analyser
 
-from .set_up import setup_validation_data
+from ..set_up import setup_validation_data
 
 
 class TestUrineOutputProbe(TestCase):

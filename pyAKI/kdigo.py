@@ -105,8 +105,11 @@ class Analyser:
 
     def validate_data(self, datasets: list[Dataset]) -> None:
         for dtype, df in datasets:
-            if (df < 0).values.any():
-                raise ValueError(f"Dataset of Type {dtype} contains negative data")
+            try:
+                if (df < 0).values.any():
+                    raise ValueError(f"Dataset of Type {dtype} contains negative data")
+            except TypeError:
+                continue
 
     def process_stays(self) -> pd.DataFrame:
         """
