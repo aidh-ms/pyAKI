@@ -163,7 +163,10 @@ class Analyser:
         for _, _df in datasets:
             if isinstance(_df, pd.Series):
                 _df = pd.DataFrame([_df], index=df.index)
-            df = df.merge(_df, how="outer", left_index=True, right_index=True)
+            columns = set(_df.columns) - set(df.columns)
+            df = df.merge(
+                _df[[*columns]], how="outer", left_index=True, right_index=True
+            )
 
         df["stage"] = df.filter(like="stage").max(axis=1)
         return df.set_index(
