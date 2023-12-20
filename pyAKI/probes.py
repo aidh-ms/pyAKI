@@ -147,9 +147,9 @@ class UrineOutputProbe(Probe):
 
         weight: pd.Series = patient[self._patient_weight_column]
         # fmt: off
-        df.loc[:, self.RESNAME] = np.nan # set all urineoutput_stage values to NaN
+        df.loc[:, self.RESNAME] = np.nan  # set all urineoutput_stage values to NaN
         df.loc[df.rolling(6).min()[self._column] >= 0, self.RESNAME] = 0
-        
+
         if self._method == UrineOutputMethod.STRICT:
             df.loc[(df.rolling(6).max()[self._column] / weight) < 0.5, self.RESNAME] = 1
             df.loc[(df.rolling(12).max()[self._column] / weight) < 0.5, self.RESNAME] = 2
@@ -235,7 +235,7 @@ class AbstractCreatinineProbe(Probe, metaclass=ABCMeta):
         patient_gender_column: str = "gender",
         baseline_timeframe: str = "7d",
         expected_clearance: float = 72,
-        method: CreatinineBaselineMethod = CreatinineBaselineMethod.FIXED_MIN,
+        method: CreatinineBaselineMethod = CreatinineBaselineMethod.ROLLING_MIN,
     ) -> None:
         super().__init__()
 
@@ -408,7 +408,12 @@ class AbsoluteCreatinineProbe(AbstractCreatinineProbe):
 
     @dataset_as_df(df=DatasetType.CREATININE, patient=DatasetType.DEMOGRAPHICS)
     @df_to_dataset(DatasetType.CREATININE)
-    def probe(self, df: pd.DataFrame, patient: pd.DataFrame, **kwargs) -> pd.DataFrame:
+    def probe(
+        self,
+        df: pd.DataFrame,
+        patient: pd.DataFrame,
+        **kwargs,
+    ) -> pd.DataFrame:
         """
         Perform KDIGO stage calculation based on absolute creatinine elevations on the provided DataFrame.
 
