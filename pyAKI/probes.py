@@ -406,6 +406,30 @@ class AbsoluteCreatinineProbe(AbstractCreatinineProbe):
 
     RESNAME = "abs_creatinine_stage"
 
+    def __init__(
+        self,
+        column: str = "creat",
+        baseline_constant_column: str = "baseline_constant",
+        patient_weight_column: str = "weight",
+        patient_age_column: str = "age",
+        patient_height_column: str = "height",
+        patient_gender_column: str = "gender",
+        baseline_timeframe: str = "2d",
+        expected_clearance: float = 72,
+        method: CreatinineBaselineMethod = CreatinineBaselineMethod.ROLLING_MIN,
+    ) -> None:
+        super().__init__(
+            column=column,
+            baseline_constant_column=baseline_constant_column,
+            patient_weight_column=patient_weight_column,
+            patient_age_column=patient_age_column,
+            patient_height_column=patient_height_column,
+            patient_gender_column=patient_gender_column,
+            baseline_timeframe=baseline_timeframe,
+            expected_clearance=expected_clearance,
+            method=method,
+        )
+
     @dataset_as_df(df=DatasetType.CREATININE, patient=DatasetType.DEMOGRAPHICS)
     @df_to_dataset(DatasetType.CREATININE)
     def probe(
