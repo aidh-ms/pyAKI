@@ -30,7 +30,7 @@ jobs:
       run: |
         python -m unittest discover
     - name: Coveralls
-      run: coveralls
+      uses: coverallsapp/github-action@v2.2.3
       env:
         COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
     - name: Run mypy
