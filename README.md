@@ -1,4 +1,4 @@
-[![Coverage Status](https://coveralls.io/repos/github/AI2MS/pyAKI/badge.svg?branch=main)](https://coveralls.io/github/AI2MS/pyAKI?branch=main)
+[![Coverage Status](https://coveralls.io/repos/github/aidh-ms/pyAKI/badge.svg?branch=main)](https://coveralls.io/github/aidh-ms/pyAKI?branch=main)
 
 # pyAKI
 
