@@ -16,16 +16,6 @@ pip install git+https://github.com/AI2MS/pyAKI
 ## Usage
 
 ```python
-from pyAKI import process_stay
-process_stay(stay_id: int,
-             urine_output: pd.DataFrame,
-             creatinine: pd.DataFrame,
-             weight: float,
-             stay_identifier: str = 'stay_id',
-             time_identifier: str = 'charttime')
-```
-
-```python
 import pandas as pd
 
 from pyAKI.probes import Dataset, DatasetType
