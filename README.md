@@ -25,10 +25,27 @@ process_stay(stay_id: int,
              time_identifier: str = 'charttime')
 ```
 
+```python
+import pandas as pd
+
+from pyAKI.probes import Dataset, DatasetType
+from pyAKI.kdigo import Analyser
+
+data = [
+    Dataset(DatasetType.URINEOUTPUT, pd.DataFrame()),
+    Dataset(DatasetType.CREATININE, pd.DataFrame()),
+    Dataset(DatasetType.DEMOGRAPHICS, pd.DataFrame()),
+    Dataset(DatasetType.RRT, pd.DataFrame()),
+]
+
+analyser = Analyser(data)
+results: pd.Dataframe =  analyser.process_stays()
+```
+
 ### Tests
 
 ```shell
-PYTHONPATH=".:${PYTHONPATH}" python -m unittest discover
+pytest --cov=. test/
 ```
 
 [^kdigo]: Improving Global Outcomes (KDIGO) Acute Kidney Injury Work Group. KDIGO Clinical Practice Guideline for Acute Kidney Injury. Kidney inter., Suppl. 2012; 2: 1–138.
