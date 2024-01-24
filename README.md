@@ -38,4 +38,18 @@ results: pd.Dataframe =  analyser.process_stays()
 pytest --cov=. test/
 ```
 
+### Acknowledgement
+
+We encourage all users to use pyAKI in their scientific work. Doing so, please use the following citation:
+```
+@misc{porschen2024pyaki,
+    title={pyAKI - An Open Source Solution to Automated KDIGO classification},
+    author={Christian Porschen and Jan Ernsting and Paul Brauckmann and Raphael Weiss and Till Würdemann and Hendrik Booke and Wida Amini and Ludwig Maidowski and Benjamin Risse and Tim Hahn and Thilo von Groote},
+    year={2024},
+    eprint={2401.12930},
+    archivePrefix={arXiv},
+    primaryClass={cs.LG}
+}
+```
+Our paper can be found on [arxiv](https://arxiv.org/abs/2401.12930).
 [^kdigo]: Improving Global Outcomes (KDIGO) Acute Kidney Injury Work Group. KDIGO Clinical Practice Guideline for Acute Kidney Injury. Kidney inter., Suppl. 2012; 2: 1–138.
