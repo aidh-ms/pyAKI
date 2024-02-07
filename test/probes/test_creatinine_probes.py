@@ -79,7 +79,7 @@ class TestRelCreatinineProbe(TestCase):
 
     def test_rel_creatinine_aki(self):
         creatinine_df = pd.DataFrame(
-            data={"creat": [1] * 24 + [1.5] * 23 + [2] * 23 + [3] * 23},
+            data={"creat": [1] * 24 + [1.5] * 23 + [3] * 23 + [9] * 23},
             index=pd.period_range(
                 start="2023-01-01 00:00:00", end="2023-01-04 20:00:00", freq="h"
             ),

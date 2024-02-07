@@ -70,7 +70,7 @@ class TestAnalyser(TestCase):
                 ),
             ]
         ).process_stays()
-        results.drop(columns=["stay_id_x", "stay_id_y", "stay_id"], inplace=True)
+        results.drop(columns=["stay_id"], inplace=True)
         self.assertEqual(results.shape[1], self.validation_data.shape[1])
         self.assertEqual(results.shape[0], self.validation_data.shape[0])
 
