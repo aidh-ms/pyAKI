@@ -10,7 +10,7 @@ The goal of this package is to establish well tested, comprehensive functions fo
 ## Installation
 
 ```shell
-pip install git+https://github.com/AI2MS/pyAKI
+pip install git+https://github.com/aidh-ms/pyAKI
 ```
 
 ## Usage
