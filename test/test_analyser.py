@@ -4,14 +4,15 @@ import pandas as pd
 
 from pyAKI.probes import Dataset, DatasetType
 from pyAKI.kdigo import Analyser
-from .set_up import setup_validation_data
+from test.set_up import setup_validation_data
 
 
 class TestAnalyser(TestCase):
     def setUp(self) -> None:
         self.validation_data, self.validation_data_unlabelled = setup_validation_data()
         self.validation_data_unlabelled.reset_index(inplace=True)
-        self.validation_data_unlabelled.drop(columns=["Unnamed: 11"], inplace=True)
+        self.validation_data_unlabelled.drop(
+            columns=["Unnamed: 11"], inplace=True)
         self.validation_data.drop(columns=["Unnamed: 11"], inplace=True)
         self.result_cols = [
             "urineoutput_stage",
@@ -60,7 +61,8 @@ class TestAnalyser(TestCase):
                 ),
                 Dataset(
                     DatasetType.DEMOGRAPHICS,
-                    self.validation_data_unlabelled[["stay_id", "weight"]].dropna(),
+                    self.validation_data_unlabelled[[
+                        "stay_id", "weight"]].dropna(),
                 ),
                 Dataset(
                     DatasetType.RRT,
@@ -79,4 +81,5 @@ class TestAnalyser(TestCase):
 
         # check if the resulting columns have the same dtype (actual results might vary slightly due to different preprocessing)
         for col in self.result_cols:
-            self.assertEqual(results_grouped[col].dtype, validation_grouped[col].dtype)
+            self.assertEqual(
+                results_grouped[col].dtype, validation_grouped[col].dtype)
