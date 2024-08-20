@@ -83,3 +83,20 @@ class TestAnalyser(TestCase):
         for col in self.result_cols:
             self.assertEqual(
                 results_grouped[col].dtype, validation_grouped[col].dtype)
+
+    def test_creatinine_settings(self):
+        results = Analyser(
+            [
+                Dataset(
+                    DatasetType.CREATININE,
+                    self.validation_data_unlabelled[
+                        ["stay_id", "charttime", "creat"]
+                    ].dropna(),
+                ),
+            ],
+            probes=[],
+            preprocessors=[],
+        ).process_stays()
+        results.drop(columns=["stay_id"], inplace=True)
+        self.assertEqual(results.shape[1], 3)
+        self.assertEqual(results.shape[0], 92)
