@@ -4,6 +4,7 @@ import pandas as pd
 
 from pyAKI.probes import Dataset, DatasetType
 from pyAKI.kdigo import Analyser
+from pyAKI.probes import UrineOutputProbe
 from .set_up import setup_validation_data
 
 
@@ -80,3 +81,20 @@ class TestAnalyser(TestCase):
         # check if the resulting columns have the same dtype (actual results might vary slightly due to different preprocessing)
         for col in self.result_cols:
             self.assertEqual(results_grouped[col].dtype, validation_grouped[col].dtype)
+
+    def test_creatinine_settings(self):
+        results = Analyser(
+            [
+                Dataset(
+                    DatasetType.CREATININE,
+                    self.validation_data_unlabelled[
+                        ["stay_id", "charttime", "creat"]
+                    ].dropna(),
+                ),
+            ],
+            probes=[],
+            preprocessors=[],
+        ).process_stays()
+        results.drop(columns=["stay_id"], inplace=True)
+        self.assertEqual(results.shape[1], 3)
+        self.assertEqual(results.shape[0], 92)
