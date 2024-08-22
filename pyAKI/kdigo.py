@@ -168,7 +168,7 @@ class Analyser:
                 _df[[*columns]], how="outer", left_index=True, right_index=True
             )
 
-        df["stage"] = df.filter(like="stage").max(axis=1)
+        df["stage"] = df.filter(like="stage").max(axis=1).fillna(0)
         return df.set_index(
             pd.MultiIndex.from_arrays(
                 [[stay_id] * len(df), df.index.values],

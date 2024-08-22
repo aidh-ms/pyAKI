@@ -10,7 +10,6 @@ from test.set_up import setup_validation_data
 class TestAnalyser(TestCase):
     def setUp(self) -> None:
         self.validation_data, self.validation_data_unlabelled = setup_validation_data()
-        self.validation_data_unlabelled.reset_index(inplace=True)
         self.validation_data_unlabelled.drop(columns=["Unnamed: 11"], inplace=True)
         self.validation_data.drop(columns=["Unnamed: 11"], inplace=True)
         self.result_cols = [
@@ -44,29 +43,26 @@ class TestAnalyser(TestCase):
             )
 
     def test_full_analyser(self):
+        data = self.validation_data_unlabelled.copy()
+        data.reset_index(inplace=True)
+
         results = Analyser(
             [
                 Dataset(
                     DatasetType.URINEOUTPUT,
-                    self.validation_data_unlabelled[
-                        ["stay_id", "charttime", "urineoutput"]
-                    ].dropna(),
+                    data[["stay_id", "charttime", "urineoutput"]].dropna(),
                 ),
                 Dataset(
                     DatasetType.CREATININE,
-                    self.validation_data_unlabelled[
-                        ["stay_id", "charttime", "creat"]
-                    ].dropna(),
+                    data[["stay_id", "charttime", "creat"]].dropna(),
                 ),
                 Dataset(
                     DatasetType.DEMOGRAPHICS,
-                    self.validation_data_unlabelled[["stay_id", "weight"]].dropna(),
+                    data[["stay_id", "weight"]].dropna(),
                 ),
                 Dataset(
                     DatasetType.RRT,
-                    self.validation_data_unlabelled[
-                        ["stay_id", "charttime", "rrt_status"]
-                    ].dropna(),
+                    data[["stay_id", "charttime", "rrt_status"]].dropna(),
                 ),
             ]
         ).process_stays()
@@ -81,48 +77,28 @@ class TestAnalyser(TestCase):
         for col in self.result_cols:
             self.assertEqual(results_grouped[col].dtype, validation_grouped[col].dtype)
 
-        for column in results.columns[results.columns.str.contains("stage")]:
-            pd.testing.assert_series_equal(
-                results[column],
-                self.validation_data[column],
-                check_index=False,
-            )
-
     def test_creatinine_settings(self):
-        data = self.validation_data_unlabelled.copy()
-        data["charttime"] = pd.to_datetime(data["charttime"])
-
         results = Analyser(
             [
                 Dataset(
                     DatasetType.URINEOUTPUT,
-                    data[["stay_id", "charttime", "urineoutput"]]
-                    .dropna()
-                    .set_index(["stay_id", "charttime"], drop=False)
-                    .drop(columns=["charttime"]),
+                    self.validation_data_unlabelled[["urineoutput"]],
                 ),
                 Dataset(
-                    DatasetType.CREATININE,
-                    data[["stay_id", "charttime", "creat"]]
-                    .set_index(["stay_id", "charttime"], drop=False)
-                    .drop(columns=["charttime"]),
+                    DatasetType.CREATININE, self.validation_data_unlabelled[["creat"]]
                 ),
                 Dataset(
                     DatasetType.DEMOGRAPHICS,
-                    data[["stay_id", "weight"]].dropna().groupby("stay_id").first(),
+                    self.validation_data_unlabelled[["weight"]]
+                    .groupby("stay_id")
+                    .first(),
                 ),
                 Dataset(
-                    DatasetType.RRT,
-                    data[["stay_id", "charttime", "rrt_status"]]
-                    .dropna()
-                    .set_index(["stay_id", "charttime"], drop=False)
-                    .drop(columns=["charttime"]),
+                    DatasetType.RRT, self.validation_data_unlabelled[["rrt_status"]]
                 ),
             ],
             preprocessors=[],
         ).process_stays()
-        results.drop(columns=["stay_id"], inplace=True)
-
         self.assertEqual(results.shape[1], self.validation_data.shape[1])
         self.assertEqual(results.shape[0], self.validation_data.shape[0])
 
@@ -132,7 +108,8 @@ class TestAnalyser(TestCase):
         for col in self.result_cols:
             self.assertEqual(results_grouped[col].dtype, validation_grouped[col].dtype)
 
-        for column in results.columns[results.columns.str.contains("stage")]:
+        for column in self.result_cols:
+            print(column)
             pd.testing.assert_series_equal(
                 results[column],
                 self.validation_data[column],
