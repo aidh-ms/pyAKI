@@ -48,11 +48,11 @@ class TimeIndexCreator(Preprocessor):
     def process(self, datasets: list[Dataset]) -> list[Dataset]:
         _datasets = []
         for dtype, df in datasets:
-            if dtype not in self.DATASETS:
+            if dtype not in self.DATASETS or self._time_identifier not in df.columns:
                 _datasets.append(Dataset(dtype, df))
                 continue
 
-            if not is_datetime64_any_dtype(df[self._stay_identifier]):
+            if not is_datetime64_any_dtype(df[self._time_identifier]):
                 df[self._time_identifier] = pd.to_datetime(df[self._time_identifier])
 
             _datasets.append(Dataset(dtype, df.set_index(self._time_identifier)))

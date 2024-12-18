@@ -12,7 +12,7 @@ from pyAKI.probes import (
 )
 from pyAKI.kdigo import Analyser
 
-from ..set_up import setup_validation_data
+from test.set_up import setup_validation_data
 
 
 class TestAbsCreatinineProbe(TestCase):
@@ -206,7 +206,8 @@ class TestBaselineCreatinine(TestCase):
         self._test_helper(probe, series)
 
     def test_overall_first_baseline(self):
-        probe = AbstractCreatinineProbe(method=CreatinineBaselineMethod.OVERALL_FIRST)
+        probe = AbstractCreatinineProbe(
+            method=CreatinineBaselineMethod.OVERALL_FIRST)
 
         series = pd.Series(
             data=[1.0] * 93,
@@ -219,7 +220,8 @@ class TestBaselineCreatinine(TestCase):
         self._test_helper(probe, series)
 
     def test_overall_min_baseline(self):
-        probe = AbstractCreatinineProbe(method=CreatinineBaselineMethod.OVERALL_MIN)
+        probe = AbstractCreatinineProbe(
+            method=CreatinineBaselineMethod.OVERALL_MIN)
 
         series = pd.Series(
             data=[1.0] * 93,
@@ -232,7 +234,8 @@ class TestBaselineCreatinine(TestCase):
         self._test_helper(probe, series)
 
     def test_overall_mean_baseline(self):
-        probe = AbstractCreatinineProbe(method=CreatinineBaselineMethod.OVERALL_MEAN)
+        probe = AbstractCreatinineProbe(
+            method=CreatinineBaselineMethod.OVERALL_MEAN)
 
         data = [1] * 24 + [1.5] * 23 + [2] * 23 + [3] * 23
         mean_value = np.mean(data)
@@ -247,7 +250,8 @@ class TestBaselineCreatinine(TestCase):
         self._test_helper(probe, series)
 
     def test_constant_baseline(self):
-        probe = AbstractCreatinineProbe(method=CreatinineBaselineMethod.CONSTANT)
+        probe = AbstractCreatinineProbe(
+            method=CreatinineBaselineMethod.CONSTANT)
 
         series = pd.Series(
             data=[1.0] * 93,
@@ -260,7 +264,8 @@ class TestBaselineCreatinine(TestCase):
         self._test_helper(probe, series)
 
     def test_calculated_baseline(self):
-        probe = AbstractCreatinineProbe(method=CreatinineBaselineMethod.CALCULATED)
+        probe = AbstractCreatinineProbe(
+            method=CreatinineBaselineMethod.CALCULATED)
 
         series = pd.Series(
             data=[2.9159636295463067] * 93,

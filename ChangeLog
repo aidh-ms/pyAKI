@@ -1,0 +1,235 @@
+CHANGES
+=======
+
+0.0.2
+-----
+
+* Update setup.cfg
+* Update README.md
+* build(deps): bump pandas-stubs from 2.1.4.231227 to 2.2.0.240218
+* build(deps): bump numpy from 1.26.3 to 1.26.4
+* Update README.md
+* clean up
+* update README
+* build(deps): bump scipy from 1.11.4 to 1.12.0
+* build(deps): bump pandas from 2.1.4 to 2.2.0
+* build(deps): bump pandas-stubs from 2.1.4.231218 to 2.1.4.231227
+* build(deps): bump numpy from 1.26.2 to 1.26.3
+* fix: nan defaults
+* Update README.md
+* test: fix rel crea
+* test: fix abs crea
+* test: fix val data
+* test: fix test rel creat
+* update default timeframe forabs creat probe
+* feat: change default probe
+* build(deps): bump pandas-stubs from 2.1.1.230928 to 2.1.4.231218
+* build(deps): bump pandas from 2.1.3 to 2.1.4
+* Remove unneccessary columns
+* build(deps): bump actions/setup-python from 4 to 5
+* fix typing
+* fix minor issue
+* test: fix analyser test
+* test: fix test with old threshold
+* feat: change threshold
+* test: fix test for analyser pipeline
+* feat: add test for complete analyser
+* doc: add docstrings for new baseline methods
+* feat: unify df augmentation method
+* feat: tests for new baseline methods
+* feat: implement new baseline methods with tests
+* chore: add citation.cff file
+* Update README.md
+* Update README.md
+* Update README.md
+* Update README.md
+* merge
+* fix test
+* add calc method for creat
+* fix constant method
+* feature: implement calculated baseline method
+* fix: remove test
+* feature: implement constant creatinine baseline
+* build(deps): bump scipy from 1.11.3 to 1.11.4
+* fix pandas warnings
+* minor fixes after feedback
+* fix nan values
+* update github actions
+* update github actions
+* update github actions
+* update github actions
+* add mypy to github actions
+* fx typing of utils
+* types: fix some type errors by hardening programn flow
+* types: change variable name to fix pylance warning
+* types: fix types in utils.py
+* types: fix types in approx\_gte
+* add logging for analyser
+* add waringn when probe is skipped
+* add test case for negative input
+* handle negative data
+* fix type hints
+* add test for urine output strict probe
+* build(deps): bump pandas from 2.1.2 to 2.1.3
+* build(deps): bump numpy from 1.26.1 to 1.26.2
+* minor fixes
+* add urine output preprocessor test
+* add creatinie preprocessor test
+* add time preprocessor test
+* add demographics preprocessor test
+* add rrt preprocessor test
+* add test structure
+* clean up tests
+* minor fix
+* chore: adjust metadata version
+* chore: Remove author email from setup.cfg
+* chore: Add metadata version and package version, update author list
+* Added coverage badge
+* Added coverage calculation
+* build(deps): bump pbr from 5.11.1 to 6.0.0
+* chore: add paper to gitignore
+* chore: add results folder to keep locally
+* doc: add docstrings for CLI
+* add typer as dep
+* build(deps): bump pandas from 2.1.1 to 2.1.2
+* fix: fill empty row
+* chore: remove unnecessary files
+* fixes
+* fix urine output test
+* fix: fix error in uo stage
+* fix urine output tests
+* fix crrt test
+* chore: Update lint\_and\_test.yml
+* fix data
+* fix abs creat test
+* fix: correct validation data with nans for creat
+* update creat tests
+* update creat tests
+* fix test
+* doc: add some documentation to decorators
+* feat: fix crrt probe nan bug
+* test: add validation data
+* test: add tests on validation data
+* chore: first cleanup of test folder
+* rename crt to rrt
+* build(deps): bump numpy from 1.26.0 to 1.26.1
+* fix for floating point errors
+* clean up
+* add time index creator
+* fix minor issues
+* fix minor issues
+* build(deps): bump scipy from 1.11.2 to 1.11.3
+
+v0.1.0
+------
+
+* fix bug
+* build(deps): bump numpy from 1.25.2 to 1.26.0
+* build(deps): bump pandas from 2.0.3 to 2.1.1
+* fix abs value for stage 3 from 4mg/dl increase over baseline to 4mg/dl
+* build(deps): bump actions/checkout from 3 to 4
+* update setup file
+* initiation for human testing
+* build(deps): bump scipy from 1.11.1 to 1.11.2
+* remove prints
+* generation of experiment data
+* build(deps): bump numpy from 1.25.1 to 1.25.2
+* new testing notebook
+* add unittest for creatinine baseline
+* clean up
+* fix unittests
+* doc: add module docstring
+* fix: Default creatinine baseline method is fixed 7d
+* doc: add documentation for FIXED method
+* test generation
+* feat: add fixed creatinine baseline method
+* fix: change baseline creatinie to correct method
+* fix: add resilience when data is missing
+* build(deps): bump numpy from 1.25.0 to 1.25.1
+* feature: add enum for urineoutputprobe
+* feature: mean method for urine output
+* feature: crrt probe working with tests
+* build(deps): bump scipy from 1.10.1 to 1.11.1
+* build(deps): bump pandas from 2.0.2 to 2.0.3
+* build(deps): bump numpy from 1.24.3 to 1.25.0
+* feature: adjust for new dataframes
+* fix: fix settingwithcopywarning in pandas
+* add typing imports
+* fix: remove additional stay\_id column
+* chore: fix spelling in tests
+* clean up and fixes
+* add rel creatinine test
+* add abs creatinine test
+* set python version to 3.11 for ci
+* fix imports
+* merge
+* clean up
+* add test for urineoutput probe
+* fix imports for mimic test
+* fix imports
+* feature: add crrt to analyser class
+* feature: crrt probe
+* feature: time series preprocessor for crrt
+* fix: add environment to gitignore
+* fix: resolve comments
+* doc: use optional type hints
+* chore: fix some imports and configs
+* doc: add documentation for preprocessors
+* chore: fix style
+* chore: add data folder to .gitignore
+* doc: add type annotation
+* update mimic test
+* chore: format style test\_kdigo
+* doc: add type annotations in kdigo
+* doc: add documentation for process stays
+* chore: remove duplicate documentation
+* add test script for mimic data
+* add method for processing multiple stays
+* chore: fix spelling
+* chore: remove unnecessary import
+* doc: add documentation to analyser
+* chore: fix spelling in Analyzer class
+* chore: formatting
+* doc: finish docstrings for probes
+* fix: pull the calculation of baseline crea into abstract class
+* chore: rename timeframe to baseline\_timeframe
+* chore: rename creatininemethod to CreatinineBaselineMethod
+* chore: fix spelling in AbstracCreatinineProbe
+* doc: add documentation for urineoutput probe
+* chore: fix typo in Resampler Class
+* doc: add type annotation and docstrings to probe
+* docs: add type annotations to preprocessor
+* docs: add docstrings and type annotations to utils.py
+* doc: add docstrings to utils.py
+* clean up
+* update to new decorator
+* add preprocessor for demograhics dataset
+* add preprocessor for creatinine dataset
+* add preprocessor for urineoutput dataset
+* fix readme
+* add DEMOGRAPHICS dataset to types
+* refactor propes
+* add abs serum creatinie probe
+* correct urineoutput in docs
+* add tests to readme
+* refactor probes
+* create analysis services
+* add probes for urine output and relative serum creatinine
+* add proprocessor for data
+* add util methods
+* Update .gitignore
+* Remove pyaki from .gitignore
+* Updated testing
+* Updated workflows
+* Initial version of pyAKI. [WIP]
+* Create dependabot.yml
+* init tests
+* update requirements
+* add vscode stuff
+* add vscode stuff
+* init requirements file
+* fix readme
+* init kdigo file
+* add env
+* update readme file
+* Initial commit
