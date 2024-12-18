@@ -1,6 +1,6 @@
 pandas==2.2.2
 pandas-stubs==2.2.0.240218
 numpy==1.26.4
-scipy==1.12.0
+scipy==1.13.1
 pbr==6.0.0
 typer[all]==0.9.0
