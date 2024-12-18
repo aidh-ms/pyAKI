@@ -6,7 +6,7 @@ import numpy as np
 from pyAKI.probes import UrineOutputProbe, Dataset, DatasetType, UrineOutputMethod
 from pyAKI.kdigo import Analyser
 
-from ..set_up import setup_validation_data
+from test.set_up import setup_validation_data
 
 
 class TestUrineOutputProbe(TestCase):
@@ -48,7 +48,8 @@ class TestUrineOutputProbe(TestCase):
         pd.testing.assert_series_equal(
             df["urineoutput_stage"],
             pd.Series(
-                data=[np.nan, np.nan, np.nan, np.nan, np.nan, 1, 1, 1, 1, 1, 1, 3],
+                data=[np.nan, np.nan, np.nan, np.nan,
+                      np.nan, 1, 1, 1, 1, 1, 1, 3],
                 name="urineoutput_stage",
                 index=pd.DatetimeIndex(
                     data=[
