@@ -58,5 +58,5 @@ We encourage all users to use pyAKI in their scientific work. Doing so, please u
 
 }
 ```
-Our paper can be found on [arxiv](https://arxiv.org/abs/2401.12930).
+Our paper can be found on [PLOS One](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0315325).
 [^kdigo]: Improving Global Outcomes (KDIGO) Acute Kidney Injury Work Group. KDIGO Clinical Practice Guideline for Acute Kidney Injury. Kidney inter., Suppl. 2012; 2: 1–138.
