@@ -17,9 +17,7 @@ class TestDemographicsPreProcessor(TestCase):
             },
         )
 
-        _, df = self.preprocessor.process([Dataset(DatasetType.DEMOGRAPHICS, demo_df)])[
-            0
-        ]
+        _, df = self.preprocessor.process([Dataset(DatasetType.DEMOGRAPHICS, demo_df)])[0]
 
         pd.testing.assert_series_equal(
             df["weight"],

@@ -23,9 +23,7 @@ class TestAbsCreatinineProbe(TestCase):
     def test_abs_creatinine_aki(self):
         creatinine_df = pd.DataFrame(
             data={"creat": [1] * 24 + [1.3] * 23 + [6] * 23},
-            index=pd.period_range(
-                start="2023-01-01 00:00:00", end="2023-01-03 21:00:00", freq="h"
-            ),
+            index=pd.period_range(start="2023-01-01 00:00:00", end="2023-01-03 21:00:00", freq="h"),
         )
 
         _type, df = self.probe.probe(
@@ -40,9 +38,7 @@ class TestAbsCreatinineProbe(TestCase):
             pd.Series(
                 data=[0.0] * 24 + [1.0] * 23 + [3.0] * 23,
                 name="abs_creatinine_stage",
-                index=pd.period_range(
-                    start="2023-01-01 00:00:00", end="2023-01-03 21:00:00", freq="h"
-                ),
+                index=pd.period_range(start="2023-01-01 00:00:00", end="2023-01-03 21:00:00", freq="h"),
             ),
             check_index=False,
         )
@@ -80,9 +76,7 @@ class TestRelCreatinineProbe(TestCase):
     def test_rel_creatinine_aki(self):
         creatinine_df = pd.DataFrame(
             data={"creat": [1] * 24 + [1.5] * 23 + [3] * 23 + [9] * 23},
-            index=pd.period_range(
-                start="2023-01-01 00:00:00", end="2023-01-04 20:00:00", freq="h"
-            ),
+            index=pd.period_range(start="2023-01-01 00:00:00", end="2023-01-04 20:00:00", freq="h"),
         )
 
         _type, df = self.probe.probe(
@@ -97,9 +91,7 @@ class TestRelCreatinineProbe(TestCase):
             pd.Series(
                 data=[0.0] * 24 + [1.0] * 23 + [2.0] * 23 + [3.0] * 23,
                 name="rel_creatinine_stage",
-                index=pd.period_range(
-                    start="2023-01-01 00:00:00", end="2023-01-04 20:00:00", freq="h"
-                ),
+                index=pd.period_range(start="2023-01-01 00:00:00", end="2023-01-04 20:00:00", freq="h"),
             ),
             check_index=False,
         )
@@ -131,148 +123,113 @@ class TestRelCreatinineProbe(TestCase):
 
 class TestBaselineCreatinine(TestCase):
     def test_rolling_min_baseline(self):
-        probe = AbstractCreatinineProbe(
-            baseline_timeframe="1d", method=CreatinineBaselineMethod.ROLLING_MIN
-        )
+        probe = AbstractCreatinineProbe(baseline_timeframe="1d", method=CreatinineBaselineMethod.ROLLING_MIN)
         series = pd.Series(
             data=[1.0] * 47 + [1.5] * 23 + [2.0] * 23,
             name="creat",
-            index=pd.period_range(
-                start="2023-01-01 00:00:00", end="2023-01-04 20:00:00", freq="h"
-            ),
+            index=pd.period_range(start="2023-01-01 00:00:00", end="2023-01-04 20:00:00", freq="h"),
         )
 
         self._test_helper(probe, series)
 
     def test_rolling_first_baseline(self):
-        probe = AbstractCreatinineProbe(
-            baseline_timeframe="1d", method=CreatinineBaselineMethod.ROLLING_FIRST
-        )
+        probe = AbstractCreatinineProbe(baseline_timeframe="1d", method=CreatinineBaselineMethod.ROLLING_FIRST)
 
         series = pd.Series(
             data=[1.0] * 47 + [1.5] * 23 + [2.0] * 23,
             name="creat",
-            index=pd.period_range(
-                start="2023-01-01 00:00:00", end="2023-01-04 20:00:00", freq="h"
-            ),
+            index=pd.period_range(start="2023-01-01 00:00:00", end="2023-01-04 20:00:00", freq="h"),
         )
 
         self._test_helper(probe, series)
 
     def test_rolling_mean_baseline(self):
-        probe = AbstractCreatinineProbe(
-            baseline_timeframe="1d", method=CreatinineBaselineMethod.ROLLING_MEAN
-        )
+        probe = AbstractCreatinineProbe(baseline_timeframe="1d", method=CreatinineBaselineMethod.ROLLING_MEAN)
         series = pd.Series(
             data=[1] * 24 + [1.5] * 23 + [2] * 23 + [3] * 23,
             name="creat",
-            index=pd.period_range(
-                start="2023-01-01 00:00:00", end="2023-01-04 20:00:00", freq="h"
-            ),
+            index=pd.period_range(start="2023-01-01 00:00:00", end="2023-01-04 20:00:00", freq="h"),
         )
         series = series.rolling(24).mean()  # rolling window of 24 hours
         series = series.bfill()  # backwards fill
         self._test_helper(probe, series)
 
     def test_fixed_min_baseline(self):
-        probe = AbstractCreatinineProbe(
-            baseline_timeframe="1d", method=CreatinineBaselineMethod.FIXED_MIN
-        )
+        probe = AbstractCreatinineProbe(baseline_timeframe="1d", method=CreatinineBaselineMethod.FIXED_MIN)
 
         series = pd.Series(
             data=[1.0] * 93,
             name="creat",
-            index=pd.period_range(
-                start="2023-01-01 00:00:00", end="2023-01-04 20:00:00", freq="h"
-            ),
+            index=pd.period_range(start="2023-01-01 00:00:00", end="2023-01-04 20:00:00", freq="h"),
         )
 
         self._test_helper(probe, series)
 
     def test_fixed_mean_baseline(self):
-        probe = AbstractCreatinineProbe(
-            baseline_timeframe="2d", method=CreatinineBaselineMethod.FIXED_MEAN
-        )
+        probe = AbstractCreatinineProbe(baseline_timeframe="2d", method=CreatinineBaselineMethod.FIXED_MEAN)
         data_list = [1] * 24 + [1.5] * 23 + [2] * 23 + [3] * 23
         mean_value = np.mean(data_list[:49])
         series = pd.Series(
             data=[mean_value] * 93,
             name="creat",
-            index=pd.period_range(
-                start="2023-01-01 00:00:00", end="2023-01-04 20:00:00", freq="h"
-            ),
+            index=pd.period_range(start="2023-01-01 00:00:00", end="2023-01-04 20:00:00", freq="h"),
         )
 
         self._test_helper(probe, series)
 
     def test_overall_first_baseline(self):
-        probe = AbstractCreatinineProbe(
-            method=CreatinineBaselineMethod.OVERALL_FIRST)
+        probe = AbstractCreatinineProbe(method=CreatinineBaselineMethod.OVERALL_FIRST)
 
         series = pd.Series(
             data=[1.0] * 93,
             name="creat",
-            index=pd.period_range(
-                start="2023-01-01 00:00:00", end="2023-01-04 20:00:00", freq="h"
-            ),
+            index=pd.period_range(start="2023-01-01 00:00:00", end="2023-01-04 20:00:00", freq="h"),
         )
 
         self._test_helper(probe, series)
 
     def test_overall_min_baseline(self):
-        probe = AbstractCreatinineProbe(
-            method=CreatinineBaselineMethod.OVERALL_MIN)
+        probe = AbstractCreatinineProbe(method=CreatinineBaselineMethod.OVERALL_MIN)
 
         series = pd.Series(
             data=[1.0] * 93,
             name="creat",
-            index=pd.period_range(
-                start="2023-01-01 00:00:00", end="2023-01-04 20:00:00", freq="h"
-            ),
+            index=pd.period_range(start="2023-01-01 00:00:00", end="2023-01-04 20:00:00", freq="h"),
         )
 
         self._test_helper(probe, series)
 
     def test_overall_mean_baseline(self):
-        probe = AbstractCreatinineProbe(
-            method=CreatinineBaselineMethod.OVERALL_MEAN)
+        probe = AbstractCreatinineProbe(method=CreatinineBaselineMethod.OVERALL_MEAN)
 
         data = [1] * 24 + [1.5] * 23 + [2] * 23 + [3] * 23
         mean_value = np.mean(data)
         series = pd.Series(
             data=[mean_value] * 93,
             name="creat",
-            index=pd.period_range(
-                start="2023-01-01 00:00:00", end="2023-01-04 20:00:00", freq="h"
-            ),
+            index=pd.period_range(start="2023-01-01 00:00:00", end="2023-01-04 20:00:00", freq="h"),
         )
 
         self._test_helper(probe, series)
 
     def test_constant_baseline(self):
-        probe = AbstractCreatinineProbe(
-            method=CreatinineBaselineMethod.CONSTANT)
+        probe = AbstractCreatinineProbe(method=CreatinineBaselineMethod.CONSTANT)
 
         series = pd.Series(
             data=[1.0] * 93,
             name="creat",
-            index=pd.period_range(
-                start="2023-01-01 00:00:00", end="2023-01-04 20:00:00", freq="h"
-            ),
+            index=pd.period_range(start="2023-01-01 00:00:00", end="2023-01-04 20:00:00", freq="h"),
         )
 
         self._test_helper(probe, series)
 
     def test_calculated_baseline(self):
-        probe = AbstractCreatinineProbe(
-            method=CreatinineBaselineMethod.CALCULATED)
+        probe = AbstractCreatinineProbe(method=CreatinineBaselineMethod.CALCULATED)
 
         series = pd.Series(
             data=[2.9159636295463067] * 93,
             name="creat",
-            index=pd.period_range(
-                start="2023-01-01 00:00:00", end="2023-01-04 20:00:00", freq="h"
-            ),
+            index=pd.period_range(start="2023-01-01 00:00:00", end="2023-01-04 20:00:00", freq="h"),
         )
 
         self._test_helper(probe, series)
@@ -280,9 +237,7 @@ class TestBaselineCreatinine(TestCase):
     def _test_helper(self, probe, series):
         creatinine_df = pd.DataFrame(
             data={"creat": [1] * 24 + [1.5] * 23 + [2] * 23 + [3] * 23},
-            index=pd.period_range(
-                start="2023-01-01 00:00:00", end="2023-01-04 20:00:00", freq="h"
-            ),
+            index=pd.period_range(start="2023-01-01 00:00:00", end="2023-01-04 20:00:00", freq="h"),
         )
 
         patient_df = pd.Series(

@@ -48,8 +48,7 @@ class TestUrineOutputProbe(TestCase):
         pd.testing.assert_series_equal(
             df["urineoutput_stage"],
             pd.Series(
-                data=[np.nan, np.nan, np.nan, np.nan,
-                      np.nan, 1, 1, 1, 1, 1, 1, 3],
+                data=[np.nan, np.nan, np.nan, np.nan, np.nan, 1, 1, 1, 1, 1, 1, 3],
                 name="urineoutput_stage",
                 index=pd.DatetimeIndex(
                     data=[
@@ -187,9 +186,7 @@ class TestUrineOutputProbe(TestCase):
                 ),
                 Dataset(
                     DatasetType.DEMOGRAPHICS,
-                    self.validation_data_unlabelled[["weight"]]
-                    .groupby("stay_id")
-                    .first(),
+                    self.validation_data_unlabelled[["weight"]].groupby("stay_id").first(),
                 ),
             ],
             probes=[UrineOutputProbe()],
@@ -206,9 +203,7 @@ class TestUrineOutputProbe(TestCase):
     def test_aki_strict(self):
         urine_output_df = pd.DataFrame(
             data={"urineoutput": [100] + [25] * 24},
-            index=pd.period_range(
-                start="2023-01-01 00:00:00", end="2023-01-02 00:00:00", freq="h"
-            ),
+            index=pd.period_range(start="2023-01-01 00:00:00", end="2023-01-02 00:00:00", freq="h"),
         )
 
         demographics = pd.Series(data={"weight": 100})
@@ -225,9 +220,7 @@ class TestUrineOutputProbe(TestCase):
             pd.Series(
                 data=[np.nan] * 5 + [0] + [1] * 6 + [2] * 12 + [3],
                 name="urineoutput_stage",
-                index=pd.period_range(
-                    start="2023-01-01 00:00:00", end="2023-01-02 00:00:00", freq="h"
-                ),
+                index=pd.period_range(start="2023-01-01 00:00:00", end="2023-01-02 00:00:00", freq="h"),
                 dtype=float,
             ),
             check_index=False,
@@ -236,9 +229,7 @@ class TestUrineOutputProbe(TestCase):
     def test_nan_values(self):
         urine_output_df = pd.DataFrame(
             data={"urineoutput": [100] * 6 + [np.nan] * 6 + [100] * 6},
-            index=pd.period_range(
-                start="2023-01-01 00:00:00", end="2023-01-01 17:00:00", freq="h"
-            ),
+            index=pd.period_range(start="2023-01-01 00:00:00", end="2023-01-01 17:00:00", freq="h"),
         )
 
         demographics = pd.Series(data={"weight": 100})
@@ -262,9 +253,7 @@ class TestUrineOutputProbe(TestCase):
             pd.Series(
                 data=[np.nan] * 5 + [0] + [np.nan] * 11 + [0],
                 name="urineoutput_stage",
-                index=pd.period_range(
-                    start="2023-01-01 00:00:00", end="2023-01-01 17:00:00", freq="h"
-                ),
+                index=pd.period_range(start="2023-01-01 00:00:00", end="2023-01-01 17:00:00", freq="h"),
                 dtype=float,
             ),
             check_index=False,
@@ -275,9 +264,7 @@ class TestUrineOutputProbe(TestCase):
             pd.Series(
                 data=[np.nan] * 5 + [0] + [np.nan] * 11 + [0],
                 name="urineoutput_stage",
-                index=pd.period_range(
-                    start="2023-01-01 00:00:00", end="2023-01-01 17:00:00", freq="h"
-                ),
+                index=pd.period_range(start="2023-01-01 00:00:00", end="2023-01-01 17:00:00", freq="h"),
                 dtype=float,
             ),
             check_index=False,

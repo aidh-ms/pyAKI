@@ -25,9 +25,7 @@ class TestAnalyser(TestCase):
             data={
                 "rrt_status": [0] * 24 + [1] * 23 + [0] * 23 + [1] * 22 + [-1],
             },
-            index=pd.period_range(
-                start="2023-01-01 00:00:00", end="2023-01-04 20:00:00", freq="h"
-            ),
+            index=pd.period_range(start="2023-01-01 00:00:00", end="2023-01-04 20:00:00", freq="h"),
         )
 
         with self.assertRaises(ValueError):
@@ -84,18 +82,12 @@ class TestAnalyser(TestCase):
                     DatasetType.URINEOUTPUT,
                     self.validation_data_unlabelled[["urineoutput"]],
                 ),
-                Dataset(
-                    DatasetType.CREATININE, self.validation_data_unlabelled[["creat"]]
-                ),
+                Dataset(DatasetType.CREATININE, self.validation_data_unlabelled[["creat"]]),
                 Dataset(
                     DatasetType.DEMOGRAPHICS,
-                    self.validation_data_unlabelled[["weight"]]
-                    .groupby("stay_id")
-                    .first(),
+                    self.validation_data_unlabelled[["weight"]].groupby("stay_id").first(),
                 ),
-                Dataset(
-                    DatasetType.RRT, self.validation_data_unlabelled[["rrt_status"]]
-                ),
+                Dataset(DatasetType.RRT, self.validation_data_unlabelled[["rrt_status"]]),
             ],
             preprocessors=[],
         ).process_stays()
