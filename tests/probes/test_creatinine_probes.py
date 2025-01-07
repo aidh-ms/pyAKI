@@ -1,18 +1,18 @@
 from unittest import TestCase
 
-import pandas as pd
 import numpy as np
+import pandas as pd
+
+from pyAKI.kdigo import Analyser
 from pyAKI.probes import (
-    RelativeCreatinineProbe,
     AbsoluteCreatinineProbe,
-    CreatinineBaselineMethod,
     AbstractCreatinineProbe,
+    CreatinineBaselineMethod,
     Dataset,
     DatasetType,
+    RelativeCreatinineProbe,
 )
-from pyAKI.kdigo import Analyser
-
-from test.set_up import setup_validation_data
+from tests.set_up import setup_validation_data
 
 
 class TestAbsCreatinineProbe(TestCase):

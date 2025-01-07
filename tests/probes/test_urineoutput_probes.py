@@ -1,12 +1,11 @@
 from unittest import TestCase
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 
-from pyAKI.probes import UrineOutputProbe, Dataset, DatasetType, UrineOutputMethod
 from pyAKI.kdigo import Analyser
-
-from test.set_up import setup_validation_data
+from pyAKI.probes import Dataset, DatasetType, UrineOutputMethod, UrineOutputProbe
+from tests.set_up import setup_validation_data
 
 
 class TestUrineOutputProbe(TestCase):
