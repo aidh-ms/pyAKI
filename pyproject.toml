@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "pyAKI"
+name = "pyaki"
 description = "pyAKI allows calculation of Acute Kidney Injury from urine output and creatinine based on KDIGO criteria."
 version = "1.0.0"
 license = "MIT"
@@ -42,6 +42,9 @@ coveralls = "^4.0.1"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+pyaki-cli = "pyaki.bin.process_aki_stages:run"
 
 [tool.mypy]
 python_version = "3.13"
