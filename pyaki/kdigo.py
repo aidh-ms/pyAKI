@@ -1,26 +1,24 @@
 import logging
-
 from typing import Optional
 
 import pandas as pd
 
-from pyAKI.probes import (
-    Probe,
-    UrineOutputProbe,
-    AbsoluteCreatinineProbe,
-    RelativeCreatinineProbe,
-    RRTProbe,
-)
-from pyAKI.preprocessors import (
-    Preprocessor,
-    TimeIndexCreator,
-    UrineOutputPreProcessor,
+from pyaki.preprocessors import (
     CreatininePreProcessor,
     DemographicsPreProcessor,
+    Preprocessor,
     RRTPreProcessor,
+    TimeIndexCreator,
+    UrineOutputPreProcessor,
 )
-
-from pyAKI.utils import Dataset
+from pyaki.probes import (
+    AbsoluteCreatinineProbe,
+    Probe,
+    RelativeCreatinineProbe,
+    RRTProbe,
+    UrineOutputProbe,
+)
+from pyaki.utils import Dataset
 
 logger = logging.getLogger(__name__)
 
@@ -74,19 +72,11 @@ class Analyser:
             ]
         if preprocessors is None:  # apply default preprocessors if not provided
             preprocessors = [
-                TimeIndexCreator(
-                    stay_identifier=stay_identifier, time_identifier=time_identifier
-                ),
-                UrineOutputPreProcessor(
-                    stay_identifier=stay_identifier, time_identifier=time_identifier
-                ),
-                CreatininePreProcessor(
-                    stay_identifier=stay_identifier, time_identifier=time_identifier
-                ),
+                TimeIndexCreator(stay_identifier=stay_identifier, time_identifier=time_identifier),
+                UrineOutputPreProcessor(stay_identifier=stay_identifier, time_identifier=time_identifier),
+                CreatininePreProcessor(stay_identifier=stay_identifier, time_identifier=time_identifier),
                 DemographicsPreProcessor(stay_identifier=stay_identifier),
-                RRTPreProcessor(
-                    stay_identifier=stay_identifier, time_identifier=time_identifier
-                ),
+                RRTPreProcessor(stay_identifier=stay_identifier, time_identifier=time_identifier),
             ]
 
         # validate datasets
@@ -164,9 +154,7 @@ class Analyser:
             if isinstance(_df, pd.Series):
                 _df = pd.DataFrame([_df], index=df.index)
             columns = set(_df.columns) - set(df.columns)
-            df = df.merge(
-                _df[[*columns]], how="outer", left_index=True, right_index=True
-            )
+            df = df.merge(_df[[*columns]], how="outer", left_index=True, right_index=True)
 
         df["stage"] = df.filter(like="stage").max(axis=1)
         return df.set_index(

@@ -3,12 +3,12 @@ used for probing for the different KDIGO criteria."""
 
 from abc import ABC, ABCMeta
 from enum import StrEnum, auto
+from typing import Any
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 
-import logging
-from pyAKI.utils import dataset_as_df, df_to_dataset, approx_gte, Dataset, DatasetType
+from pyaki.utils import Dataset, DatasetType, approx_gte, dataset_as_df, df_to_dataset
 
 
 class Probe(ABC):
@@ -42,7 +42,7 @@ class Probe(ABC):
 
     RESNAME: str = ""  # name of the column that will be added to the dataframe
 
-    def probe(self, datasets: list[Dataset], **kwargs) -> list[Dataset]:
+    def probe(self, datasets: list[Dataset], **kwargs: Any) -> list[Dataset]:
         """
         Abstract method to be implemented by subclasses.
 
@@ -127,7 +127,7 @@ class UrineOutputProbe(Probe):
         self,
         df: pd.DataFrame,
         patient: pd.DataFrame,
-        **kwargs,
+        **kwargs: Any,
     ) -> pd.DataFrame:
         """
         Perform urine output analysis on the provided DataFrame.
@@ -303,12 +303,10 @@ class AbstractCreatinineProbe(Probe, metaclass=ABCMeta):
                 .ffill()[self._column]
             )
             min_value: pd.DatetimeIndex = values[
-                values.index
-                <= (values.index[0] + pd.Timedelta(self._baseline_timeframe))
+                values.index <= (values.index[0] + pd.Timedelta(self._baseline_timeframe))
             ].min()  # calculate min value for first 7 days
             values[
-                values.index
-                > (values.index[0] + pd.Timedelta(self._baseline_timeframe))
+                values.index > (values.index[0] + pd.Timedelta(self._baseline_timeframe))
             ] = min_value  # set all values after first 7 days to min value
 
             return values
@@ -436,7 +434,7 @@ class AbsoluteCreatinineProbe(AbstractCreatinineProbe):
         self,
         df: pd.DataFrame,
         patient: pd.DataFrame,
-        **kwargs,
+        **kwargs: Any,
     ) -> pd.DataFrame:
         """
         Perform KDIGO stage calculation based on absolute creatinine elevations on the provided DataFrame.
@@ -480,7 +478,7 @@ class RelativeCreatinineProbe(AbstractCreatinineProbe):
 
     @dataset_as_df(df=DatasetType.CREATININE, patient=DatasetType.DEMOGRAPHICS)
     @df_to_dataset(DatasetType.CREATININE)
-    def probe(self, df: pd.DataFrame, patient: pd.DataFrame, **kwargs) -> pd.DataFrame:
+    def probe(self, df: pd.DataFrame, patient: pd.DataFrame, **kwargs: Any) -> pd.DataFrame:
         """
         Perform calculation of relative creatinine elevations on the provided DataFrame.
 
@@ -498,9 +496,7 @@ class RelativeCreatinineProbe(AbstractCreatinineProbe):
         baseline_values: pd.Series = self.creatinine_baseline(df, patient)
 
         df.loc[:, self.RESNAME] = 0
-        df.loc[
-            approx_gte((df[self._column] / baseline_values), 1.5), self.RESNAME
-        ] = 1.0
+        df.loc[approx_gte((df[self._column] / baseline_values), 1.5), self.RESNAME] = 1.0
         df.loc[approx_gte((df[self._column] / baseline_values), 2), self.RESNAME] = 2
         df.loc[approx_gte((df[self._column] / baseline_values), 3), self.RESNAME] = 3
 

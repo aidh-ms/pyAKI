@@ -1,14 +1,13 @@
 #! /usr/bin/env python3
-"""pyAKI CLI tool"""
-
-import typer
+"""pyaki CLI tool"""
 
 from pathlib import Path
 
 import pandas as pd
+import typer
 
-from pyAKI.kdigo import Analyser
-from pyAKI.utils import Dataset, DatasetType
+from pyaki.kdigo import Analyser
+from pyaki.utils import Dataset, DatasetType
 
 
 def main(
@@ -17,7 +16,7 @@ def main(
     creatinine_file: str = "creatinine.csv",
     rrt_file: str = "rrt.csv",
     demographics_file: str = "demographics.csv",
-):
+) -> None:
     """
     CLI tool to process AKI stages from time series data.
 
@@ -46,8 +45,8 @@ def main(
     if (scr_file := root_dir / creatinine_file).is_file():
         datasets.append(Dataset(DatasetType.CREATININE, pd.read_csv(scr_file)))
 
-    if (rrt_file := root_dir / rrt_file).is_file():
-        datasets.append(Dataset(DatasetType.RRT, pd.read_csv(rrt_file)))
+    if (_rrt_file := root_dir / rrt_file).is_file():
+        datasets.append(Dataset(DatasetType.RRT, pd.read_csv(_rrt_file)))
 
     if (demo_file := root_dir / demographics_file).is_file():
         datasets.append(Dataset(DatasetType.DEMOGRAPHICS, pd.read_csv(demo_file)))
@@ -56,5 +55,10 @@ def main(
     ana.process_stays().to_csv(root_dir / "aki.csv")
 
 
-if __name__ == "__main__":
+def run() -> None:
+    """Run the CLI tool"""
     typer.run(main)
+
+
+if __name__ == "__main__":
+    run()

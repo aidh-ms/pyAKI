@@ -1,8 +1,7 @@
 import logging
-
-from typing import NamedTuple, cast
 from enum import StrEnum, auto
 from functools import wraps
+from typing import Any, Callable, NamedTuple, cast
 
 import numpy as np
 import pandas as pd
@@ -41,7 +40,7 @@ class Dataset(NamedTuple):
     df: pd.DataFrame
 
 
-def dataset_as_df(**mapping: DatasetType):
+def dataset_as_df(**mapping: DatasetType) -> Callable:
     """
     Decorator factory for methods that process datasets with dataframes.
 
@@ -82,14 +81,12 @@ def dataset_as_df(**mapping: DatasetType):
 
     # in_mapping: Dict[DatasetType, str] = {v: k for k, v in mapping.items()}
 
-    def decorator(func):
+    def decorator(func: Callable) -> Callable:
         @wraps(func)
-        def wrapper(self, datasets: list[Dataset], *args, **kwargs) -> list[Dataset]:
+        def wrapper(self: Any, datasets: list[Dataset], *args: Any, **kwargs: Any) -> list[Dataset]:
             # map the dataset types to corresponding DataFrames
             _mapping: dict[str, pd.DataFrame] = {
-                in_mapping[dtype]: df
-                for dtype, df in datasets
-                if dtype in in_mapping.keys()
+                in_mapping[dtype]: df for dtype, df in datasets if dtype in in_mapping.keys()
             }
             # check if all datasets are mapped, otherwise return the original datasets
             if len(in_mapping) != len(_mapping):
@@ -103,16 +100,14 @@ def dataset_as_df(**mapping: DatasetType):
             _dtype, _df = func(self, *args, **_mapping, **kwargs)
 
             # return the updated datasets
-            return [
-                Dataset(dtype, _df if dtype == _dtype else df) for dtype, df in datasets
-            ]
+            return [Dataset(dtype, _df if dtype == _dtype else df) for dtype, df in datasets]
 
         return wrapper
 
     return decorator
 
 
-def df_to_dataset(dtype: DatasetType):
+def df_to_dataset(dtype: DatasetType) -> Callable:
     """
     Decorator that converts a DataFrame into a dataset with the specified type.
 
@@ -135,9 +130,9 @@ def df_to_dataset(dtype: DatasetType):
             ...
     """
 
-    def decorator(func):
+    def decorator(func: Callable) -> Callable:
         @wraps(func)
-        def wrapper(self, *args: list, **kwargs: dict) -> Dataset:
+        def wrapper(self: Any, *args: Any, **kwargs: Any) -> Dataset:
             return Dataset(dtype, func(self, *args, **kwargs))
 
         return wrapper

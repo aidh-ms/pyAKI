@@ -4,15 +4,13 @@ from typing import Optional
 import pandas as pd
 from pandas.api.types import is_datetime64_any_dtype
 
-from pyAKI.utils import dataset_as_df, df_to_dataset, Dataset, DatasetType
+from pyaki.utils import Dataset, DatasetType, dataset_as_df, df_to_dataset
 
 
 class Preprocessor(ABC):
     """Abstract base class for preprocessors."""
 
-    def __init__(
-        self, stay_identifier: str = "stay_id", time_identifier: str = "charttime"
-    ) -> None:
+    def __init__(self, stay_identifier: str = "stay_id", time_identifier: str = "charttime") -> None:
         """
         Initialize a new instance of the Preprocessor class.
 
