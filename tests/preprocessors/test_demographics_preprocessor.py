@@ -1,8 +1,9 @@
 from unittest import TestCase
+
 import pandas as pd
 
-from pyAKI.preprocessors import DemographicsPreProcessor
-from pyAKI.utils import Dataset, DatasetType
+from pyaki.preprocessors import DemographicsPreProcessor
+from pyaki.utils import Dataset, DatasetType
 
 
 class TestDemographicsPreProcessor(TestCase):

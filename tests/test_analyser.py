@@ -2,8 +2,8 @@ from unittest import TestCase
 
 import pandas as pd
 
-from pyAKI.kdigo import Analyser
-from pyAKI.probes import Dataset, DatasetType
+from pyaki.kdigo import Analyser
+from pyaki.probes import Dataset, DatasetType
 from tests.set_up import setup_validation_data
 
 

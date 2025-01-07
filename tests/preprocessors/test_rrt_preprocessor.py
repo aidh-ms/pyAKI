@@ -1,10 +1,10 @@
 from unittest import TestCase
-import pandas as pd
+
 import numpy as np
+import pandas as pd
 
-
-from pyAKI.preprocessors import RRTPreProcessor
-from pyAKI.utils import Dataset, DatasetType
+from pyaki.preprocessors import RRTPreProcessor
+from pyaki.utils import Dataset, DatasetType
 
 
 class TestRRTPreProcessor(TestCase):

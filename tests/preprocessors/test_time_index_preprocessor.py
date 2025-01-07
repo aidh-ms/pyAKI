@@ -1,8 +1,9 @@
 from unittest import TestCase
+
 import pandas as pd
 
-from pyAKI.preprocessors import TimeIndexCreator
-from pyAKI.utils import Dataset, DatasetType
+from pyaki.preprocessors import TimeIndexCreator
+from pyaki.utils import Dataset, DatasetType
 
 
 class TestTimeIndexCreator(TestCase):

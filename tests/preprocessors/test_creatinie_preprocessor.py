@@ -1,9 +1,10 @@
 from unittest import TestCase
-import pandas as pd
-import numpy as np
 
-from pyAKI.preprocessors import CreatininePreProcessor
-from pyAKI.utils import Dataset, DatasetType
+import numpy as np
+import pandas as pd
+
+from pyaki.preprocessors import CreatininePreProcessor
+from pyaki.utils import Dataset, DatasetType
 
 
 class TestCreatininePreProcessor(TestCase):

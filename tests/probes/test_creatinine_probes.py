@@ -3,8 +3,8 @@ from unittest import TestCase
 import numpy as np
 import pandas as pd
 
-from pyAKI.kdigo import Analyser
-from pyAKI.probes import (
+from pyaki.kdigo import Analyser
+from pyaki.probes import (
     AbsoluteCreatinineProbe,
     AbstractCreatinineProbe,
     CreatinineBaselineMethod,
