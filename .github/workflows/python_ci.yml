@@ -6,7 +6,7 @@ on: push
 
 jobs:
   build:
-
+    environment: pyaki
     runs-on: ubuntu-latest
     strategy:
       matrix:
