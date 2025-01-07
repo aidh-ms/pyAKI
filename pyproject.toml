@@ -22,7 +22,7 @@ Changelog = "https://github.com/AI2MS/pyAKI/releases"
 Bugtracker = "https://github.com/AI2MS/pyAKI/issues"
 
 [tool.poetry.dependencies]
-python = "^3.13"
+python = "~3.12"
 pandas = "^2.2.3"
 pandas-stubs = "^2.2.3.241126"
 scipy = "^1.15.0"
@@ -37,6 +37,7 @@ ruff = "^0.8.6"
 pytest-recording = "^0.13.1"
 pytest-random-order = "^1.1.1"
 jupyterlab = "^4.3.4"
+coveralls = "^4.0.1"
 
 [build-system]
 requires = ["poetry-core"]
