@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "pyaki"
 description = "pyAKI allows calculation of Acute Kidney Injury from urine output and creatinine based on KDIGO criteria."
-version = "1.0.0"
+version = "0.0.0"  # Placeholder
 license = "MIT"
 authors = ["ADIH MS"]
 readme = "README.md"
