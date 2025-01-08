@@ -49,7 +49,7 @@ results: pd.Dataframe =  analyser.process_stays()
 
 1. **Clone the repository:**
     ```bash
-    git clone https://github.com/aidh-ms/pyAKI
+    git clone git+https://github.com/aidh-ms/pyAKI
     cd pyAKI
     ```
 
