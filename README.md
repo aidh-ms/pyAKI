@@ -71,7 +71,7 @@ To test your contribution, you can use the testing tap in the VS code or utilise
 poetry run pytest .
 ```
 
-### Acknowledgement
+## Acknowledgement
 
 We encourage all users to use pyAKI in their scientific work. Doing so, please use the following citation. Our paper can be found on [PLOS One](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0315325).
 ```
