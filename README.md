@@ -9,6 +9,14 @@ The goal of this package is to establish well tested, comprehensive functions fo
 
 ## Installation
 
+You can install the pyAKI package from PyPI or from source.
+
+Frm PyPI:
+```shell
+pip install pyAKI
+```
+
+From source:
 ```shell
 pip install git+https://github.com/aidh-ms/pyAKI
 ```
@@ -18,8 +26,8 @@ pip install git+https://github.com/aidh-ms/pyAKI
 ```python
 import pandas as pd
 
-from pyAKI.probes import Dataset, DatasetType
-from pyAKI.kdigo import Analyser
+from pyaki.probes import Dataset, DatasetType
+from pyaki.kdigo import Analyser
 
 data = [
     Dataset(DatasetType.URINEOUTPUT, pd.DataFrame()),
@@ -32,15 +40,40 @@ analyser = Analyser(data)
 results: pd.Dataframe =  analyser.process_stays()
 ```
 
+## Contributing
+
+### Getting Started
+
+> [!NOTE]
+> Use the included dev container to automatically install all the necessary dev tools and dependencies. To use this you first need to install docker under Linux or WSL2 under windows.
+
+1. **Clone the repository:**
+    ```bash
+    git clone git+https://github.com/aidh-ms/pyAKI
+    cd pyAKI
+    ```
+
+2. **Open the project in Visual Studio Code:**
+    ```bash
+    code .
+    ```
+
+3. **Reopen in Container:**
+    - Press `F1` to open the command palette.
+    - Type `Remote-Containers: Reopen in Container` and select it.
+    - VS Code will build the Docker container defined in the `.devcontainer` folder and open the project inside the container.
+
 ### Tests
 
+To test your contribution, you can use the testing tap in the VS code or utilise the following command to run the unit tests for this project:
+
 ```shell
-pytest --cov=. test/
+poetry run pytest .
 ```
 
-### Acknowledgement
+## Acknowledgement
 
-We encourage all users to use pyAKI in their scientific work. Doing so, please use the following citation:
+We encourage all users to use pyAKI in their scientific work. Doing so, please use the following citation. Our paper can be found on [PLOS One](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0315325).
 ```
 @article{10.1371/journal.pone.0315325,
     doi = {10.1371/journal.pone.0315325},
@@ -58,5 +91,5 @@ We encourage all users to use pyAKI in their scientific work. Doing so, please u
 
 }
 ```
-Our paper can be found on [PLOS One](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0315325).
+
 [^kdigo]: Improving Global Outcomes (KDIGO) Acute Kidney Injury Work Group. KDIGO Clinical Practice Guideline for Acute Kidney Injury. Kidney inter., Suppl. 2012; 2: 1–138.
