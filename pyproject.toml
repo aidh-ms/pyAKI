@@ -37,7 +37,6 @@ ruff = ">=0.8.6,<0.10.0"
 pytest-recording = "^0.13.1"
 pytest-random-order = "^1.1.1"
 jupyterlab = "^4.3.4"
-coveralls = "^4.0.1"
 
 [build-system]
 requires = ["poetry-core"]
