@@ -1,3 +1,7 @@
+"""
+This module contains the analysis class for processing AKI stages from time series data.
+"""
+
 import logging
 from typing import Optional
 
@@ -31,25 +35,29 @@ class Analyser:
     It processes the input data through the specified preprocessors and applies the probes to perform
     the analysis. The analysis results are returned as a DataFrame.
 
-    Args:
-        data (list[Dataset]): A list of Dataset objects containing the input data.
-        probes (list[Probe], optional): A list of Probe objects representing the analysis probes to apply.
-            If not provided, default probes including UrineOutputProbe, AbsoluteCreatinineProbe, and
-            RelativeCreatinineProbe will be used.
-        preprocessors (list[Preprocessor], optional): A list of Preprocessor objects representing the
-            preprocessors to apply on the input data. If not provided, default preprocessors including
-            UrineOutputPreProcessor, CreatininePreProcessor, and DemographicsPreProcessor will be used.
-        stay_identifier (str, optional): The column name in the input data representing the stay identifier.
-            Defaults to "stay_id".
-        time_identifier (str, optional): The column name in the input data representing the time identifier.
-            Defaults to "charttime".
+    Parameters
+    ----------
+    data : list[Dataset]
+        A list of Dataset objects containing the input data.
+    probes : list[Probe], optional
+        A list of Probe objects representing the analysis probes to apply. If not provided, default
+        probes including UrineOutputProbe, AbsoluteCreatinineProbe, and RelativeCreatinineProbe will be used.
+    preprocessors : list[Preprocessor], optional
+        A list of Preprocessor objects representing the preprocessors to apply on the input data. If not
+        provided, default preprocessors including UrineOutputPreProcessor, CreatininePreProcessor, and
+        DemographicsPreProcessor will be used.
+    stay_identifier : str, default: "stay_id"
+        The column name in the input data representing the stay identifier.
+    time_identifier : str, default: "charttime"
+        The column name in the input data representing the time identifier.
 
-    Example:
-        # Instantiate the Analyser class with custom data, probes, and preprocessors
-        analyser = Analyser(data=my_datasets, probes=[MyProbe()], preprocessors=[MyPreprocessor()])
+    Examples
+    --------
+    Instantiate the Analyser class with custom data, probes, and preprocessors
+    >>> analyser = Analyser(data=my_datasets, probes=[MyProbe()], preprocessors=[MyPreprocessor()])
 
-        # Process stays and obtain the analysis results
-        result_df = analyser.process_stays()
+    Process stays and obtain the analysis results
+    >>> result_df = analyser.process_stays()
     """
 
     def __init__(
@@ -60,9 +68,6 @@ class Analyser:
         stay_identifier: str = "stay_id",
         time_identifier: str = "charttime",
     ) -> None:
-        """
-        Initialize the Analyser instance.
-        """
         if probes is None:  # apply default probes if not provided
             probes = [
                 UrineOutputProbe(),
@@ -94,6 +99,19 @@ class Analyser:
         self._stay_identifier: str = stay_identifier
 
     def validate_data(self, datasets: list[Dataset]) -> None:
+        """
+        validate the input data for negative values.
+
+        Parameters
+        ----------
+        datasets : list[Dataset]
+            A list of Dataset objects containing the input data.
+
+        Raises
+        ------
+        ValueError
+            If any of the datasets contain negative values.
+        """
         for dtype, df in datasets:
             try:
                 if (df < 0).values.any():
@@ -108,8 +126,10 @@ class Analyser:
         This method processes all stays in the input data by applying the configured probes.
         The analysis results for all stays are concatenated and returned as a single DataFrame.
 
-        Returns:
-            pd.DataFrame: The analysis results for all stays.
+        Returns
+        -------
+        pd.DataFrame
+            The analysis results for all stays.
         """
         logger.info("Start probing")
 
@@ -132,11 +152,15 @@ class Analyser:
         This method processes a specific stay in the input data by applying the configured probes and preprocessors.
         The analysis results for the stay are returned as a DataFrame.
 
-        Args:
-            stay_id (str): The identifier of the stay to process.
+        Parameters
+        ----------
+        stay_id : str
+            The identifier of the stay to process.
 
-        Returns:
-            pd.DataFrame: The analysis results for the specific stay.
+        Returns
+        -------
+        pd.DataFrame
+            The analysis results for the specific stay.
         """
         logger.debug("Processing stay with id: %s", stay_id)
 

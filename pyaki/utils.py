@@ -1,3 +1,7 @@
+"""
+This module contains the utility functions and classes used in the pyaki package.
+"""
+
 import logging
 from enum import StrEnum, auto
 from functools import wraps
@@ -10,7 +14,20 @@ logger = logging.getLogger(__name__)
 
 
 class DatasetType(StrEnum):
-    """Enumeration class representing different types of datasets."""
+    """
+    Enumeration class representing different types of datasets.
+
+    Attributes
+    ----------
+    URINEOUTPUT : str
+        The urine output dataset.
+    CREATININE : str
+        The creatinine dataset.
+    DEMOGRAPHICS : str
+        The demographics dataset.
+    RRT : str
+        The renal replacement therapy dataset.
+    """
 
     URINEOUTPUT = auto()
     CREATININE = auto()
@@ -28,12 +45,16 @@ class Dataset(NamedTuple):
     the type of the dataset. The `df` field is of type `pd.DataFrame` and represents
     the actual data stored in a pandas DataFrame object.
 
-    Attributes:
-        dataset_type (DatasetType): The type of the dataset.
-        df (pd.DataFrame): The DataFrame object containing the dataset.
+    Attributes
+    ----------
+    dataset_type : DatasetType
+        The type of the dataset.
+    df : pd.DataFrame
+        The DataFrame object containing the dataset.
 
-    Example:
-        dataset = Dataset(dataset_type=DatasetType.URINEOUTPUT, df=my_dataframe)
+    Examples
+    --------
+    >>> dataset = Dataset(dataset_type=DatasetType.URINEOUTPUT, df=my_dataframe)
     """
 
     dataset_type: DatasetType
@@ -49,30 +70,34 @@ def dataset_as_df(**mapping: DatasetType) -> Callable:
     corresponding dataframe names. The decorator then replaces the dataframes of the
     specified types with the results of the decorated method.
 
-    Args:
-        **mapping (dict[str, DatasetType]): A mapping of dataset type names to their
-            corresponding `DatasetType`. Dataset types not found in this mapping will
-            be ignored.
+    Parameters
+    ----------
+    **mapping : dict[str, DatasetType]
+        A mapping of dataset type names to their corresponding `DatasetType`.
+        Dataset types not found in this mapping will be ignored.
 
-    Returns:
-        decorator: A decorator that can be applied to methods in a class. The decorated
-            method is expected to accept a list of `Dataset` objects and optional
-            additional arguments and keyword arguments.
+    Returns
+    -------
+    decorator : Callable
+        A decorator that can be applied to methods in a class. The decorated
+        method is expected to accept a list of `Dataset` objects and optional
+        additional arguments and keyword arguments.
 
-    Example:
-        Suppose you have a method `process_data` that takes a list of `Dataset` objects
-        and a `mapping` as specified in the decorator:
+    Examples
+    --------
+    Suppose you have a method `process_data` that takes a list of `Dataset` objects
+    and a `mapping` as specified in the decorator:
 
-        @dataset_as_df(data=DatasetType.DATA, labels=DatasetType.LABELS)
+    >>> @dataset_as_df(data=DatasetType.DATA, labels=DatasetType.LABELS)
         def process_data(self, data: pd.DataFrame, labels: pd.DataFrame):
             # Your data processing logic here
             return processed_data, labels
 
-        When you call `process_data` with a list of `Dataset` objects containing data
-        and labels, the decorator will automatically replace the dataframes based on
-        the mapping and pass them to the method:
+    When you call `process_data` with a list of `Dataset` objects containing data
+    and labels, the decorator will automatically replace the dataframes based on
+    the mapping and pass them to the method:
 
-        processed_datasets = my_instance.process_data(datasets)
+    >>> processed_datasets = my_instance.process_data(datasets)
     """
     # swap keys and values in the mapping
     in_mapping: dict[DatasetType, str] = {}
@@ -115,16 +140,21 @@ def df_to_dataset(dtype: DatasetType) -> Callable:
     It wraps the method and converts the returned DataFrame into a dataset object
     with the specified type. The converted dataset is then returned.
 
-    Args:
-        dtype: The DatasetType enum value representing the type of the dataset.
+    Parameters
+    ----------
+    dtype : DatasetType
+        The DatasetType enum value representing the type of the dataset.
 
-    Returns:
+    Returns
+    -------
+    decorator : Callable
         A decorated function that takes the original arguments, performs the wrapped
         function, converts the returned DataFrame into a Dataset object with the
         specified type, and returns the converted dataset.
 
-    Example:
-        @df_to_dataset(DatasetType.URINEOUTPUT)
+    Examples
+    --------
+    >>> @df_to_dataset(DatasetType.URINEOUTPUT)
         def process_dataframe(self, *args: list, **kwargs: dict) -> pd.DataFrame:
             # Process the DataFrame
             ...
@@ -141,4 +171,14 @@ def df_to_dataset(dtype: DatasetType) -> Callable:
 
 
 def approx_gte(x: pd.Series, y: pd.Series | float) -> bool | np.ndarray:
+    """
+    Check if x is greater than or approximately equal to y.
+
+    Parameters
+    ----------
+    x : pd.Series
+        The series to compare.
+    y : pd.Series or float
+        The series or float to compare with.
+    """
     return np.logical_or(np.asarray(x >= y), np.isclose(x, y))
