@@ -1,0 +1,48 @@
+site_name: "pyAKI"
+docs_dir: docs/docs
+nav:
+- Getting Started:
+  - Package Overview: 'getting_started/overview.md'
+  - Installation: 'getting_started/installation.md'
+  - Basic Usage: 'getting_started/basic_usage.md'
+  - Paper: 'getting_started/paper.md'
+- User Guide:
+  - Tutorial: 'guide/tutorial.md'
+- API Reference: reference/
+extra_css: []
+theme:
+  name: material
+  repo_url: 'https://github.com/aidh-ms/pyAKI'
+  features:
+    - navigation.tabs
+    - navigation.footer
+extra:
+  social:
+  - icon: fontawesome/brands/github
+    link: https://github.com/aidh-ms/pyAKI
+  - icon: fontawesome/brands/python
+    link: https://pypi.org/project/pyaki/
+copyright: Copyright &copy; 2023 AIDH-MS
+
+markdown_extensions:
+  - attr_list
+  - pymdownx.highlight:
+      linenums: true
+  - pymdownx.superfences
+
+plugins:
+- search:
+- macros:
+    include_dir: ./
+- gen-files:
+    scripts:
+      - docs/scripts/gen_ref_pages.py
+- literate-nav:
+    nav_file: SUMMARY.md
+- section-index
+- mkdocstrings:
+    handlers:
+      python:
+        paths: ['pyaki']
+        options:
+          docstring_style: numpy
