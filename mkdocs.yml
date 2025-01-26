@@ -8,6 +8,8 @@ nav:
   - Paper: 'getting_started/paper.md'
 - User Guide:
   - Tutorial: 'guide/tutorial.md'
+  - Probes: 'guide/probes.md'
+  - Preprocessing: 'guide/preprocessing.md'
 - API Reference: reference/
 extra_css: []
 theme:
