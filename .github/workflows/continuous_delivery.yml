@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.12"]  # Add more Python versions to test here
+        python-version: ["3.13"]  # Add more Python versions to test here
 
     steps:
     - uses: actions/checkout@v4
