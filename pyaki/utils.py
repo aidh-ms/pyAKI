@@ -54,7 +54,9 @@ class Dataset(NamedTuple):
 
     Examples
     --------
+    ```pycon
     >>> dataset = Dataset(dataset_type=DatasetType.URINEOUTPUT, df=my_dataframe)
+    ```
     """
 
     dataset_type: DatasetType
@@ -88,16 +90,20 @@ def dataset_as_df(**mapping: DatasetType) -> Callable:
     Suppose you have a method `process_data` that takes a list of `Dataset` objects
     and a `mapping` as specified in the decorator:
 
+    ```pycon
     >>> @dataset_as_df(data=DatasetType.DATA, labels=DatasetType.LABELS)
-        def process_data(self, data: pd.DataFrame, labels: pd.DataFrame):
-            # Your data processing logic here
-            return processed_data, labels
+    ... def process_data(self, data: pd.DataFrame, labels: pd.DataFrame):
+    ...     # Your data processing logic here
+    ...     return processed_data, labels
+    ```
 
     When you call `process_data` with a list of `Dataset` objects containing data
     and labels, the decorator will automatically replace the dataframes based on
     the mapping and pass them to the method:
 
+    ```pycon
     >>> processed_datasets = my_instance.process_data(datasets)
+    ```
     """
     # swap keys and values in the mapping
     in_mapping: dict[DatasetType, str] = {}
@@ -154,10 +160,12 @@ def df_to_dataset(dtype: DatasetType) -> Callable:
 
     Examples
     --------
+    ```pycon
     >>> @df_to_dataset(DatasetType.URINEOUTPUT)
-        def process_dataframe(self, *args: list, **kwargs: dict) -> pd.DataFrame:
-            # Process the DataFrame
-            ...
+    ... def process_dataframe(self, *args: list, **kwargs: dict) -> pd.DataFrame:
+    ...     # Process the DataFrame
+    ...     ...
+    ```
     """
 
     def decorator(func: Callable) -> Callable:

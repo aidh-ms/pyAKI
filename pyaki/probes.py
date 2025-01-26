@@ -35,14 +35,16 @@ class Probe(ABC):
 
     Example
     -------
+    ```pycon
     >>> class MyProbe(Probe):
-            RESNAME = "my_result"
-
-            def probe(self, datasets: list[Dataset], **kwargs) -> pd.DataFrame:
-                # Implementation of the probe's analysis...
-
-        my_probe = MyProbe()
-        result_df = my_probe.probe(datasets=my_datasets, additional_arg=value)
+    ...     RESNAME = "my_result"
+    ...
+    ...     def probe(self, datasets: list[Dataset], **kwargs) -> pd.DataFrame:
+    ...         # Implementation of the probe's analysis...
+    ...
+    ... my_probe = MyProbe()
+    ... result_df = my_probe.probe(datasets=my_datasets, additional_arg=value)
+    ```
     """
 
     RESNAME: str = ""  # name of the column that will be added to the dataframe
@@ -110,8 +112,10 @@ class UrineOutputProbe(Probe):
 
     Example
     -------
+    ```pycon
     >>> probe = UrineOutputProbe(column="urineoutput", anuria_limit=0.1)
-        result_df = probe.probe(df=my_dataframe, patient=patient_df)
+    ... result_df = probe.probe(df=my_dataframe, patient=patient_df)
+    ```
     """
 
     RESNAME = "urineoutput_stage"
@@ -259,13 +263,15 @@ class AbstractCreatinineProbe(Probe, metaclass=ABCMeta):
 
     Example
     -------
+    ```pycon
     >>> class MyCreatinineProbe(AbstractCreCreatinineProbe):
-            def __init__(self, column="creatinine", baseline_timeframe="7d", method=CreatinineBaselineMethod.MIN):
-                super().__init__(column, baseline_timeframe, method)
-                # Additional initialization
-
-            def probe(self, df, **kwargs):
-                # Probe implementation specific to the derived class
+    ...     def __init__(self, column="creatinine", baseline_timeframe="7d", method=CreatinineBaselineMethod.MIN):
+    ...         super().__init__(column, baseline_timeframe, method)
+    ...         # Additional initialization
+    ...
+    ...     def probe(self, df, **kwargs):
+    ...         # Probe implementation specific to the derived class
+    ```
     """
 
     def __init__(
@@ -482,8 +488,10 @@ class AbsoluteCreatinineProbe(AbstractCreatinineProbe):
 
     Example
     -------
+    ```pycon
     >>> probe = AbsoluteCreatinineProbe(column="creatinine", baseline_timeframe="7d", method=CreatinineMethod.MIN)
-        df_result = probe.probe(df)
+    ... df_result = probe.probe(df)
+    ```
     """
 
     RESNAME = "abs_creatinine_stage"
@@ -584,8 +592,10 @@ class RelativeCreatinineProbe(AbstractCreatinineProbe):
 
     Example
     -------
+    ```pycon
     >>> probe = RelativeCreatinineProbe(column="creatinine", baseline_timeframe="7d", method=CreatinineBaselineMethod.MIN)
-        df_result = probe.probe(df)
+    ... df_result = probe.probe(df)
+    ```
     """
 
     RESNAME = "rel_creatinine_stage"

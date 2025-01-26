@@ -54,10 +54,14 @@ class Analyser:
     Examples
     --------
     Instantiate the Analyser class with custom data, probes, and preprocessors
+    ```pycon
     >>> analyser = Analyser(data=my_datasets, probes=[MyProbe()], preprocessors=[MyPreprocessor()])
+    ```
 
     Process stays and obtain the analysis results
+    ```pycon
     >>> result_df = analyser.process_stays()
+    ```
     """
 
     def __init__(
