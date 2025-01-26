@@ -50,4 +50,4 @@ jobs:
 
     - name: Build and deploy Documentation
       run: |
-        poetry run mkdocs gh-deploy
+        poetry run mkdocs gh-deploy --force
