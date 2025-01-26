@@ -51,5 +51,5 @@ jobs:
         github-token: ${{ secrets.GITHUB_TOKEN }}
       uses: coverallsapp/github-action@v2.3.4
 
-    - name: Build
+    - name: Check docs
       run: poetry run mkdocs build
