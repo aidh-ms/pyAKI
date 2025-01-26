@@ -1,5 +1,5 @@
 #! /usr/bin/env python3
-"""pyaki CLI tool"""
+"""pyaki CLI tool to process AKI stages from time series data."""
 
 from pathlib import Path
 
@@ -27,14 +27,14 @@ def main(
     ----------
     path : str
         Path to the folder containing the data files.
-    urineoutput_file : str, optional
-        Name of the file containing urine output data, by default "urineoutput.csv"
-    creatinine_file : str, optional
-        name of the file containing creatinine data, by default "creatinine.csv"
-    rrt_file : str, optional
-        Name of the file containing rrt data, by default "rrt.csv"
-    demographics_file : str, optional
-        Name of the file containing demographic data of the patient like the patients weight, by default "demographics.csv"
+    urineoutput_file : str, default: "urineoutput.csv"
+        Name of the file containing urine output data.
+    creatinine_file : str, default: "creatinine.csv"
+        name of the file containing creatinine data.
+    rrt_file : str, default: "rrt.csv"
+        Name of the file containing rrt data.
+    demographics_file : str, default: "demographics.csv"
+        Name of the file containing demographic data of the patient like the patients weight.
     """
     root_dir = Path(path)
     datasets = []

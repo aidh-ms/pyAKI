@@ -1,39 +1,12 @@
-"""
-pyaki: A Python package for classification of acute kidney injury.
+# Package overview
 
-This package provides a Python API and CLI tool for analysing time series to classification of acute kidney injury.
+Python package to detect AKI within time series data.
 
-Modules:
-- bin: Command line interface for the pyaki package.
-- kdigo: Implementation of the KDIGO criteria for classification of acute kidney injury.
-- preprocessing: Preprocessing of time series data.
-- probes: Implementation of the probes for classification of acute kidney injury.
-- utils: Utility functions for the pyaki package.
+The goal of this package is to establish well tested, comprehensive functions for the detection of Acute Kidney Injury (AKI) in time series data, according to the Kidney Disease Improving Global Outcomes (KDIGO) Criteria, established in 2012 [^kdigo].
+![](../img/kdigo_criteria.png)
 
-Usage:
-```python
-import pandas as pd
+# License
 
-from pyaki.kdigo import Analyser
-from pyaki.probes import Dataset, DatasetType
-
-datasets: list[Dataset] =[
-    Dataset(DatasetType.URINEOUTPUT, pd.DataFrame()),
-    Dataset(DatasetType.CREATININE, pd.DataFrame()),
-    Dataset(DatasetType.DEMOGRAPHICS, pd.DataFrame()),
-    Dataset(DatasetType.RRT, pd.DataFrame()),
-]
-
-analyser = Analyser(datasets)
-reult_df = analyser.process_stays()
-```
-
-Author:
-- Christian Porschen
-- Jan Ernsting
-- Paul Brauckmann
-
-License:
 ```
 MIT License
 
@@ -57,4 +30,5 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
-"""
+
+[^kdigo]: Improving Global Outcomes (KDIGO) Acute Kidney Injury Work Group. KDIGO Clinical Practice Guideline for Acute Kidney Injury. Kidney inter., Suppl. 2012; 2: 1–138.
