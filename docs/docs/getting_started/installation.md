@@ -38,6 +38,7 @@ poetry add git+https://github.com/aidh-ms/pyAKI
 ## Dependencies
 
 This library has the following dependencies:
+
 * [Pandas](https://pandas.pydata.org/)
 * [SciPy](https://scipy.org/)
 * [Typer](https://typer.tiangolo.com/)
