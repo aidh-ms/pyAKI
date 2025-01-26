@@ -1,5 +1,5 @@
 #! /usr/bin/env python3
-"""pyaki CLI tool"""
+"""pyaki CLI tool to process AKI stages from time series data."""
 
 from pathlib import Path
 
