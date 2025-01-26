@@ -43,3 +43,11 @@ jobs:
         poetry publish --skip-existing --build
       env:
         POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_TOKEN }}
+
+    - name: Install doc dependencies
+      run: |
+        poetry install --with docs
+
+    - name: Build and deploy Documentation
+      run: |
+        poetry run mkdocs gh-deploy
