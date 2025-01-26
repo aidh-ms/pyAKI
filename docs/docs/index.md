@@ -1,7 +1,7 @@
 # pyAKI
 
 <p style="text-align:center;" markdown="1">
-_A Python package to detect AKI within time series data._
+_A Python package to detect AKI within time series data._ <br>
 [![Coverage Status](https://coveralls.io/repos/github/aidh-ms/pyAKI/badge.svg?branch=main)](https://coveralls.io/github/aidh-ms/pyAKI?branch=main)
 </p>
 
