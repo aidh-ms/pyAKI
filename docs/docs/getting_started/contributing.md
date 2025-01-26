@@ -6,7 +6,7 @@ Here is how you can contribute to this project.
 
 Use the included dev container to automatically install all the necessary dev tools and dependencies.
 
-> **Prerequisite**: To use this you first need to install docker under Linux or WSL2 under windows.
+> **Prerequisite**: To use this you first need to install docker under Linux, MacOS or WSL2 under windows.
 
 1. **Clone the repository:**
     ```bash
