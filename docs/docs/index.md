@@ -7,7 +7,7 @@ _A Python package to detect AKI within time series data._ <br>
 
 ---
 
-**Source Code:** [https://github.com/aidh-ms/pyAKI](https://github.com/aidh-ms/pyAKI)
+**Source Code:** [https://github.com/aidh-ms/pyAKI](https://github.com/aidh-ms/pyAKI) <br>
 **Paper:** [https://doi.org/10.1371/journal.pone.0315325](https://doi.org/10.1371/journal.pone.0315325)
 
 ---
