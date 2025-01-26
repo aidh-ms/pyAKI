@@ -28,10 +28,11 @@ extra:
 copyright: Copyright &copy; 2023 AIDH-MS
 
 markdown_extensions:
-  - attr_list
-  - pymdownx.highlight:
-      linenums: true
-  - pymdownx.superfences
+- attr_list
+- pymdownx.highlight:
+    linenums: true
+- pymdownx.superfences
+- footnotes
 
 plugins:
 - search:
