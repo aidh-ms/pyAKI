@@ -134,7 +134,7 @@ class UrineOutputPreProcessor(Preprocessor):
             The processed urine output dataset as a pandas DataFrame.
         """
 
-        df = df.groupby(self._stay_identifier).resample("1H").sum()  # type: ignore
+        df = df.groupby(self._stay_identifier).resample("1h").sum()  # type: ignore
         df[df["urineoutput"] == 0] = None
 
         if not self._interpolate:
@@ -195,7 +195,7 @@ class CreatininePreProcessor(Preprocessor):
         pd.DataFrame
             The processed creatinine dataset as a pandas DataFrame.
         """
-        df = df.groupby(self._stay_identifier).resample("1H").mean()  # type: ignore
+        df = df.groupby(self._stay_identifier).resample("1h").mean()  # type: ignore
         if not self._ffill:
             return df
 
@@ -244,5 +244,5 @@ class RRTPreProcessor(Preprocessor):
         pd.DataFrame
             The processed RRT dataset as a pandas DataFrame.
         """
-        df = df.groupby(self._stay_identifier).resample("1H").last()  # type: ignore
+        df = df.groupby(self._stay_identifier).resample("1h").last()  # type: ignore
         return df.ffill()

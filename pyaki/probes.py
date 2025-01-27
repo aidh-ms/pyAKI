@@ -9,6 +9,7 @@ from typing import Any
 
 import numpy as np
 import pandas as pd
+from pandas import PeriodIndex
 
 from pyaki.utils import Dataset, DatasetType, approx_gte, dataset_as_df, df_to_dataset
 
@@ -164,6 +165,8 @@ class UrineOutputProbe(Probe):
         if self._patient_weight_column not in patient:
             raise ValueError("Missing weight for stay")
 
+        df = df.copy()
+
         weight: pd.Series = patient[self._patient_weight_column]
         # fmt: off
         df.loc[:, self.RESNAME] = np.nan  # set all urineoutput_stage values to NaN
@@ -316,6 +319,9 @@ class AbstractCreatinineProbe(Probe, metaclass=ABCMeta):
         pd.Series
             The calculated creatinine baseline values.
         """
+        if isinstance(df.index, PeriodIndex):
+            df.index = df.index.to_timestamp()
+
         if self._method == CreatinineBaselineMethod.ROLLING_FIRST:
             return (
                 df[df[self._column] > 0]
@@ -547,6 +553,8 @@ class AbsoluteCreatinineProbe(AbstractCreatinineProbe):
         pd.DataFrame
             The modified DataFrame with the absolute creatinine stage column added.
         """
+        df = df.copy()
+
         baseline_values: pd.Series = self.creatinine_baseline(df, patient)
 
         df.loc[:, self.RESNAME] = 0
@@ -623,6 +631,8 @@ class RelativeCreatinineProbe(AbstractCreatinineProbe):
         pd.DataFrame
             The modified DataFrame with the relative creatinine stage column added.
         """
+        df = df.copy()
+
         baseline_values: pd.Series = self.creatinine_baseline(df, patient)
 
         df.loc[:, self.RESNAME] = 0
@@ -676,6 +686,8 @@ class RRTProbe(Probe):
         pd.DataFrame
             The modified DataFrame with the RRT stage column added.
         """
+        df = df.copy()
+
         df.loc[:, self.RESNAME] = 0
         df.loc[df[self._column] == 1, self.RESNAME] = 3
 
