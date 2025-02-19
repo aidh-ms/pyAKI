@@ -18,5 +18,5 @@ data = [
 ]
 
 analyser = Analyser(data)
-results: pd.Dataframe =  analyser.process_stays()
+results: pd.DataFrame =  analyser.process_stays()
 ```
