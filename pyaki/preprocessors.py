@@ -100,6 +100,8 @@ class UrineOutputPreProcessor(Preprocessor):
         The column name that identifies stays or admissions in the dataset.
     time_identifier : str, default: "charttime"
         The column name that identifies the timestamp or time variable in the dataset.
+    urineoutput_column : str, default: "urineoutput"
+        The column name that represents the urine output values in the dataset.
     interpolate : bool, default: True
         Flag indicating whether to perform interpolation on missing values.
     threshold : int, default: 6
@@ -110,12 +112,14 @@ class UrineOutputPreProcessor(Preprocessor):
         self,
         stay_identifier: str = "stay_id",
         time_identifier: str = "charttime",
+        urineoutput_column: str = "urineoutput",
         interpolate: bool = True,
         threshold: int = 6,
     ) -> None:
         super().__init__(stay_identifier, time_identifier)
         self._interpolate: bool = interpolate
         self._threshold: int = threshold
+        self._urineoutput_column: str = urineoutput_column
 
     @dataset_as_df(df=DatasetType.URINEOUTPUT)
     @df_to_dataset(DatasetType.URINEOUTPUT)
@@ -135,13 +139,13 @@ class UrineOutputPreProcessor(Preprocessor):
         """
 
         df = df.groupby(self._stay_identifier).resample("1h").sum()  # type: ignore
-        df[df["urineoutput"] == 0] = None
+        df[df[self._urineoutput_column] == 0] = None
 
         if not self._interpolate:
             return df
 
-        mask = df["urineoutput"].isnull()
-        df["urineoutput"] /= (
+        mask = df[self._urineoutput_column].isnull()
+        df[self._urineoutput_column] /= (
             (mask.cumsum() - mask.cumsum().where(~mask).ffill().fillna(0))
             .shift(1)
             .clip(upper=self._threshold)
@@ -161,6 +165,8 @@ class CreatininePreProcessor(Preprocessor):
         The column name that identifies stays or admissions in the dataset.
     time_identifier : str, default: "charttime"
         The column name that identifies the timestamp or time variable in the dataset.
+    creatinine_column : str, default: "creat"
+        The column name that represents the creatinine values in the dataset.
     ffill : bool, default: True
         Flag indicating whether to perform forward filling on missing values.
     threshold : int, default: 72
@@ -171,6 +177,7 @@ class CreatininePreProcessor(Preprocessor):
         self,
         stay_identifier: str = "stay_id",
         time_identifier: str = "charttime",
+        creatinine_column: str = "creat",
         ffill: bool = True,
         threshold: int = 72,
     ) -> None:
@@ -178,6 +185,7 @@ class CreatininePreProcessor(Preprocessor):
 
         self._ffill: bool = ffill
         self._threshold: Optional[int] = threshold
+        self._creatinine_column: str = creatinine_column
 
     @dataset_as_df(df=DatasetType.CREATININE)
     @df_to_dataset(DatasetType.CREATININE)
@@ -199,7 +207,7 @@ class CreatininePreProcessor(Preprocessor):
         if not self._ffill:
             return df
 
-        df[df["creat"] == 0] = None
+        df[df[self._creatinine_column] == 0] = None
         return df.ffill(limit=self._threshold)
 
 
