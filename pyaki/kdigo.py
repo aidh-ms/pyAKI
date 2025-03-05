@@ -138,9 +138,9 @@ class Analyser:
         logger.info("Start probing")
 
         (_, df), *datasets = self._data
-        stay_ids: pd.Index = df.index.get_level_values("stay_id").unique()
+        stay_ids: pd.Index = df.index.get_level_values(self._stay_identifier).unique()
         for _, df in datasets:
-            stay_ids.join(df.index.get_level_values("stay_id").unique())
+            stay_ids.join(df.index.get_level_values(self._stay_identifier).unique())
 
         data: pd.DataFrame = self.process_stay(stay_ids.values[0])
         for stay_id in stay_ids.values[1:]:
