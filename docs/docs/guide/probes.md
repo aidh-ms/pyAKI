@@ -1,7 +1,7 @@
 # Using Probes in pyAKI
 
 ## Overview
-Probes in `pyAKI` allow for detecting **Acute Kidney Injury (AKI)** based on different clinical markers such as **absolute or relative creatinine levels, urine output, and renal replacement therapy (RRT)**. The `AbsoluteCreatinineProbe`, `RelativeCreatinineProbe`, `UrineOutputProbe` and `RRT` provide various methods to define AKI stages. In general, it adds one resulted column for each specified probe and a general evaluation column of the AKI stage. 
+Probes in `pyAKI` allow for detecting **Acute Kidney Injury (AKI)** based on different clinical markers such as **absolute or relative creatinine levels, urine output, and renal replacement therapy (RRT)**. The `AbsoluteCreatinineProbe`, `RelativeCreatinineProbe`, `UrineOutputProbe` and `RRT` provide various methods to define AKI stages. In general, it adds one resulted column for each specified probe and a general evaluation column of the AKI stage.
 
 ## Importing Required Libraries
 
@@ -25,7 +25,7 @@ The `AbsoluteCreatinineProbe` determines AKI stages using the provided data fram
 
 ```python
 AbsCreatProbe = AbsoluteCreatinineProbe(
-    column="creat", 
+    column="creat",
     method=CreatinineBaselineMethod.ROLLING_MIN,  # Choose any method from below
     baseline_timeframe = "1d" # Default value: "2d"
 )
@@ -48,21 +48,22 @@ AbsCreatProbe = AbsoluteCreatinineProbe(
 
 The **Cockcroft-Gault Formula** is:
 
-```math
-\text{Creatinine Clearance, mg/dl} = \frac{(140 - \text{age}) \times \text{ABW} (\times 0.85 \text{ if female})}{70 \times \text{Expected Clearance}},
-```
+$$
+\text{Creatinine Clearance, mg/dl} = \frac{(140 - \text{age}) \times \text{ABW} (\times 0.85 \text{ if female})}{70 \times \text{Expected Clearance}}
+$$
 
 where the **ABW (Adjusted Body Weight) Calculation** is:
-```math
+
+$$
 \text{ABW} = \text{IBW} + 0.4 \times (\text{weight} - \text{IBW}).
-```
+$$
 
 ### Example of constant baseline method
 
 ```python
 validation_data_unlabelled['baseline_column'] = validation_data_unlabelled.loc[:, 'creat'].mean()
 
-AbsCreatProbe = AbsoluteCreatinineProbe(column="creat", 
+AbsCreatProbe = AbsoluteCreatinineProbe(column="creat",
                                 baseline_constant_column = "baseline_column",
                                 method=CreatinineBaselineMethod.CONSTANT)
 ```
@@ -72,7 +73,7 @@ random.seed(1)
 n = len(validation_data)
 age = random.choices(list(range(10,90)), k=n)
 height = random.choices(list(range(140,180)), k=n)
-gender = random.choices(["M", "F"], k=n)  
+gender = random.choices(["M", "F"], k=n)
 new_validation_data_unlabelled = validation_data_unlabelled
 new_validation_data_unlabelled["age"]= age
 new_validation_data_unlabelled["height"] = height
@@ -89,7 +90,7 @@ AbsCreatProbe = AbsoluteCreatinineProbe(column="creat", patient_age_column="age"
 
 ## Using Relative Creatinine Probe
 
-The `RelativeCreatinineProbe` determines AKI stages by comparing changes in creatinine levels relative to baseline values. The list and use of available baseline methods is similar to of Absolute Creatinine Probe. The users are encouraged to look into [Absolute Creatinine Probe section](#Using-absolute-creatinine-probe). 
+The `RelativeCreatinineProbe` determines AKI stages by comparing changes in creatinine levels relative to baseline values. The list and use of available baseline methods is similar to of Absolute Creatinine Probe. The users are encouraged to look into [Absolute Creatinine Probe section](#Using-absolute-creatinine-probe).
 
 
 ```python
@@ -102,14 +103,14 @@ RelCreatProb = RelativeCreatinineProbe(
 
 ## Using Urine Output Probe
 
-The `UrineOutputProbe` assesses AKI based on **urine output levels**, considering patient weight and anuria thresholds. 
+The `UrineOutputProbe` assesses AKI based on **urine output levels**, considering patient weight and anuria thresholds.
 
 
 
 ```python
 UrineProbe = UrineOutputProbe(
     column="urineoutput",
-    patient_weight_column="patient_weight", 
+    patient_weight_column="patient_weight",
     anuria_limit=0.2, #Default value: 0.1
     method=UrineOutputMethod.STRICT #Choose a suitable method from below
 )
@@ -173,8 +174,3 @@ results = analyser.process_stays()
 results_one_id = analyser.process_stay(stay_id=32314488)
 print(results_one_id.tail(1))
 ```
-
-
-
-
-
