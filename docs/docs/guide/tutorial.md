@@ -9,16 +9,4 @@ This tutorial is divided into two sections:
 
 ## Installation
 
-Before using `pyAKI`, ensure you have **Python 3.12+** installed. You can install `pyAKI` using **pip**:
-
-```bash
-pip install pyAKI
-```
-
-Alternatively, if you are working from source, navigate to the project directory and install dependencies:
-
-```bash
-pip install -r requirements.txt
-```
-
-
+See [Installation](https://aidh-ms.github.io/pyAKI/getting_started/installation/).

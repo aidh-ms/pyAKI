@@ -16,6 +16,17 @@ from pyaki.preprocessors import (
 )
 ```
 
+## Loading data
+
+
+The input data includes patient id, event time,  weight, urine output, creatinine level and if the patient has undergone RRT or not.
+
+```python
+import pandas as pd
+
+validation_data = pd.read_csv("tests/data/validation_data.csv")
+```
+
 ## Time Index Creation
 
 The `TimeIndexCreator` ensures that data is properly indexed by **time** before analysis.
@@ -81,10 +92,10 @@ Before running an analysis, apply the preprocessing steps:
 
 ```python
 data = [
-    Dataset(DatasetType.URINEOUTPUT, validation_data_unlabelled),
-    Dataset(DatasetType.CREATININE, validation_data_unlabelled),
-    Dataset(DatasetType.DEMOGRAPHICS, validation_data_unlabelled),
-    Dataset(DatasetType.RRT, validation_data_unlabelled),
+    Dataset(DatasetType.URINEOUTPUT, validation_data),
+    Dataset(DatasetType.CREATININE, validation_data),
+    Dataset(DatasetType.DEMOGRAPHICS, validation_data),
+    Dataset(DatasetType.RRT, validation_data),
 ]
 
 analyser = Analyser(
@@ -95,7 +106,7 @@ analyser = Analyser(
 results = analyser.process_stays()
 ```
 
-In case of not specifying Preprocessing, the Analyser will run all five Preprocessing with its default setting. 
+In case of not specifying Preprocessing, the Analyser will run all five Preprocessings with its default setting.
 
 ## Extracting Results for a Single Patient
 
@@ -103,4 +114,3 @@ In case of not specifying Preprocessing, the Analyser will run all five Preproce
 results_one_id = analyser.process_stay(stay_id=32314488)
 print(results_one_id[:1])
 ```
-

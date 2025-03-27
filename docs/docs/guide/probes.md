@@ -15,6 +15,8 @@ from pyaki.probes import (
 
 ## Loading Data
 
+The input data included patient id, event time,  weight, urine output, creatinine level and if the patient has undergone RRT or not.
+
 ```python
 import pandas as pd
 
@@ -70,25 +72,9 @@ AbsCreatProbe = AbsoluteCreatinineProbe(column="creat",
                                 method=CreatinineBaselineMethod.CONSTANT)
 ```
 ### Example of calculated baseline method
-```python
-random.seed(1)
-n = len(validation_data)
-age = random.choices(list(range(10,90)), k=n)
-height = random.choices(list(range(140,180)), k=n)
-gender = random.choices(["M", "F"], k=n)
-new_validation_data_unlabelled = validation_data_unlabelled
-new_validation_data_unlabelled["age"]= age
-new_validation_data_unlabelled["height"] = height
-new_validation_data_unlabelled["gender"] = gender
 
+See [below](###Special-case-of-calculated-baseline-method).
 
-AbsCreatProbe = AbsoluteCreatinineProbe(column="creat", patient_age_column="age",
-                                        patient_gender_column="gender",
-                                        patient_height_column="height",
-                                        patient_weight_column="patient_weight",
-                                        expected_clearance = 72, #Default value: 72
-                                        method=CreatinineBaselineMethod.CALCULATED)
-```
 
 ## Using Relative Creatinine Probe
 
@@ -138,10 +124,10 @@ RRTProbe = RRTProbe(column="rrt")
 
 ```python
 data = [
-    Dataset(DatasetType.URINEOUTPUT, validation_data_unlabelled),
-    Dataset(DatasetType.CREATININE, validation_data_unlabelled),
-    Dataset(DatasetType.DEMOGRAPHICS, validation_data_unlabelled),
-    Dataset(DatasetType.RRT, validation_data_unlabelled),
+    Dataset(DatasetType.URINEOUTPUT, validation_data_),
+    Dataset(DatasetType.CREATININE, validation_data),
+    Dataset(DatasetType.DEMOGRAPHICS, validation_data),
+    Dataset(DatasetType.RRT, validation_data),
 ]
 
 analyser = Analyser(
@@ -152,12 +138,35 @@ analyser = Analyser(
 results = analyser.process_stays()
 ```
 
-### Especial case calculated baselined method
+### Special case of calculated baseline method
+
+
+The usage of calculaed baseline method is different from others that we need to supply a new dataframe with information of age, height, weight and gender of each patient into data.
+
+
 ```python
+
+random.seed(1)
+n = len(validation_data)
+age = random.choices(list(range(10,90)), k=n)
+height = random.choices(list(range(140,180)), k=n)
+gender = random.choices(["M", "F"], k=n)
+added_validation_data["age"]= age
+added_validation_data["height"] = height
+added_validation_data["gender"] = gender
+
+
+AbsCreatProbe = AbsoluteCreatinineProbe(column="creat", patient_age_column="age",
+                                        patient_gender_column="gender",
+                                        patient_height_column="height",
+                                        patient_weight_column="patient_weight",
+                                        expected_clearance = 72, #Default value: 72
+                                        method=CreatinineBaselineMethod.CALCULATED)
+
 data = [
-    Dataset(DatasetType.URINEOUTPUT, validation_data_unlabelled),
-    Dataset(DatasetType.CREATININE, validation_data_unlabelled),
-    Dataset(DatasetType.DEMOGRAPHICS, new_validation_data_unlabelled),
+    Dataset(DatasetType.URINEOUTPUT, validation_data),
+    Dataset(DatasetType.CREATININE, validation_data),
+    Dataset(DatasetType.DEMOGRAPHICS, added_validation_data),
     Dataset(DatasetType.RRT, validation_data_unlabelled),
 ]
 
