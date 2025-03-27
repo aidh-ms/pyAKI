@@ -21,7 +21,10 @@ from pyaki.preprocessors import (
 The `TimeIndexCreator` ensures that data is properly indexed by **time** before analysis.
 
 ```python
-TimePrep = TimeIndexCreator()
+TimePrep = TimeIndexCreator(
+    stay_identifier="stay_id",
+    time_identifier="charttime"
+)
 ```
 
 ## Urine Output Preprocessing
