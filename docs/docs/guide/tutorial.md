@@ -9,7 +9,7 @@ This tutorial is divided into two sections:
 
 ## Installation
 
-Before using `pyAKI`, ensure you have **Python 3.8+** installed. You can install `pyAKI` using **pip**:
+Before using `pyAKI`, ensure you have **Python 3.12+** installed. You can install `pyAKI` using **pip**:
 
 ```bash
 pip install pyAKI
