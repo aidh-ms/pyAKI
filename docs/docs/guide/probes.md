@@ -16,6 +16,8 @@ from pyaki.probes import (
 ## Loading Data
 
 ```python
+import pandas as pd
+
 validation_data = pd.read_csv("tests/data/validation_data.csv")
 ```
 
