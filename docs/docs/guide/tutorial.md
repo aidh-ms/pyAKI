@@ -21,6 +21,4 @@ Alternatively, if you are working from source, navigate to the project directory
 pip install -r requirements.txt
 ```
 
-For more details, check the **official documentation**:  
-📖 **[pyAKI Documentation](https://aidh-ms.github.io/pyAKI/)**
 
