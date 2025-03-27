@@ -32,7 +32,12 @@ TimePrep = TimeIndexCreator(
 Handles missing or incorrect urine output values.
 
 ```python
-UrinPrep = UrineOutputPreProcessor(threshold=6)  # Hours of missing data threshold
+UrinPrep = UrineOutputPreProcessor(
+    stay_identifier="stay_id",
+    time_identifier="charttime",
+    interpolate=True,  # Flag indicating whether to interpolate missing values
+    threshold=6,  # The threshold value for limiting the interpolation range
+)
 ```
 
 ## Creatinine Preprocessing
