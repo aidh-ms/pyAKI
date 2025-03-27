@@ -49,7 +49,7 @@ CreatPrep = CreatininePreProcessor(
     stay_identifier="stay_id",
     time_identifier="charttime",
     ffill=True,  # Forward-fill missing values
-    threshold=72  # Hours of missing data allowed
+    threshold=72  # The threshold value for limiting the forward filling range
 )
 ```
 
