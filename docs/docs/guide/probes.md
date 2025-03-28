@@ -1,7 +1,9 @@
 # Using Probes in pyAKI
 
 ## Overview
-Probes in `pyAKI` allow for detecting **Acute Kidney Injury (AKI)** based on different clinical markers such as **absolute or relative creatinine levels, urine output, and renal replacement therapy (RRT)**. The `AbsoluteCreatinineProbe`, `RelativeCreatinineProbe`, `UrineOutputProbe` and `RRT` provide various methods to define AKI stages. In general, it adds one resulted column for each specified probe and a general evaluation column of the AKI stage.
+Probes in `pyAKI` allow for detecting **Acute Kidney Injury (AKI)** based on different clinical markers such as **absolute or relative creatinine levels, urine output, and renal replacement therapy (RRT)**. The `AbsoluteCreatinineProbe`, `RelativeCreatinineProbe`, `UrineOutputProbe` and `RRTProbe` provide various methods to define AKI stages. In general, it adds one resulted column for each specified probe and a general evaluation column of the AKI stage.
+
+![](/img/kdigo_criteria.png)
 
 ## Importing Required Libraries
 

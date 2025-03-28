@@ -9,4 +9,4 @@ This tutorial is divided into two sections:
 
 ## Installation
 
-See [Installation](https://aidh-ms.github.io/pyAKI/getting_started/installation/).
+See [Installation](/getting_started/installation/).
