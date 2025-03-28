@@ -12,21 +12,31 @@ nav:
   - Probes: 'guide/probes.md'
   - Preprocessing: 'guide/preprocessing.md'
 - API Reference: reference/
-extra_css:
-- css/code_select.css
+
+copyright: Copyright &copy; 2023 AIDH-MS
+
 theme:
   name: material
   repo_url: 'https://github.com/aidh-ms/pyAKI'
   features:
     - navigation.tabs
     - navigation.footer
+  font: false
+
 extra:
   social:
   - icon: fontawesome/brands/github
     link: https://github.com/aidh-ms/pyAKI
   - icon: fontawesome/brands/python
     link: https://pypi.org/project/pyaki/
-copyright: Copyright &copy; 2023 AIDH-MS
+
+extra_javascript:
+- assets/js/mathjax/mathjax.js
+- assets/js/mathjax/tex-mml-chtml.js
+
+extra_css:
+- assets/css/code_select.css
+- assets/css/fonts.css
 
 markdown_extensions:
 - attr_list
@@ -37,6 +47,9 @@ markdown_extensions:
 - pymdownx.superfences
 - pymdownx.extra
 - footnotes
+- pymdownx.arithmatex:
+    generic: true
+
 
 plugins:
 - search:
