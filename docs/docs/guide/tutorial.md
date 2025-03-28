@@ -9,4 +9,4 @@ This tutorial is divided into two sections:
 
 ## Installation
 
-See [Installation](/getting_started/installation/).
+See [Installation](../getting_started/installation.md).
