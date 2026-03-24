@@ -737,6 +737,7 @@ python-versions = ">=3.10"
 groups = ["docs"]
 files = [
     {file = "griffelib-2.0.0-py3-none-any.whl", hash = "sha256:01284878c966508b6d6f1dbff9b6fa607bc062d8261c5c7253cb285b06422a7f"},
+    {file = "griffelib-2.0.0.tar.gz", hash = "sha256:e504d637a089f5cab9b5daf18f7645970509bf4f53eda8d79ed71cce8bd97934"},
 ]
 
 [package.extras]
@@ -1708,18 +1709,18 @@ pyyaml = ">=5.1"
 
 [[package]]
 name = "mkdocs-jupyter"
-version = "0.25.1"
+version = "0.26.0"
 description = "Use Jupyter in mkdocs websites"
 optional = false
 python-versions = ">=3.9"
 groups = ["docs"]
 files = [
-    {file = "mkdocs_jupyter-0.25.1-py3-none-any.whl", hash = "sha256:3f679a857609885d322880e72533ef5255561bbfdb13cfee2a1e92ef4d4ad8d8"},
-    {file = "mkdocs_jupyter-0.25.1.tar.gz", hash = "sha256:0e9272ff4947e0ec683c92423a4bfb42a26477c103ab1a6ab8277e2dcc8f7afe"},
+    {file = "mkdocs_jupyter-0.26.0-py3-none-any.whl", hash = "sha256:67df2b69dba855eeade7800b98059850411a54125048085f0e1b846aeb534be4"},
+    {file = "mkdocs_jupyter-0.26.0.tar.gz", hash = "sha256:4ba461f9b9639923984eb1c625fb4c448e5275b67aa8f7267d0cbc346cc2635e"},
 ]
 
 [package.dependencies]
-ipykernel = ">6.0.0,<7.0.0"
+ipykernel = ">6.0.0,<8"
 jupytext = ">1.13.8,<2"
 mkdocs = ">=1.4.0,<2"
 mkdocs-material = ">9.0.0"
@@ -3747,4 +3748,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12"
-content-hash = "38ea1730e99d3c8c73d1a28b567aedac1e0887c231ea9874be51f735ce787ca5"
+content-hash = "1397872207454246d2ec431c52714ec3d4acbd96d3c22b56e2229439d42b24ad"
