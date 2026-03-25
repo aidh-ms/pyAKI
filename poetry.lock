@@ -1709,14 +1709,14 @@ pyyaml = ">=5.1"
 
 [[package]]
 name = "mkdocs-jupyter"
-version = "0.26.0"
+version = "0.26.1"
 description = "Use Jupyter in mkdocs websites"
 optional = false
 python-versions = ">=3.9"
 groups = ["docs"]
 files = [
-    {file = "mkdocs_jupyter-0.26.0-py3-none-any.whl", hash = "sha256:67df2b69dba855eeade7800b98059850411a54125048085f0e1b846aeb534be4"},
-    {file = "mkdocs_jupyter-0.26.0.tar.gz", hash = "sha256:4ba461f9b9639923984eb1c625fb4c448e5275b67aa8f7267d0cbc346cc2635e"},
+    {file = "mkdocs_jupyter-0.26.1-py3-none-any.whl", hash = "sha256:527242c2c8f1d30970764bbab752de41243e5703f458d8bc05336ec53828192e"},
+    {file = "mkdocs_jupyter-0.26.1.tar.gz", hash = "sha256:7c80c0d3953de91e5b40a0d3209233795c8f800243ab298e4ec38e0504eda630"},
 ]
 
 [package.dependencies]
