@@ -2781,14 +2781,14 @@ pytest = "*"
 
 [[package]]
 name = "pytest-recording"
-version = "0.13.4"
+version = "0.14.0"
 description = "A pytest plugin powered by VCR.py to record and replay HTTP traffic"
 optional = false
-python-versions = ">=3.9"
+python-versions = ">=3.10"
 groups = ["dev"]
 files = [
-    {file = "pytest_recording-0.13.4-py3-none-any.whl", hash = "sha256:ad49a434b51b1c4f78e85b1e6b74fdcc2a0a581ca16e52c798c6ace971f7f439"},
-    {file = "pytest_recording-0.13.4.tar.gz", hash = "sha256:568d64b2a85992eec4ae0a419c855d5fd96782c5fb016784d86f18053792768c"},
+    {file = "pytest_recording-0.14.0-py3-none-any.whl", hash = "sha256:419f1a9325827987043d01a33a26dcafa69c1744521e1ed1ffa7c7b5fabc865c"},
+    {file = "pytest_recording-0.14.0.tar.gz", hash = "sha256:175f62a71da36c0a019dbee47f92b9fa4c72dea18e215da1488282e8d4d08b35"},
 ]
 
 [package.dependencies]
@@ -2796,8 +2796,8 @@ pytest = ">=3.5.0"
 vcrpy = ">=2.0.1"
 
 [package.extras]
-dev = ["pytest-httpbin", "pytest-mock", "requests", "werkzeug (==3.1.3)"]
-tests = ["pytest-httpbin", "pytest-mock", "requests", "werkzeug (==3.1.3)"]
+dev = ["pytest-httpbin", "pytest-mock", "requests", "werkzeug (==3.1.8)"]
+tests = ["pytest-httpbin", "pytest-mock", "requests", "werkzeug (==3.1.8)"]
 
 [[package]]
 name = "python-dateutil"
@@ -3899,4 +3899,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12"
-content-hash = "ba11a78c9640c5cdeb828aaa34847dc749f988551ef6eb77791b9fb4c6acbd0e"
+content-hash = "56b3d3a81b4ab2edc5e9bd8087d2399c6bb4a12bb9a621209b1bf6819e34a9f6"
